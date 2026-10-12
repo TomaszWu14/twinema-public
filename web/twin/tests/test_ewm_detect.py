@@ -54,7 +54,7 @@ class DetectHeightsTests(SimpleTestCase):
     def test_level_heights_and_weights_are_medians_from_master(self):
         master = []
         for bay, (height, kg) in zip((10, 11, 12), ((1400, 900), (1500, 1000), (1600, 1100)), strict=True):
-            master += [(f"B0-01-{bay}{p}A", "0052", height, kg) for p in range(3)]
+            master += [(f"B0-01-{bay}{p}A", "0020", height, kg) for p in range(3)]
             master += [(f"B0-01-{bay}{p}X", "0010", 0, 0) for p in range(3)]
         prop = detect(rows_of({"01": 3}), master)
         self.assertEqual(len(prop["templates"]), 1)

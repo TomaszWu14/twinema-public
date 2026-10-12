@@ -34,7 +34,7 @@ class ImportServiceTests(TestCase):
 
     def test_locations_create_new_active_master(self):
         old = WarehouseLocationMasterBatch.objects.create(name="stary", is_active=True)
-        services.import_file("locations", "lok.csv", _csv("Lokalizacja;Typ\nB0-01-100A;0052\nB0-01-100Y;0010\n"))
+        services.import_file("locations", "lok.csv", _csv("Lokalizacja;Typ\nB0-01-100A;0020\nB0-01-100Y;0010\n"))
         old.refresh_from_db()
         self.assertFalse(old.is_active)
         batch = WarehouseLocationMasterBatch.objects.get(is_active=True)

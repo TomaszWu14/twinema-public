@@ -13,9 +13,9 @@ def lvl(letter, h, typ, split=False):
 
 
 UPPER = [lvl("X", 1800, "0010"), lvl("Y", 1800, "0010"), lvl("Z", 1800, "0010")]
-PICK = NS(pallets_per_beam=3, levels=[lvl("B", 400, "0052"), lvl("C", 400, "0052", True),
-                                      lvl("D", 400, "0052", True)] + UPPER)
-FLOOR = NS(pallets_per_beam=3, levels=[lvl("A", 1500, "0052")] + UPPER)
+PICK = NS(pallets_per_beam=3, levels=[lvl("B", 400, "0020"), lvl("C", 400, "0020", True),
+                                      lvl("D", 400, "0020", True)] + UPPER)
+FLOOR = NS(pallets_per_beam=3, levels=[lvl("A", 1500, "0020")] + UPPER)
 PASSAGE = NS(pallets_per_beam=4, levels=[lvl("Y", 1800, "0010"), lvl("Z", 1800, "0010")])
 
 
@@ -78,7 +78,7 @@ class ExpandRowTests(SimpleTestCase):
         self.assertEqual(by["B0-07-312X"]["along_m"], 4.95)          # 2. gniazdo, pozycja 2
         self.assertEqual(by["B0-07-300X"]["z_m"], 1.2)               # B+C+D = 3 × 0,4 m
         self.assertEqual(by["B0-07-300X"]["level_index"], 3)
-        self.assertEqual(by["B0-07-300C-1"]["ewm_type"], "0052")
+        self.assertEqual(by["B0-07-300C-1"]["ewm_type"], "0020")
         self.assertFalse(by["B0-07-300B"]["blocked"])
 
     def test_reverse_mirrors_along(self):
@@ -108,7 +108,7 @@ class ExpandRowTests(SimpleTestCase):
             ov(30, "skip", "A", 1),
             ov(30, "add", "A", 3, value="0050"),
             ov(30, "rename", "X", 0, value="B0-07-SPEC1"),
-            ov(30, "ewm_type", "Y", 0, value="0011"),
+            ov(30, "ewm_type", "Y", 0, value="0030"),
             ov(30, "block", "Z", 2),
         ])
         by = {loc["code"]: loc for loc in locs}
@@ -116,7 +116,7 @@ class ExpandRowTests(SimpleTestCase):
         self.assertEqual(by["B0-07-303A"]["ewm_type"], "0050")
         self.assertIn("B0-07-SPEC1", by)
         self.assertNotIn("B0-07-300X", by)
-        self.assertEqual(by["B0-07-300Y"]["ewm_type"], "0011")
+        self.assertEqual(by["B0-07-300Y"]["ewm_type"], "0030")
         self.assertTrue(by["B0-07-302Z"]["blocked"])
         self.assertEqual(len(locs), 12)                              # 12 − skip + add
 

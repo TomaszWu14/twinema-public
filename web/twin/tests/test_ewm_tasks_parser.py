@@ -124,17 +124,17 @@ class RowTests(SimpleTestCase):
 class KindMappingTests(SimpleTestCase):
     def test_default_mapping(self):
         cases = [(("1010",), "putaway"), (("2010", "ZQ01/PICK1"), "picking"),
-                 (("2010", "ZQ01/STAGING"), "outbound"), (("21GL",), "outbound"),
-                 (("3010",), "replenishment"), (("301D",), "replenishment"), (("3030",), "move"),
+                 (("2010", "ZQ01/STAGING"), "outbound"), (("2150",), "outbound"),
+                 (("3010",), "replenishment"), (("3020",), "replenishment"), (("3030",), "move"),
                  (("4010",), "move"), (("9010",), "putaway"), (("9999",), "move"),
-                 (("X020",), "outbound"), (("", "", "PICK"), "picking"), (("", "", "", "1"), "putaway"),
+                 (("Z020",), "outbound"), (("ZPCK",), "picking"), (("", "", "PICK"), "picking"), (("", "", "", "1"), "putaway"),
                  (("", "", "", "2"), "outbound"), (("",), "move")]
         for args, want in cases:
             self.assertEqual(map_kind(*args), want, args)
 
     def test_overrides_win(self):
-        overrides, errors = parse_overrides("2010 = kompletacja\n3040=przesunięcie\n# komentarz\n21gl = Wydanie")
-        self.assertEqual(overrides, {"2010": "picking", "3040": "move", "21GL": "outbound"})
+        overrides, errors = parse_overrides("2010 = kompletacja\n3040=przesunięcie\n# komentarz\nz100 = Wydanie")
+        self.assertEqual(overrides, {"2010": "picking", "3040": "move", "Z100": "outbound"})
         self.assertEqual(errors, [])
         self.assertEqual(map_kind("2010", "", overrides=overrides), "picking")
 

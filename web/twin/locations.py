@@ -2,7 +2,7 @@
 
 Litera na końcu kodu EWM = poziom (i półka/część) w jednym stosie — reguły w
 ui.views.core.ewm_levels (B/C/D = półki poz. 1, X/G/H/T = 2, Y/U = 3, Z/V = 4, W = 5;
-hala A: A–E = 1–5). Legacy litery J/K/L/M/N/O = kolumna w boku; obsługuje też
+schemat blokowy A<cyfry>: A–E = 1–5). Legacy litery J/K/L/M/N/O = kolumna w boku; obsługuje też
 4-członowy format generatora (B0-01-100-2X, litera = kolumna, poziom jawny).
 """
 

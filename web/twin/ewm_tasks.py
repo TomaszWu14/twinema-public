@@ -69,14 +69,12 @@ FIELD_LABELS = {
 KIND_LABELS = {"putaway": "Przyjęcie / odłożenie", "replenishment": "Uzupełnienie",
                "picking": "Kompletacja", "outbound": "Wydanie / załadunek", "move": "Przesunięcie"}
 
-# Rodzaje procesu (słownik EWM), których pierwsza cyfra kłamie albo nie jest cyfrą.
+# Rodzaje procesu (słownik EWM), których pierwsza cyfra kłamie albo nie jest cyfrą. Przykładowy zestaw —
+# rodzaje procesów to konfiguracja konkretnego magazynu; własne kody dopisuje się nadpisaniami przy imporcie.
 PROCESS_KINDS = {
-    "2020": "picking", "3010": "replenishment", "3011": "replenishment", "3012": "replenishment",
-    "301D": "replenishment", "3100": "replenishment", "3060": "putaway", "3065": "putaway",
-    "3070": "outbound", "3071": "outbound", "37BG": "outbound", "9010": "putaway",
-    "X010": "putaway", "X020": "outbound", "FTCU": "putaway", "FTPD": "putaway",
-    "OFTC": "picking", "OFTP": "picking", "OMDX": "picking",
-    "KTSI": "putaway", "KTRI": "putaway", "KTSO": "picking", "KTRO": "picking",
+    "2020": "picking", "3010": "replenishment", "3020": "replenishment",
+    "3060": "putaway", "3070": "outbound", "9010": "putaway",
+    "Z010": "putaway", "Z020": "outbound", "ZPUT": "putaway", "ZPCK": "picking",
 }
 ACTIVITY_KINDS = {"PTWY": "putaway", "PICK": "picking", "REPL": "replenishment",
                   "INTL": "move", "STCH": "move", "INVE": "move"}

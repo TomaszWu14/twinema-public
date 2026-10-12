@@ -22,8 +22,7 @@ class WarehouseRackType(models.Model):
     code         = models.CharField(max_length=20, unique=True, verbose_name="Kod typu")
     name         = models.CharField(max_length=100, verbose_name="Nazwa")
     # Regał = fizyczna konstrukcja z wymiarami do 3D; strefa = obszar podłogowy/techniczny
-    # (wysyłka, bufor, laboratorium…) bez geometrii regału. Decyzja usera 2026-08-24:
-    # wymiary definiujemy TYLKO dla 0010/0011/0050/0052/0070.
+    # (wysyłka, bufor, laboratorium…) bez geometrii regału — wymiary definiujemy tylko dla typów regałowych.
     kind         = models.CharField(max_length=8, choices=KIND, default="rack",
                                     verbose_name="Rodzaj")
     description  = models.CharField(max_length=200, blank=True, default="",
@@ -112,7 +111,7 @@ def validate_bay_numbers(value):
 class BayTemplate(models.Model):
     """Szablon gniazda (słupa regału): belka, palety na belce, poziomy od podłogi w górę.
 
-    levels: [{"letter": "B", "height_mm": 400, "ewm_type": "0052", "split": false, "max_kg": 1000}, …]
+    levels: [{"letter": "B", "height_mm": 400, "ewm_type": "0020", "split": false, "max_kg": 1000}, …]
     `split` = miejsce dzielone wszerz na dwie połówki (kody z końcówką -1/-2)."""
     name = models.CharField(max_length=100, verbose_name="Nazwa")
     beam_mm = models.IntegerField(default=2700, verbose_name="Szerokość belki [mm]")

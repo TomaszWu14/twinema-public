@@ -2,20 +2,20 @@
 
 Kod EWM: ``{strefa}-{przejście}-{gniazdo:02}{pozycja}{litera}[-1|-2]``, np. ``B0-07-300C-1``.
 Litera NIE jest kolumną w boku — to poziom (i ewentualnie półka / część) w jednym stosie.
-Reguły potwierdzone na realnym eksporcie EWM (35 780 lokalizacji regałowych):
+Konwencja adresowania przyjęta w projekcie (dwa schematy liter):
 
-Hala B (każda strefa poza ``A0``–``A3``), kolejność od podłogi:
+Schemat standardowy (każda strefa poza ``A<cyfry>``), kolejność od podłogi:
   • poziom 1 (dół, picking): ``A`` = pełna paleta; ALBO ``B``/``C``/``D`` = półki JEDNA NAD
     DRUGĄ w otworze poziomu 1 (B najniżej, D najwyżej); ``S`` = poziom 1 regału 5-poziomowego,
   • poziom 2: ``X``; ALBO ``G`` + ``H`` = miejsce X PODZIELONE na dwie części (G niżej,
-    H wyżej — podział pionowy, potwierdzony: stos B → C → D → G → H albo B → C → D → X); ``T``,
+    H wyżej — podział pionowy: stos B → C → D → G → H albo B → C → D → X); ``T``,
   • poziom 3: ``Y`` / ``U``;  poziom 4: ``Z`` / ``V``;  poziom 5: ``W``.
   Końcówka ``-1``/``-2`` (np. ``C-1``, ``D-2``) = lewa/prawa połówka (~40 cm) tego miejsca.
 
-Hala A (strefy ``A<cyfry>``, typ 0070): ``A``..``E`` = poziomy 1..5 (pełne palety).
+Schemat blokowy (strefy ``A<cyfry>``): ``A``..``E`` = poziomy 1..5 (pełne palety).
 
-Kolumna EWM „Poziom miejsca skł.” jest niewiarygodna (dla półek C-1…D-2 zawiera kolejne
-numery), więc poziom ZAWSZE wynika z litery. Nieznana litera (np. legacy J/K/L/M/N/O
+Poziom ZAWSZE wynika z litery, nie z kolumny poziomu w eksporcie (dla półek dzielonych
+kolumna ta może zawierać kolejne numery zamiast poziomu). Nieznana litera (np. legacy J/K/L/M/N/O
 generatora) → ``None``: konsument zachowuje swój dotychczasowy fallback.
 
 Czysty Python (bez ORM) — testowalny bez bazy.
@@ -38,13 +38,13 @@ class LetterSlot(NamedTuple):
     side: int
 
 
-# G/H dzielą miejsce X (poziom 2, każde ~1,1 m³ zamiast 2,2 m³). Potwierdzone: podział
+# G/H dzielą miejsce X (poziom 2, każde ~1,1 m³ zamiast 2,2 m³). Przyjęty podział
 # PIONOWY (G niżej, H wyżej). False = podział na lewą/prawą część (side 1/2).
 GH_SPLIT_VERTICAL = True
 
 _HALL_A_ZONE = re.compile(r"^A\d+$")
 _HALL_A = {"A": 1, "B": 2, "C": 3, "D": 4, "E": 5}
-# litera → (poziom, półka) dla hali B
+# litera → (poziom, półka) w schemacie standardowym
 _HALL_B = {
     "A": (1, 0), "B": (1, 1), "C": (1, 2), "D": (1, 3), "S": (1, 0),
     "X": (2, 0), "T": (2, 0),
@@ -56,7 +56,7 @@ _GH_PART = {"G": 1, "H": 2}
 
 
 def is_hall_a(zone):
-    """Strefa hali A (A0–A3…): litery A–E to kolejne poziomy."""
+    """Strefa schematu blokowego (A0, A1…): litery A–E to kolejne poziomy."""
     return bool(_HALL_A_ZONE.match((zone or "").strip().upper()))
 
 
@@ -97,7 +97,7 @@ def code_slot(code):
     return letter_slot(parts[0], parts[2][-1], int(half))
 
 
-# Ile półek/części dzieli otwór poziomu (hala B): B/C/D → 3 w poziomie 1, G/H → 2 w poziomie 2.
+# Ile półek/części dzieli otwór poziomu (schemat standardowy): B/C/D → 3 w poziomie 1, G/H → 2 w poziomie 2.
 _SHELVES_IN_OPENING = {1: 3, 2: 2}
 
 

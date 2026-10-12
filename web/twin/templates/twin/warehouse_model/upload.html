@@ -51,7 +51,7 @@
               <label for="id_name">Nazwa modelu *</label>
               <input type="text" name="name" id="id_name"
                      value="{{ form.name.value|default:'' }}"
-                     placeholder="np. Hala A — układ 2024"
+                     placeholder="np. Magazyn główny — układ obecny"
                      {% if form.name.errors %}style="border-color:var(--red)"{% endif %}>
               {% if form.name.errors %}
               <ul class="error-list">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
