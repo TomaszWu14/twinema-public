@@ -9,7 +9,8 @@ nieregularne gniazdo dostaje najbliższy szablon + wyjątki skip/add.
 from collections import Counter, defaultdict
 from statistics import median
 
-from .addressing import format_bay_numbers, letter_rank, parse_code
+from .addressing import format_bay_numbers, parse_code
+from .ewm_levels import letter_rank
 
 BEAM_MM = {2: 1825, 3: 2700, 4: 3600}   # typowe belki; inne k → k × 900 mm (do poprawy w formularzu)
 DEFAULT_HEIGHT_MM = 1000                  # eksport EWM nie niesie wysokości → wartość do poprawy

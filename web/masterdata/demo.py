@@ -8,7 +8,7 @@ from twin.addressing import make_code
 
 GROUPS = ["Elektronika", "AGD", "Chemia gospodarcza", "Spożywcze suche", "Tekstylia",
           "Zabawki", "Narzędzia", "Opakowania"]
-LEVEL_LETTERS = "AXYZW"              # poziomy 1–5 od podłogi (schemat standardowy, twin/ewm_levels.py)
+LEVEL_LETTERS = "ABCDE"              # poziomy 1–5 od podłogi (twin/ewm_levels.py)
 N_MATERIALS = 3000                   # = materiały w tools/ewm_demo_tasks.py
 PALLET_SLOT_M = 0.9                  # szerokość miejsca na paletę EU wzdłuż belki
 

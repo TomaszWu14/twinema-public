@@ -23,7 +23,7 @@ class EwmViewsTests(TestCase):
         self.client.force_login(self.admin)
         r = self.client.get(reverse("twin:warehouse_model_detect", args=[self.wm.pk]))
         self.assertEqual(r.status_code, 200)
-        self.assertContains(r, "3 pal. · A X Y Z · 0020/0010")
+        self.assertContains(r, "3 pal. · A B C D · 0020/0010")
         self.assertContains(r, "10-47,50")
         self.assertEqual(BayTemplate.objects.count(), 0)
 

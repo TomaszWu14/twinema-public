@@ -1,8 +1,8 @@
 """Kody lokalizacji magazynu — wspólna konwencja mapy 3D / eksportu SAP.
 
 Litera na końcu kodu EWM = poziom (i półka/część) w jednym stosie — reguły w
-ui.views.core.ewm_levels (B/C/D = półki poz. 1, X/G/H/T = 2, Y/U = 3, Z/V = 4, W = 5;
-schemat blokowy A<cyfry>: A–E = 1–5). Legacy litery J/K/L/M/N/O = kolumna w boku; obsługuje też
+twin.ewm_levels (A–H = poziomy 1–8, P/Q/R = półki poz. 1, S/T = części poz. 2).
+Legacy litery J/K/L/M/N/O = kolumna w boku; obsługuje też
 4-członowy format generatora (B0-01-100-2X, litera = kolumna, poziom jawny).
 """
 

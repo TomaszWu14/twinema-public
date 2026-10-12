@@ -82,10 +82,10 @@ class ParseTests(SimpleTestCase):
 
     def test_location_level_from_column_or_code(self):
         cols = im.map_columns("locations", ["lokalizacja", "typ"])
-        data, _ = im.parse_location(["B0-01-100Y", "0010"], cols, level_of=lambda c: 3)
+        data, _ = im.parse_location(["B0-01-100C", "0010"], cols, level_of=lambda c: 3)
         self.assertEqual((data["level"], data["warehouse_type"], data["blocked_pick"]), (3, "0010", False))
         cols = im.map_columns("locations", ["lokalizacja", "poziom", "blokada wydania"])
-        data, _ = im.parse_location(["B0-01-100Y", "2", "X"], cols, level_of=lambda c: 3)
+        data, _ = im.parse_location(["B0-01-100C", "2", "X"], cols, level_of=lambda c: 3)
         self.assertEqual((data["level"], data["blocked_pick"]), (2, True))
 
     def test_parse_rows_counts_and_caps_sample(self):
