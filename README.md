@@ -8,7 +8,7 @@
 
 📹 [Prezentacja działania — 2 min](<DO UZUPEŁNIENIA: link YouTube>)
 
-🔗 **Demo:** [twinema.twapp.pl](https://twinema.twapp.pl) — konto `demo` (rola Podgląd, tylko odczyt), hasło: <DO UZUPEŁNIENIA>. Dane w demo są syntetyczne.
+🔗 **Demo:** [twinema.twapp.pl](https://twinema.twapp.pl) — konto `demo` (rola Podgląd, tylko odczyt), hasło: \<DO UZUPEŁNIENIA\>. Dane w demo są syntetyczne.
 
 ## Problem → rozwiązanie
 
@@ -115,7 +115,7 @@ odpala `seed_demo` przy każdym starcie (idempotentnie); `seed_demo --reset` odt
 | ElevenLabs, Anthropic Claude (opcjonalnie) | lektor, szkic narracji | na zewnątrz idzie tylko tekst kwestii i zagregowane liczby ([D13](docs/06-decyzje.md)) |
 | openpyxl + defusedxml | import i eksport xlsx | odczyt XLSX bez podatności XXE |
 | django-axes, gitleaks, ruff | bezpieczeństwo i jakość | blokada zgadywania haseł, skan sekretów przed commitem, lint w CI |
-| Docker + Coolify | wdrożenie demo | <DO UZUPEŁNIENIA: dlaczego Coolify> |
+| Docker + Coolify | wdrożenie demo | \<DO UZUPEŁNIENIA: dlaczego Coolify\> |
 
 ## Zakres i ograniczenia
 
@@ -129,7 +129,7 @@ odpala `seed_demo` przy każdym starcie (idempotentnie); `seed_demo --reset` odt
 ## Kontekst projektu
 
 Projekt portfolio inspirowany pracą przy magazynie; wszystkie dane, nazwy i scenariusze w repozytorium są
-syntetyczne. <DO UZUPEŁNIENIA: czas realizacji, Twoja rola, sposób pracy — w tym udział narzędzi AI>
+syntetyczne. \<DO UZUPEŁNIENIA: czas realizacji, Twoja rola, sposób pracy — w tym udział narzędzi AI\>
 
 ## Licencja
 

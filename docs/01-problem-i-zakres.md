@@ -17,9 +17,9 @@ Pytania, na które przed TWINEMA nie było jednego narzędzia:
 | Który z dwóch układów jest lepszy przy tych samych wolumenach? | Zarząd |
 | Jak to pokazać komuś, kto nie czyta arkuszy? | Projektant → zarząd |
 
-<DO UZUPEŁNIENIA: jak wyglądała praca przed — narzędzia, czas przygotowania jednego wariantu,
+\<DO UZUPEŁNIENIA: jak wyglądała praca przed — narzędzia, czas przygotowania jednego wariantu,
 przykład sytuacji, w której brak wizualizacji był problemem. Na podstawie wywiadu: „był brak” —
-narzędzia do wizualizacji i symulacji nie było.>
+narzędzia do wizualizacji i symulacji nie było.\>
 
 ## Interesariusze
 
@@ -57,6 +57,6 @@ Zarząd i rekruter to odbiorcy zakładani w projekcie (persony), nie zweryfikowa
 | Optymalizacja automatyczna (system sam proponuje najlepszy układ) | system ocenia warianty narysowane przez projektanta i podpowiada, co dodać przy wąskim gardle |
 | Dokładne koszty inwestycji | koszty są widełkami min–max ze stawek syntetycznych |
 | Samodzielna rejestracja i odzyskiwanie hasła | konta zakłada administrator |
-| Interfejs w innym języku niż polski | przyjęta zasada projektu „UI i teksty po polsku”; <DO UZUPEŁNIENIA: powód> |
+| Interfejs w innym języku niż polski | przyjęta zasada projektu „UI i teksty po polsku”; \<DO UZUPEŁNIENIA: powód\> |
 
 Znane braki i problemy: [07-ograniczenia.md](07-ograniczenia.md).

@@ -33,7 +33,7 @@ flowchart TD
 - brak sposobu, by sprawdzić dzień szczytowy przed budową — ryzyko wychodzi dopiero w eksploatacji;
 - każda zmiana układu = ręczne przeliczenie od nowa;
 - zarząd ocenia liczby, nie widzi przepływu;
-- <DO UZUPEŁNIENIA: konkretny przykład z praktyki>.
+- \<DO UZUPEŁNIENIA: konkretny przykład z praktyki\>.
 
 ## PO — z aplikacją
 
