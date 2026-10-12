@@ -29,7 +29,7 @@ Wymagania **odtworzone z działającego kodu** — każde ma kryterium akceptacj
 | ID | Wymaganie | Kryterium akceptacji | Gdzie zrealizowane | Uwagi |
 |---|---|---|---|---|
 | R-09 | Podgląd pliku przed importem | Po wgraniu pliku (do 300 MB) system pokazuje rozpoznane kolumny, mapowanie procesów, próbkę 15 zadań i błędne wiersze z pierwszych 2000; nic nie trafia do bazy przed „Importuj cały plik”; brak wymaganych kolumn ukrywa przycisk importu | `twin/views/warehouse_tasks.py:65-105` | |
-| R-10 | Rodzaj ruchu wyznaczany z procesu z możliwością nadpisania | Kolejność: nadpisanie użytkownika → słownik wyjątków → pierwsza cyfra procesu → działanie → kategoria → przesunięcie; zadania anulowane są pomijane | `twin/ewm_tasks.py:73-80,247-270` | |
+| R-10 | Rodzaj ruchu wyznaczany z procesu z możliwością nadpisania | Kolejność: nadpisanie użytkownika → słownik wyjątków → pierwsza cyfra procesu → działanie → kategoria → przesunięcie; zadania anulowane są pomijane | `twin/ewm_tasks.py:72-78,245-268` | |
 | R-11 | Duży import w tle ze statusem | Plik do 5 MB importuje się od razu; większy w tle, raport odświeża status co 5 s; błąd → status „Błąd”, zapisane wiersze usunięte, komunikat z numerem wiersza | `twin/views/warehouse_tasks.py:23-44,107-157`, `twin/ewm_tasks_import.py:63-101` | restart serwera zostawia import „wiszący” |
 
 ### Model hali i edytor

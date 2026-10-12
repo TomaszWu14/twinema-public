@@ -260,10 +260,10 @@ Pole `created_by` / `uploaded_by` (FK do `User`, SET_NULL) mają: ImportLog, Sce
 | Reguła | W bazie | Tylko w kodzie |
 |---|---|---|
 | Unikalny kod materiału, nośnika, typu regału, klucz stawki | ✅ `unique` | |
-| (model, strefa, nr regału) unikalne | ✅ `unique_together` (`twin/models.py:223`) | |
-| (partia, kod lokalizacji) unikalne | ✅ (`twin/models.py:98`) | |
+| (model, strefa, nr regału) unikalne | ✅ `unique_together` (`twin/models.py:222`) | |
+| (partia, kod lokalizacji) unikalne | ✅ (`twin/models.py:97`) | |
 | (scenariusz, rodzaj dnia) unikalne | ✅ `UniqueConstraint` (`scenario/models.py:172`) | |
-| Wyjątek adresu unikalny | ✅ (`twin/models.py:261`) | |
+| Wyjątek adresu unikalny | ✅ (`twin/models.py:260-262`) | |
 | 0 ≤ min ≤ śr ≤ max we wszystkich trójkach | ❌ | `check_triples` w `clean()` (`scenario/models.py:46-52`) |
 | Okno 0 ≤ od < do ≤ 24 h, procenty 0–100 | ❌ | `clean()` (`scenario/models.py:240-281`) |
 | Jeden aktywny master lokalizacji | ❌ | `services.py:112` dezaktywuje poprzednie; odczyt ratuje się `order_by` |
@@ -285,6 +285,6 @@ Pole `created_by` / `uploaded_by` (FK do `User`, SET_NULL) mają: ImportLog, Sce
 7. **`WarehouseModelRack.x_m / y_m` nullable**, a edytor, symulacja i 3D potrzebują pozycji.
 8. **`WarehouseModel.floor_width_m` bez minimum** w formularzu (`twin/forms.py:9`), edytor wymaga 1–5000 m (`layout.py:126`).
 9. **Redundancja w `Material`**: `cartons_per_pallet` obok `cartons_per_layer × layers_per_pallet` — rozbieżność tylko ostrzega (`packaging.py:13-17,46-62`).
-10. **Dwa „typy lokalizacji”**: `WarehouseRackType` (3D, mm) i — wg komentarza — `WarehouseLocationType` (symulacja pakowania, cm), którego w tym repo nie ma (`twin/models.py:50-51`). Pozostałość po kodzie źródłowym.
+10. **Dwa „typy lokalizacji”**: `WarehouseRackType` (3D, mm) i — wg komentarza — `WarehouseLocationType` (symulacja pakowania, cm), którego w tym repo nie ma (`twin/models.py:51-52`). Pozostałość po kodzie źródłowym.
 11. **JSON-y czytane bez sprawdzenia struktury**: `ScenarioRun.result["rep"]["seed"]` (`views_sim.py:43,113`), slajdy zapisane z pominięciem `clean_slides` (ORM/admin).
 12. **`Shift`** — brak kontroli nakładania się zmian tego samego procesu.
