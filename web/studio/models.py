@@ -1,7 +1,8 @@
-"""Studio prezentacji: film o modelu hali składany z ujęć (preset kamery + kwestia lektora).
+"""Studio prezentacji: film o modelu hali składany z ujęć (preset kamery + tekst wypalony jako napis).
 
-Statusy idą tylko do przodu: szkic → tekst zatwierdzony → audio → render → montaż → gotowe.
-Kwestie wolno edytować wyłącznie w szkicu — nic nie idzie do lektora ani renderu przed akceptacją.
+Statusy idą tylko do przodu: szkic → tekst zatwierdzony → render → montaż → gotowe.
+Teksty wolno edytować wyłącznie w szkicu — nic nie idzie do renderu przed akceptacją.
+Film nie ma lektora: długość ujęcia = czas na przeczytanie napisu (`captions.shot_seconds`).
 """
 import math
 import secrets
@@ -11,15 +12,13 @@ from django.db import models
 
 from render.models import RenderJob
 
-from .script import estimate_seconds
-from .voice import voice_key
+from .captions import shot_seconds
 
 
 class Presentation(models.Model):
     STATUS_CHOICES = [
         ("draft", "Szkic"),
         ("approved", "Tekst zatwierdzony"),
-        ("audio", "Lektor"),
         ("render", "Render ujęć"),
         ("montage", "Montaż"),
         ("done", "Gotowe"),
@@ -28,8 +27,6 @@ class Presentation(models.Model):
     model = models.ForeignKey("twin.WarehouseModel", on_delete=models.CASCADE, related_name="presentations",
                               verbose_name="Model hali")
     title = models.CharField(max_length=200, verbose_name="Tytuł filmu")
-    voice_id = models.CharField(max_length=64, blank=True, default="", verbose_name="Głos lektora (voice_id)",
-                                help_text="Puste = domyślny głos z ELEVENLABS_VOICE_ID.")
     status = models.CharField(max_length=8, choices=STATUS_CHOICES, default="draft", db_index=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -49,35 +46,8 @@ class Presentation(models.Model):
         return self.status == "draft"
 
     @property
-    def estimated_seconds(self):
-        return round(sum(estimate_seconds(s.text) for s in self.shots.all()))
-
-    @property
-    def effective_voice(self):
-        return self.voice_id or settings.ELEVENLABS_VOICE_ID
-
-    def all_voiced(self):
-        shots = list(self.shots.select_related("voice"))       # shot.presentation = self (cache menedżera)
-        return bool(shots) and all(s.voice_ok for s in shots)
-
-
-class VoiceTrack(models.Model):
-    """Nagranie lektora — cache po hashu (tekst + głos + model), współdzielony między ujęciami."""
-    key = models.CharField(max_length=64, unique=True)
-    voice_id = models.CharField(max_length=64)
-    model_id = models.CharField(max_length=64)
-    text = models.TextField()
-    audio = models.FileField(upload_to="voice/%Y/%m/")
-    duration_s = models.FloatField()
-    alignment = models.JSONField(default=dict)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = "Nagranie lektora"
-        verbose_name_plural = "Nagrania lektora"
-
-    def __str__(self):
-        return f"{self.text[:40]}… ({self.duration_s:.1f} s)"
+    def film_seconds(self):
+        return round(sum(s.duration_s for s in self.shots.all()))
 
 
 class Shot(models.Model):
@@ -85,8 +55,7 @@ class Shot(models.Model):
     order = models.PositiveSmallIntegerField(default=0, verbose_name="Kolejność")
     preset = models.CharField(max_length=12, choices=RenderJob.PRESET_CHOICES, default="ogolny",
                               verbose_name="Ujęcie")
-    text = models.TextField(verbose_name="Kwestia lektora")
-    voice = models.ForeignKey(VoiceTrack, on_delete=models.SET_NULL, null=True, blank=True, related_name="shots")
+    text = models.TextField(verbose_name="Tekst na ekranie")
     render = models.ForeignKey(RenderJob, on_delete=models.SET_NULL, null=True, blank=True, related_name="studio_shots")
     render_key = models.CharField(max_length=64, blank=True, default="", db_index=True)
     still = models.ForeignKey(RenderJob, on_delete=models.SET_NULL, null=True, blank=True, related_name="studio_stills")
@@ -101,28 +70,20 @@ class Shot(models.Model):
         return f"{self.order}. {self.get_preset_display()}"
 
     @property
-    def estimated_seconds(self):
-        return estimate_seconds(self.text)
-
-    @property
-    def voice_key(self):
-        return voice_key(self.text, self.presentation.effective_voice, settings.ELEVENLABS_MODEL)
-
-    @property
-    def voice_ok(self):
-        """Nagranie pasuje do obecnego tekstu i głosu (po poprawce kwestii — nieaktualne)."""
-        return self.voice is not None and self.voice.key == self.voice_key
+    def duration_s(self):
+        """Długość ujęcia w filmie: czas na przeczytanie napisu."""
+        return shot_seconds(self.text)
 
     @property
     def render_seconds(self):
-        """Długość klipu: nagranie + zapas 0,5 s, w granicach kolejki renderów (2–60 s)."""
-        return min(60, max(2, math.ceil(self.voice.duration_s + 0.5))) if self.voice else None
+        """Długość klipu: pełne sekundy ≥ ujęcia, w granicach kolejki renderów (≤ 60 s)."""
+        return min(60, math.ceil(self.duration_s))
 
     @property
     def render_current(self):
-        """Render pasuje do obecnego presetu i długości kwestii (stan zlecenia osobno)."""
+        """Render pasuje do obecnego presetu i długości ujęcia (stan zlecenia osobno)."""
         r = self.render
-        return (r is not None and self.voice_ok and r.preset == self.preset and r.seconds == self.render_seconds
+        return (r is not None and r.preset == self.preset and r.seconds == self.render_seconds
                 and r.resolution == RENDER_RESOLUTION)
 
 

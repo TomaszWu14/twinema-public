@@ -10,7 +10,7 @@ Proces: **zaprojektowanie układu magazynu i uzasadnienie go przed zarządem.**
 | Zarząd | człowiek (rola `Podgląd` albo publiczny link) | ogląda pokaz, podejmuje decyzję |
 | System magazynowy (WMS / SAP EWM) | system zewnętrzny | źródło plików: materiały, lokalizacje, stany, historia zadań — tylko eksport |
 | Worker renderu | system (PC z Blenderem i ffmpeg) | renderuje ujęcia i montuje film (opcjonalnie) |
-| ElevenLabs, Anthropic Claude | usługi zewnętrzne | lektor i szkic narracji (opcjonalnie) |
+| Anthropic Claude | usługa zewnętrzna | szkic tekstów filmu (opcjonalnie) |
 
 ## PRZED — bez aplikacji
 
@@ -92,7 +92,7 @@ flowchart TD
         R2 --> R3{Kto ogląda?}
         R3 -- konto Podgląd --> R4[Link wewnętrzny: tylko pokaz]
         R3 -- osoba bez konta --> R5[Publiczny link ważny 1–90 dni]
-        R1 -. opcjonalnie .-> F1[Studio: tekst, lektor, render, montaż:<br/>MP4 i deck PDF]
+        R1 -. opcjonalnie .-> F1[Studio: tekst, render, montaż z napisami:<br/>MP4 i deck PDF]
     end
 
     D4 --> H0
@@ -118,7 +118,7 @@ flowchart TD
 | Czy obsada pokrywa potrzebę? | Projektant | „Obsada: zakładana vs potrzebna” | zmiana zmian albo norm |
 | Co zmienić przy wąskim gardle? | Projektant | wąskie gardła z podpowiedzią (+N osób, doków, wózków) | wróć do layoutu albo do scenariusza |
 | Komu i na jak długo udostępnić pokaz? | Projektant | — | link dla roli Podgląd albo publiczny link z datą ważności |
-| Czy zatwierdzić tekst filmu? | Projektant | kwestie (szablon albo szkic z Claude) | dopiero po zatwierdzeniu lektor i render |
+| Czy zatwierdzić tekst filmu? | Projektant | teksty ujęć (szablon albo szkic z Claude) | dopiero po zatwierdzeniu render i montaż |
 
 ## Wejścia i wyjścia
 

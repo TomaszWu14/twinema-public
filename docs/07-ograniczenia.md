@@ -12,7 +12,7 @@
 | Własne strony błędów 404 i 500 | wygasły link publiczny albo usunięty wynik → domyślna strona Django bez nawigacji |
 | Anulowanie trwającego importu zadań | jest tylko „Wstrzymaj odświeżanie” |
 | Render po stronie serwera | wymaga Blendera 4.x na osobnym PC z workerem (`tools/render_worker.py`) |
-| Zweryfikowany film end-to-end | Studio jest zbudowane i ma testy, ale pierwszy prawdziwy film wymaga kluczy ElevenLabs/Claude i ffmpeg u workera ([D6](06-decyzje.md#d6-prezentacja-3d-w-przeglądarce-przed-filmem)) |
+| Zweryfikowany film end-to-end | Studio jest zbudowane i ma testy, a montaż z napisami sprawdzony na ffmpeg; pierwszy prawdziwy film wymaga workera z Blenderem i ffmpeg ≥ 6.1 ([D6](06-decyzje.md#d6-prezentacja-3d-w-przeglądarce-przed-filmem)) |
 | Model czasu cyklu z ML | w planie; dziś prognoza wolumenów i segmentacja SKU |
 
 ## Znane problemy
@@ -38,7 +38,7 @@
 - Brak potwierdzenia przy usuwaniu: scenariusza, prezentacji 3D, prezentacji Studio, zlecenia renderu, sprzętu, slajdu.
 - Po błędzie walidacji wpisane dane przepadają: formularze scenariusza (`scenario/views.py:306-364`), typ regału (`twin/views/warehouse_racktype.py:28-108`), edycja stref (`twin/views/warehouse_variant_edit.py:69`).
 - Komunikat sukcesu mimo pominięcia danych: współrzędne regałów (`twin/views/warehouse_model.py:212,235`), elementy hali (`twin/shared.py:150-154`), import sprzętu z samymi odrzuceniami (`equipment/views.py:124`).
-- Po wygaśnięciu sesji zapis w edytorze prezentacji i nagrywanie lektora pokazują „Brak połączenia z serwerem” zamiast prośby o zalogowanie.
+- Po wygaśnięciu sesji zapis w edytorze prezentacji pokazuje „Brak połączenia z serwerem” zamiast prośby o zalogowanie.
 
 ### Dokumentacja projektowa
 - `docs/PLAN.md` i `docs/ZALOZENIA.md` to zapis prac z okresu budowy (fazy F0–F6, decyzje z burzy mózgów). Niektóre szczegóły się zdezaktualizowały: `PLAN.md` opisuje `/api/render/next` (w kodzie `/api/render/claim/`) i scenę w wersji 1 (w kodzie wersja 2).

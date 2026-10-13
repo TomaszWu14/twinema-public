@@ -1,7 +1,7 @@
 """Czysta logika scenariusza: fakty z KPI, szablon, walidacja szkicu, szacunek długości."""
 from unittest import TestCase
 
-from studio.script import (MAX_SHOT_CHARS, MAX_SHOTS, PRESETS, clean_draft, estimate_seconds, kpi_facts,
+from studio.script import (MAX_SHOT_CHARS, MAX_SHOTS, PRESETS, clean_draft, kpi_facts,
                            template_script)
 
 KPI = {"pallet_positions": 2304, "positions_per_m2": 0.768, "built_area_m2": 1210.5, "floor_area_m2": 3000.0,
@@ -53,8 +53,3 @@ class CleanDraftTests(TestCase):
         self.assertEqual(clean_draft(None), ([], []))
         self.assertEqual(clean_draft([None])[0], [])
 
-
-class EstimateTests(TestCase):
-    def test_estimate(self):
-        self.assertEqual(estimate_seconds(""), 0.0)
-        self.assertEqual(estimate_seconds("słowo " * 24), 10.0)

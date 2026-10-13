@@ -12,7 +12,6 @@ urlpatterns = [
     path("studio/<int:pk>/deck.pdf", views.deck_pdf, name="deck_pdf"),
     path("api/studio/montage/claim/", api.claim, name="api_claim"),
     path("api/studio/montage/<int:pk>/clip/<int:n>/", api.clip, name="api_clip"),
-    path("api/studio/montage/<int:pk>/audio/<int:n>/", api.audio, name="api_audio"),
     path("api/studio/montage/<int:pk>/result/", api.result, name="api_result"),
     path("api/studio/montage/<int:pk>/fail/", api.fail, name="api_fail"),
     path("studio/", views.presentation_list, name="list"),
@@ -24,8 +23,6 @@ urlpatterns = [
     path("studio/<int:pk>/zatwierdz/", views.approve, name="approve"),
     path("studio/<int:pk>/edycja/", views.reopen, name="reopen"),
     path("studio/<int:pk>/usun/", views.presentation_delete, name="delete"),
-    path("studio/<int:pk>/lektor/<int:shot_pk>/", views.voice_shot, name="voice_shot"),
     path("studio/<int:pk>/napisy.srt", views.subtitles, name="subtitles"),
     path("studio/<int:pk>/youtube.txt", views.youtube_text, name="youtube"),
-    path("studio/lektor/<int:pk>.mp3", views.voice_file, name="voice_file"),
 ]

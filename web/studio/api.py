@@ -1,9 +1,9 @@
 """API workera dla montażu filmu — ten sam token (RENDER_WORKER_TOKEN) i ten sam wzorzec jednorazowego
-przejęcia co kolejka renderów (render/api.py). Pliki ujęć i nagrań tylko z X-Worker-Token + X-Claim.
+przejęcia co kolejka renderów (render/api.py). Pliki ujęć tylko z X-Worker-Token + X-Claim. Film nie ma lektora: manifest niesie
+długość każdego ujęcia i jego napisy [(start, koniec, tekst)], które worker wypala w obrazie.
 
   POST /api/studio/montage/claim/                  → 200 manifest (JSON) albo 204
   GET  /api/studio/montage/<id>/clip/<n>/           → MP4 ujęcia n (0…)
-  GET  /api/studio/montage/<id>/audio/<n>/          → MP3 kwestii n
   POST /api/studio/montage/<id>/result/             → multipart: file (MP4), log
   POST /api/studio/montage/<id>/fail/               → error (tekst)
 """
@@ -21,6 +21,7 @@ from django.views.decorators.http import require_GET, require_POST
 
 from render.api import LOG_MAX, SIGNATURES, _forbidden, worker_required
 
+from .captions import shot_cues
 from .models import RENDER_RESOLUTION, MontageJob
 
 TITLE_S, END_S = 3.0, 3.0
@@ -36,21 +37,17 @@ def _claimed(request, pk):
 
 
 def _shots(job):
-    return list(job.presentation.shots.select_related("voice", "render"))
+    return list(job.presentation.shots.select_related("render"))
 
 
 def manifest(request, job):
-    from .views import film_srt
-
     shots = _shots(job)
     url = request.build_absolute_uri
     return {
         "id": job.pk, "claim": job.claim_token, "title": job.presentation.title, "subtitle": settings.APP_NAME,
         "end_title": settings.APP_NAME, "resolution": RENDER_RESOLUTION, "title_s": TITLE_S, "end_s": END_S,
-        "srt": film_srt(shots, start_s=TITLE_S),
-        "shots": [{"duration": s.voice.duration_s,
-                   "clip_url": url(reverse("studio:api_clip", args=[job.pk, i])),
-                   "audio_url": url(reverse("studio:api_audio", args=[job.pk, i]))} for i, s in enumerate(shots)],
+        "shots": [{"duration": s.duration_s, "captions": [list(c) for c in shot_cues(s.text, s.duration_s)],
+                   "clip_url": url(reverse("studio:api_clip", args=[job.pk, i]))} for i, s in enumerate(shots)],
         "result_url": url(reverse("studio:api_result", args=[job.pk])),
         "fail_url": url(reverse("studio:api_fail", args=[job.pk])),
     }
@@ -76,29 +73,19 @@ def claim(request):
     return HttpResponse(status=204)
 
 
-def _shot_file(request, pk, n, field):
+@worker_required
+@require_GET
+def clip(request, pk, n):
     job = _claimed(request, pk)
     if job is None:
         return _forbidden("Zlecenie nie jest przejęte przez tego workera.")
     shots = _shots(job)
     if not 0 <= n < len(shots):
         raise Http404
-    f = shots[n].render.result if field == "clip" else shots[n].voice.audio
+    f = shots[n].render.result
     if not f:
         raise Http404
-    return FileResponse(f.open("rb"), content_type="video/mp4" if field == "clip" else "audio/mpeg")
-
-
-@worker_required
-@require_GET
-def clip(request, pk, n):
-    return _shot_file(request, pk, n, "clip")
-
-
-@worker_required
-@require_GET
-def audio(request, pk, n):
-    return _shot_file(request, pk, n, "audio")
+    return FileResponse(f.open("rb"), content_type="video/mp4")
 
 
 @worker_required

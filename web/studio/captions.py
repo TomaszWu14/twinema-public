@@ -1,46 +1,44 @@
-"""Lektor i napisy (czysty Python — bez Django i bez sieci).
+"""Napisy filmu (czysty Python — bez Django i bez sieci). Film nie ma lektora: tekst ujęcia jest
+wypalony w obrazie, a długość ujęcia wynika z czasu potrzebnego na jego przeczytanie.
 
-  • `voice_key` — hash wejścia TTS (tekst + głos + model): ta sama kwestia = to samo audio z cache,
-    poprawka jednego zdania nagrywa tylko tę kwestię.
-  • `words` / `duration` — z wyrównania znaków ElevenLabs (character_start/end_times_seconds).
-  • `cues` — podział kwestii na napisy: ≤ 2 linie po ≤ 42 znaki, ≤ 6 s na planszę.
-  • `build_srt` — plik SRT z kwestii przesuniętych o początek ujęcia na osi filmu.
+  • `shot_seconds` — długość ujęcia z liczby słów (tempo czytania + zapas), 5–60 s.
+  • `timed_words` / `shot_cues` — słowa rozłożone po czasie ujęcia → plansze napisów.
+  • `cues` — podział tekstu na plansze: ≤ 2 linie po ≤ 42 znaki, ≤ 6 s na planszę.
+  • `build_srt` — plik SRT z ujęć przesuniętych o ich początek na osi filmu.
 """
-import hashlib
-import json
-
 LINE_CHARS, MAX_LINES, MAX_CUE_S = 42, 2, 6.0
+READ_WPS = 2.2                  # słów/s — napis czytany obok oglądanej sceny (wolniej niż sam tekst)
+PAD_S = 1.5                     # wejście + zejście napisu
+LEAD_S, TAIL_S = 0.4, 0.6       # pierwszy napis po wejściu ujęcia, ostatni znika przed cięciem
+MIN_SHOT_S, MAX_SHOT_S = 5.0, 60.0
 
 
-def voice_key(text, voice_id, model_id):
-    raw = json.dumps([text.strip(), voice_id, model_id], ensure_ascii=False)
-    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+def shot_seconds(text):
+    """Czas ujęcia: tyle, ile trzeba na przeczytanie napisu (spokojne tempo, bo widz patrzy też na scenę)
+    + zapas na wejście i zejście napisu; w granicach kolejki renderów."""
+    n = len(text.split())
+    return min(MAX_SHOT_S, max(MIN_SHOT_S, round(n / READ_WPS + PAD_S, 1)))
 
 
-def duration(alignment):
-    ends = (alignment or {}).get("character_end_times_seconds") or []
-    return round(max(ends), 3) if ends else 0.0
-
-
-def words(alignment):
-    """[(słowo, start, koniec)] ze znaków; białe znaki rozdzielają słowa."""
-    al = alignment or {}
-    chars = al.get("characters") or []
-    starts = al.get("character_start_times_seconds") or []
-    ends = al.get("character_end_times_seconds") or []
-    out, cur, t0, t1 = [], "", None, None
-    for ch, s, e in zip(chars, starts, ends, strict=False):     # dane z API: nadmiar ucinamy
-        if ch.isspace():
-            if cur:
-                out.append((cur, t0, t1))
-            cur, t0 = "", None
-            continue
-        if t0 is None:
-            t0 = s
-        cur, t1 = cur + ch, e
-    if cur:
-        out.append((cur, t0, t1))
+def timed_words(text, seconds):
+    """[(słowo, start, koniec)] — słowa rozłożone po czasie ujęcia proporcjonalnie do długości
+    (od LEAD_S do seconds − TAIL_S); zastępuje znaczniki czasu z nagrania lektora."""
+    ws = text.split()
+    if not ws:
+        return []
+    t0, t1 = LEAD_S, max(seconds - TAIL_S, LEAD_S + 0.1)
+    per = (t1 - t0) / sum(len(w) + 1 for w in ws)
+    out, t = [], t0
+    for w in ws:
+        d = (len(w) + 1) * per
+        out.append((w, round(t, 3), round(t + d, 3)))
+        t += d
     return out
+
+
+def shot_cues(text, seconds):
+    """Napisy jednego ujęcia: [(start, koniec, tekst z \\n)] na osi ujęcia."""
+    return cues(timed_words(text, seconds))
 
 
 def _wrap(ws):

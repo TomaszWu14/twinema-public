@@ -45,7 +45,7 @@ Zarząd i rekruter to odbiorcy zakładani w projekcie (persony), nie zweryfikowa
 | Prognoza | wzrost wolumenów (Holt-Winters i modele bazowe, MAPE), segmentacja SKU | [05](05-wymagania.md) |
 | Katalog sprzętu | wózki, AGV/AMR: prędkości, udźwig z krzywą, wymagana alejka, koszty | [04](04-model-danych.md) |
 | Pokaz | prezentacja 3D ze slajdami, link dla roli Podgląd i publiczny link z datą ważności | [03](03-user-flow.md) |
-| Film (opcjonalnie) | tekst → lektor ElevenLabs → render w Blenderze → montaż → MP4 + deck PDF | [07](07-ograniczenia.md) |
+| Film (opcjonalnie) | tekst → render w Blenderze → montaż z napisami w obrazie → MP4 + deck PDF | [07](07-ograniczenia.md) |
 
 ## Poza zakresem i dlaczego
 

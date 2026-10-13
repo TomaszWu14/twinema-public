@@ -84,7 +84,7 @@ class StudioViewTests(TestCase):
         p = self._create()
         p.shots.update(text="  ")
         r = self.client.post(reverse("studio:approve", args=[p.pk]), follow=True)
-        self.assertContains(r, "co najmniej jedną kwestię")
+        self.assertContains(r, "co najmniej jeden tekst ujęcia")
         p.refresh_from_db()
         self.assertEqual(p.status, "draft")
 

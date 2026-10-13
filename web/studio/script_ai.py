@@ -14,16 +14,17 @@ from .script import MAX_SHOTS, MIN_SHOTS, PRESETS, TARGET_WORDS, clean_draft
 TIMEOUT_S = 90                  # < timeout gunicorna (120 s)
 
 SYSTEM = f"""Jesteś scenarzystą krótkich filmów prezentujących projekty magazynów dla zarządu.
-Piszesz po polsku tekst dla lektora: rzeczowo, spokojnie, bez marketingowego żargonu i bez wykrzykników.
-Film ma {MIN_SHOTS}–{MAX_SHOTS} ujęć i łącznie {TARGET_WORDS[0]}–{TARGET_WORDS[1]} słów (2–3 minuty).
-Każde ujęcie to jedna kwestia (1–3 zdania) i jeden ruch kamery:
+Film nie ma lektora: piszesz po polsku napisy wyświetlane na ekranie — rzeczowo, krótkimi zdaniami,
+bez marketingowego żargonu i bez wykrzykników. Widz czyta je, oglądając halę, więc mniej znaczy lepiej.
+Film ma {MIN_SHOTS}–{MAX_SHOTS} ujęć i łącznie {TARGET_WORDS[0]}–{TARGET_WORDS[1]} słów (1,5–2,5 minuty).
+Każde ujęcie to jeden napis (1–2 krótkie zdania) i jeden ruch kamery:
   przelot — przelot nad halą (otwarcie, kontekst),
   orbita — orbita wokół hali (całość układu, sprzęt),
   przejazd — przejazd nisko wzdłuż alejek (droga, praca wózków),
   plan — plan z góry (pojemność, strefy, powierzchnia),
   ogolny — statyczny widok ogólny (podsumowanie, zamknięcie).
 Używaj wyłącznie liczb z podanych faktów, nie wymyślaj nowych i nie podawaj nazw firm ani miejsc.
-Liczby zapisuj tak, jak przeczyta je lektor (np. „ponad dwa tysiące”, „dwadzieścia trzy metry”)."""
+Liczby zapisuj cyframi z jednostkami, jak w faktach (np. „2 300 miejsc paletowych”, „23 m”)."""
 
 
 class ShotDraft(BaseModel):
@@ -67,7 +68,7 @@ def draft_script(facts, client=None):
     except (anthropic.APIStatusError, anthropic.APIConnectionError) as exc:
         raise ScriptAIError("Usługa Claude jest chwilowo niedostępna — spróbuj ponownie.") from exc
     if resp.stop_reason == "refusal":
-        raise ScriptAIError("Claude odmówił napisania szkicu — napisz kwestie ręcznie.")
+        raise ScriptAIError("Claude odmówił napisania szkicu — napisz teksty ręcznie.")
     if resp.stop_reason == "max_tokens" or resp.parsed_output is None:
         raise ScriptAIError("Szkic z AI przyszedł niekompletny — spróbuj ponownie.")
     return clean_draft([s.model_dump() for s in resp.parsed_output.shots])
