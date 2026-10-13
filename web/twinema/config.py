@@ -49,6 +49,8 @@ class AppEnv(BaseSettings):
     # ── Publiczne demo (manage.py seed_demo) ────────────────────────────────
     DEMO_PASSWORD: str = ""            # hasło konta `demo` (rola Podgląd); puste = konto nie powstaje
     DEMO_SEED: bool = False            # True = docker-entrypoint.sh odpala seed_demo przy każdym starcie
+    DEMO_PUBLIC: bool = False          # True = /demo/ wpuszcza bez hasła jako `demo` (Podgląd, tylko odczyt)
+    DEMO_VIDEO_URL: str = ""           # adres filmu (np. YouTube) na stronie /demo/; puste = bez przycisku
 
     # ── Obserwowalność ──────────────────────────────────────────────────────
     SENTRY_DSN: str = ""
@@ -64,6 +66,8 @@ class AppEnv(BaseSettings):
             raise ValueError("RENDER_WORKER_TOKEN musi mieć co najmniej 32 znaki (np. secrets.token_urlsafe(32)).")
         if self.DEMO_PASSWORD and len(self.DEMO_PASSWORD) < 8:
             raise ValueError("DEMO_PASSWORD musi mieć co najmniej 8 znaków.")
+        if self.DEMO_VIDEO_URL and not self.DEMO_VIDEO_URL.startswith("https://"):
+            raise ValueError("DEMO_VIDEO_URL musi zaczynać się od https://.")
         return self
 
 

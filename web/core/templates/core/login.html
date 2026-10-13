@@ -15,6 +15,7 @@
     <input class="form-control" type="password" name="password" id="id_password" autocomplete="current-password" required>
     <input type="hidden" name="next" value="{{ next }}">
     <button class="btn btn-primary" type="submit">Zaloguj</button>
+    {% if demo_public %}<p class="login-demo"><a href="{% url 'core:demo' %}">Zobacz wersję demo bez logowania →</a></p>{% endif %}
   </form>
 </main>
 {% endblock %}

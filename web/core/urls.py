@@ -9,5 +9,7 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("login/", auth_views.LoginView.as_view(template_name="core/login.html",
                                                 redirect_authenticated_user=True), name="login"),
+    path("demo/", views.demo, name="demo"),
+    path("demo/wejdz/", views.demo_enter, name="demo_enter"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
 ]

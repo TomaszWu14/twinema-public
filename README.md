@@ -50,6 +50,11 @@ w Blenderze → film z lektorem (ElevenLabs) i deck PDF.
 
 Każdy krok ma cache po hashu wejścia — poprawka jednego zdania nagrywa i renderuje tylko tę kwestię.
 
+**Na YouTube:** głos każdej kwestii jest normalizowany do −14 LUFS; opcjonalny podkład muzyczny ustawiasz u workera
+(`TWINEMA_MUSIC=podklad.mp3` albo `--music`) — leci cicho pod całym filmem i wygasa na końcu. Przy gotowym filmie
+w Studiu: „Pobierz MP4”, „Napisy SRT” (czasy jak w filmie — wgraj w YouTube Studio jako osobny plik napisów, ścieżki
+z MP4 YouTube nie czyta) i „Opis na YouTube” (tytuł, opis, link do `/demo/` i rozdziały z osi czasu montażu).
+
 ## Uruchomienie lokalne
 
 ```bash
@@ -84,16 +89,19 @@ Obraz z `Dockerfile`, port 8000, healthcheck `/health/`. Zmienne (poza `DJANGO_S
 
 | Zmienna | Do czego |
 |---|---|
-| `DEMO_SEED=1` | przy każdym starcie `manage.py seed_demo`: hala, scenariusz, stany demo (idempotentnie) |
-| `DEMO_PASSWORD` | hasło konta `demo` w roli Podgląd (min. 8 znaków); puste = konto nie powstaje |
+| `DEMO_SEED=1` | przy każdym starcie `manage.py seed_demo`: hala, scenariusz, stany, symulacja obu dni i prezentacja 3D ze szablonu z publicznym linkiem (idempotentnie) |
+| `DEMO_PUBLIC=1` | wejście bez logowania: `/` prowadzi na stronę `/demo/` z przyciskami „Obejrzyj prezentację 3D” i „Wejdź do systemu” (sesja konta `demo` w roli Podgląd — tylko odczyt, bez danych źródłowych) |
+| `DEMO_PASSWORD` | hasło konta `demo` (min. 8 znaków); puste przy `DEMO_PUBLIC=1` = konto bez hasła, tylko wejście gościa; puste bez `DEMO_PUBLIC` = konto nie powstaje |
+| `DEMO_VIDEO_URL` | adres filmu (np. YouTube, `https://…`) — przycisk „Zobacz film” na `/demo/` |
 | `DJANGO_SUPERUSER_USERNAME` / `_EMAIL` / `_PASSWORD` | konto administratora tworzone przy pierwszym starcie |
 
-Reset danych demo: `python manage.py seed_demo --reset` (np. Scheduled Task w Coolify) — usuwa tylko halę,
-scenariusz i stany demo. Klucze Anthropic/ElevenLabs i `RENDER_WORKER_TOKEN` zostaw puste (Studio i worker wyłączone).
+Stały adres do udostępniania: **`/demo/`** — prowadzi do aktualnej prezentacji demo (token w `/p/<token>/` zmienia
+się tylko po resecie). Reset danych demo: `python manage.py seed_demo --reset` (np. Scheduled Task w Coolify) — usuwa
+tylko halę, scenariusz, stany, wyniki i prezentację demo. Klucze Anthropic/ElevenLabs i `RENDER_WORKER_TOKEN` zostaw puste (Studio i worker wyłączone).
 
 ## Testy
 
-663 testy (Django `TestCase`/`SimpleTestCase`; logika symulacji, ML i geometrii testowana bez bazy) + ruff:
+685 testów (Django `TestCase`/`SimpleTestCase`; logika symulacji, ML i geometrii testowana bez bazy) + ruff:
 
 ```bash
 cd web

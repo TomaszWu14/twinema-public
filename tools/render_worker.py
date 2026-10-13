@@ -107,7 +107,7 @@ def run_job(api, job, blender, engine, samples):
         return True
 
 
-def run_montage(api, job, ffmpeg, font):
+def run_montage(api, job, ffmpeg, font, music=""):
     """Montaż filmu: pobierz ujęcia i nagrania, wykonaj komendy z twinema_montage.plan, wyślij MP4."""
     print(f"[{time.strftime('%H:%M:%S')}] Montaż {job['id']}: {job['title']} ({len(job['shots'])} ujęć)")
     with tempfile.TemporaryDirectory(prefix="twinema_film_") as tmp:
@@ -117,7 +117,7 @@ def run_montage(api, job, ffmpeg, font):
                 for url, name in ((s["clip_url"], f"clip_{i}.mp4"), (s["audio_url"], f"audio_{i}.mp3")):
                     with open(os.path.join(tmp, name), "wb") as fh:
                         fh.write(api.get(url, job["claim"]))
-            files, cmds, final = montage.plan(job, tmp, ffmpeg, font)
+            files, cmds, final = montage.plan(job, tmp, ffmpeg, font, music)
             for path, text in files.items():
                 with open(path, "w", encoding="utf-8") as fh:
                     fh.write(text)
@@ -148,13 +148,16 @@ def main():
     p.add_argument("--once", action="store_true", help="jedno zlecenie (albo brak) i koniec")
     p.add_argument("--ffmpeg", default="", help="ścieżka ffmpeg do montażu (inaczej FFMPEG_BIN / PATH / winget)")
     p.add_argument("--font", default="", help="font TTF plansz z polskimi znakami (inaczej TWINEMA_FONT / systemowy)")
+    p.add_argument("--music", default="", help="podkład muzyczny filmu (mp3/wav, inaczej TWINEMA_MUSIC); brak = bez muzyki")
     a = p.parse_args()
     if len(a.token) < 32:
         sys.exit("Brak tokenu: ustaw TWINEMA_WORKER_TOKEN (ten sam co RENDER_WORKER_TOKEN na serwerze).")
     blender = find_blender(a.blender)
-    ffmpeg, font = montage.find_ffmpeg(a.ffmpeg), montage.find_font(a.font)
+    ffmpeg, font, music = montage.find_ffmpeg(a.ffmpeg), montage.find_font(a.font), montage.find_music(a.music)
     api = Api(a.url, a.token, platform.node()[:40] or "worker")
     print(f"TWINEMA worker → {a.url} | Blender: {blender} | silnik: {a.engine}")
+    if music:
+        print(f"Podkład muzyczny filmów: {music}")
     if not (ffmpeg and font):
         print("Montaż filmów wyłączony — brak ffmpeg (FFMPEG_BIN / winget install Gyan.FFmpeg) "
               "albo fontu (TWINEMA_FONT). Rendery działają normalnie.")
@@ -164,7 +167,7 @@ def main():
             if job:
                 run_job(api, job, blender, a.engine, a.samples)
             elif ffmpeg and font and (job := api.claim("/api/studio/montage/claim/")):
-                run_montage(api, job, ffmpeg, font)
+                run_montage(api, job, ffmpeg, font, music)
             if job:
                 if a.once:
                     return

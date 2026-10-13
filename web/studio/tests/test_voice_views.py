@@ -60,8 +60,12 @@ class VoiceViewTests(TestCase):
         srt = self.client.get(reverse("studio:subtitles", args=[self.p.pk]))
         self.assertEqual(srt["Content-Type"], "application/x-subrip; charset=utf-8")
         body = srt.content.decode()
-        self.assertIn("00:00:00,000 --> 00:00:00,850\nPierwsza kwestia.", body)
-        self.assertIn("00:00:00,850 --> 00:00:01,550\nDruga kwestia.", body)   # przesunięta o 1. ujęcie
+        self.assertIn("00:00:03,000 --> 00:00:03,850\nPierwsza kwestia.", body)   # po planszy tytułowej, jak w MP4
+        self.assertIn("00:00:03,850 --> 00:00:04,550\nDruga kwestia.", body)   # przesunięta o 1. ujęcie
+        yt = self.client.get(reverse("studio:youtube", args=[self.p.pk]))
+        self.assertEqual(yt["Content-Type"], "text/plain; charset=utf-8")
+        self.assertTrue(yt.content.decode().startswith("Film\n"))
+        self.assertNotIn("Rozdziały", yt.content.decode())                    # 1,5 s narracji — za krótko na rozdziały
         self.s1.refresh_from_db()
         audio = self.client.get(reverse("studio:voice_file", args=[self.s1.voice_id]))
         self.assertEqual(audio["Content-Type"], "audio/mpeg")

@@ -1,0 +1,47 @@
+{% extends "core/base.html" %}{% load static %}
+{% block title %}Demo · {{ app_name }}{% endblock %}
+{% block extra_head %}<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="TWINEMA — cyfrowy bliźniak magazynu: hala w 3D, symulacja dnia pracy i prezentacja dla zarządu. Wersja demo na danych syntetycznych.">{% endblock %}
+{% block main %}
+<div class="wrap demo">
+  <section class="demo-hero">
+    <div class="demo-hero__text">
+      <div class="eyebrow">Wersja demo · dane syntetyczne</div>
+      <h1 class="hero-title">Cyfrowy bliźniak magazynu, który da się pokazać jak film.</h1>
+      <p class="lead">Centrum dystrybucyjne z importem kontenerowym: hala z regałami i dokami na działce,
+        symulacja dnia szczytowego (kolejki aut, pola odkładcze, obsada, flota) i prezentacja 3D z wnioskami.
+        Bez rejestracji i bez logowania.</p>
+      <div class="demo-cta">
+        {% if showcase_url %}<a class="btn btn-primary btn-lg" href="{{ showcase_url }}">Obejrzyj prezentację 3D</a>{% endif %}
+        {% if guest %}
+          <form method="post" action="{% url 'core:demo_enter' %}">{% csrf_token %}
+            <button class="btn btn-secondary btn-lg" type="submit">Wejdź do systemu</button>
+          </form>
+        {% endif %}
+        {% if video_url %}<a class="btn btn-secondary btn-lg" href="{{ video_url }}" rel="noopener" target="_blank">Zobacz film ↗</a>{% endif %}
+      </div>
+      {% if not showcase_url and not guest %}
+        <p class="text-muted text-sm">Demo nie jest jeszcze przygotowane — administrator uruchamia
+          <code>manage.py seed_demo</code>.</p>
+      {% endif %}
+    </div>
+    <img class="demo-hero__img" src="{% static 'core/demo/hala-3d.webp' %}" width="1060" height="530"
+         alt="Widok 3D hali demo: regały z paletami, doki i działka">
+  </section>
+
+  <section class="hub demo-steps" aria-label="Co zobaczysz">
+    <div class="hub-tile"><h2>1 · Hala i działka</h2>
+      <p>Regały paletowe i VNA, strefy ADR i temperaturowa, doki przyjęć i wydań, linie zabudowy działki.</p></div>
+    <div class="hub-tile"><h2>2 · Dzień w symulacji</h2>
+      <p>Każde auto, kontener i paleta w czasie dnia — przyspieszenie do ×300, skok do szczytu, mapa przejazdów.</p></div>
+    <div class="hub-tile"><h2>3 · Wąskie gardła i wnioski</h2>
+      <p>Gdzie dzień się zatyka, ile brakuje doków, ludzi i wózków — z podpowiedzią, co zmienić.</p></div>
+  </section>
+
+  {% if guest %}
+  <p class="demo-note text-muted text-sm">„Wejdź do systemu” otwiera konto <b>demo</b> w roli Podgląd: oglądasz modele,
+    scenariusze, animacje i prezentacje; nic nie zapiszesz, a dane źródłowe (materiały, stany) są ukryte.</p>
+  {% endif %}
+  <p class="demo-note text-muted text-sm">Masz konto? <a href="{% url 'core:login' %}">Zaloguj się</a>.</p>
+</div>
+{% endblock %}

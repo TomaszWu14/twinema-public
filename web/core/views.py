@@ -1,6 +1,14 @@
+from django.conf import settings
+from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.contrib.auth.models import User
+from django.http import Http404
+from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.views.decorators.http import require_POST
+
+from .demo import DEMO_USER, demo_showcase
+from .roles import GROUP_VIEWER
 
 # Moduły platformy w kolejności przepływu pracy — jedno źródło dla nawigacji w nagłówku i kafli strony
 # głównej (R4: te same nazwy). `apps` / `match` = kiedy pozycja jest aktywna (patrz `active_module`).
@@ -39,7 +47,39 @@ def active_module(rm):
     return next((m["key"] for m in MODULES if rm.app_name in m.get("apps", ())), None)
 
 
-@login_required
 def home(request):
+    if not request.user.is_authenticated and settings.DEMO_PUBLIC:
+        return redirect("core:demo")              # publiczne demo: gość zaczyna od strony wejściowej, nie od logowania
+    return _home(request)
+
+
+@login_required
+def _home(request):
     modules = [{**m, "url": reverse(m["url"])} for m in MODULES]
     return render(request, "core/home.html", {"modules": modules})
+
+
+def demo(request):
+    """Strona wejściowa publicznego demo (bez logowania): pokaz 3D, wejście gościa, film."""
+    sc = demo_showcase()
+    resp = render(request, "core/demo.html", {
+        "showcase_url": reverse("scenario:public", args=[sc.share_token]) if sc else "",
+        "guest": settings.DEMO_PUBLIC, "video_url": settings.DEMO_VIDEO_URL})
+    resp["Referrer-Policy"] = "same-origin"       # adres pokazu niesie token — poza domenę go nie wysyłamy;
+    # no-referrer odpada: przeglądarka wysłałaby wtedy Origin: null i CSRF odrzuciłby „Wejdź do systemu”
+    return resp
+
+
+@require_POST
+def demo_enter(request):
+    """Wejście gościa: sesja konta `demo` w roli Podgląd (tylko odczyt, bez danych źródłowych).
+    Tylko z DEMO_PUBLIC; konto musi być zwykłym Podglądem — nigdy nie loguje kogoś z wyższymi prawami."""
+    if not settings.DEMO_PUBLIC:
+        raise Http404
+    if not request.user.is_authenticated:
+        user = User.objects.filter(username=DEMO_USER, is_active=True, is_staff=False, is_superuser=False,
+                                   groups__name=GROUP_VIEWER).first()
+        if user is None or user.groups.exclude(name=GROUP_VIEWER).exists():
+            raise Http404
+        login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+    return redirect("core:home")

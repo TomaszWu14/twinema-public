@@ -62,7 +62,10 @@
         <a class="btn btn-primary btn-sm" href="{% url 'studio:film_file' montage.pk %}?pobierz=1">Pobierz MP4</a>
         <a class="btn btn-ghost btn-sm" href="{% url 'studio:deck_pdf' p.pk %}?pobierz=1">Pobierz deck PDF</a>
         <a class="btn btn-ghost btn-sm" href="{% url 'studio:subtitles' p.pk %}">Napisy SRT</a>
+        <a class="btn btn-ghost btn-sm" href="{% url 'studio:youtube' p.pk %}">Opis na YouTube</a>
       </div>
+      <p class="text-muted text-sm" style="margin:10px 0 0">YouTube: wgraj MP4, w opisie wklej tekst z rozdziałami,
+        a napisy dodaj osobno (Napisy → Prześlij plik → SRT z czasem) — ścieżki napisów z MP4 YouTube nie czyta.</p>
     </div>
   </div>
 </div></section>

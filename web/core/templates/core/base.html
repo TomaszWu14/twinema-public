@@ -28,6 +28,8 @@
       </form>
     {% endif %}
   </header>
+  {% if is_demo_guest %}<div class="demo-banner" role="note">Wersja demo — tylko podgląd, dane syntetyczne.
+    <a href="{% url 'core:demo' %}">O demo</a></div>{% endif %}
   <main class="page" id="content" tabindex="-1">
     {% block main %}
     <div class="container content">
