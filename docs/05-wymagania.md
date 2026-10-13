@@ -76,10 +76,10 @@ Wymagania **odtworzone z działającego kodu** — każde ma kryterium akceptacj
 
 | ID | Wymaganie | Kryterium akceptacji | Gdzie zrealizowane | Uwagi |
 |---|---|---|---|---|
-| R-32 | Tekst zatwierdzany przed nagraniem | Kwestie edytowalne tylko w szkicu; zatwierdzenie wymaga co najmniej jednej kwestii; lektor przed zatwierdzeniem → 409 | `studio/views.py:121-125,180-243` | |
-| R-33 | Kolejność etapów | Render dopiero po nagraniu wszystkich kwestii; montaż dopiero, gdy każde ujęcie ma aktualny render | `studio/views.py:278-342` | |
+| R-32 | Tekst zatwierdzany przed renderem | Teksty edytowalne tylko w szkicu; zatwierdzenie wymaga co najmniej jednego tekstu; render przed zatwierdzeniem nie rusza | `studio/views.py` (`approve`, `render_shots`) | |
+| R-33 | Kolejność etapów | Render dopiero po zatwierdzeniu tekstu; montaż dopiero, gdy każde ujęcie ma aktualny render; długość ujęcia = czas czytania napisu | `studio/views.py` (`render_shots`, `montage_create`), `studio/captions.py` | film bez lektora ([D14](06-decyzje.md)) |
 | R-34 | Do usługi AI idą tylko zagregowane liczby | Szkic z Claude dostaje wyłącznie zdania z KPI modelu, bez nazw, materiałów i lokalizacji | `studio/script.py:30-52`, `studio/script_ai.py:46-73` | |
-| R-35 | Poprawka jednej kwestii nie powtarza całej pracy | Nagranie, render i montaż mają klucz z hasha wejścia; ten sam klucz = wynik z pamięci | `studio/models.py:42-80,141`, `studio/views.py:291-342` | |
+| R-35 | Poprawka jednej kwestii nie powtarza całej pracy | Render i montaż mają klucz z hasha wejścia; ten sam klucz = wynik z pamięci; poprawka tekstu bez zmiany długości ujęcia nie renderuje klipu ponownie | `studio/models.py`, `studio/views.py` (`render_shots`, `montage_input_key`) | |
 
 ## Wymagania niefunkcjonalne
 

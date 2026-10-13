@@ -108,15 +108,14 @@ def run_job(api, job, blender, engine, samples):
 
 
 def run_montage(api, job, ffmpeg, font, music=""):
-    """Montaż filmu: pobierz ujęcia i nagrania, wykonaj komendy z twinema_montage.plan, wyślij MP4."""
+    """Montaż filmu: pobierz klipy ujęć, wykonaj komendy z twinema_montage.plan (napisy w obrazie), wyślij MP4."""
     print(f"[{time.strftime('%H:%M:%S')}] Montaż {job['id']}: {job['title']} ({len(job['shots'])} ujęć)")
     with tempfile.TemporaryDirectory(prefix="twinema_film_") as tmp:
         t0, log = time.time(), []
         try:
             for i, s in enumerate(job["shots"]):
-                for url, name in ((s["clip_url"], f"clip_{i}.mp4"), (s["audio_url"], f"audio_{i}.mp3")):
-                    with open(os.path.join(tmp, name), "wb") as fh:
-                        fh.write(api.get(url, job["claim"]))
+                with open(os.path.join(tmp, f"clip_{i}.mp4"), "wb") as fh:
+                    fh.write(api.get(s["clip_url"], job["claim"]))
             files, cmds, final = montage.plan(job, tmp, ffmpeg, font, music)
             for path, text in files.items():
                 with open(path, "w", encoding="utf-8") as fh:

@@ -1,6 +1,6 @@
 """Deck PDF prezentacji (czysty Python — fpdf2, bez Django i bez bazy).
 
-Strony 16:9: tytułowa → liczby z KPI (kafle) → ujęcie na stronę (kadr + kwestia lektora) → końcowa.
+Strony 16:9: tytułowa → liczby z KPI (kafle) → ujęcie na stronę (kadr + tekst ujęcia) → końcowa.
 Font DejaVu Sans (w repo, studio/fonts) — polskie znaki bez zależności od systemu.
 """
 import io

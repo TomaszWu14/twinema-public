@@ -3,7 +3,7 @@
 {% block extra_head %}
 <style>
   .st-sec { font:600 var(--fs-xs) var(--font-mono); text-transform:uppercase; letter-spacing:.12em; color:var(--primary); margin:0 0 12px; }
-  .st-new { display:grid; grid-template-columns:minmax(0,2fr) minmax(0,3fr) minmax(0,1.2fr) auto; gap:12px; align-items:end; }
+  .st-new { display:grid; grid-template-columns:minmax(0,2fr) minmax(0,3fr) auto; gap:12px; align-items:end; }
   @media (max-width: 760px) { .st-new { grid-template-columns:1fr; } }
   .st-new label { display:flex; flex-direction:column; gap:4px; font-size:var(--fs-sm); color:var(--fg-muted); }
   .st-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; margin-top:24px; }
@@ -22,7 +22,7 @@
 <div class="page-header">
   <div>
     <div class="page-header__title">Studio prezentacji</div>
-    <div class="page-header__sub">Film o modelu hali: kwestie lektora pod ujęcia kamery → lektor → render → montaż MP4 i deck PDF.</div>
+    <div class="page-header__sub">Film o modelu hali: teksty pod ujęcia kamery → render → montaż MP4 z napisami w obrazie i deck PDF.</div>
   </div>
 </div>
 
@@ -32,10 +32,9 @@
   <form class="st-new" method="post" action="{% url 'studio:create' %}">{% csrf_token %}
     <label for="{{ form.model.id_for_label }}">{{ form.model.label }} {{ form.model }}</label>
     <label for="{{ form.title.id_for_label }}">{{ form.title.label }} {{ form.title }}</label>
-    <label for="{{ form.voice_id.id_for_label }}">Głos lektora (opcjonalnie) {{ form.voice_id }}</label>
     <button class="btn btn-primary" type="submit">Utwórz</button>
   </form>
-  <p class="text-muted text-sm" style="margin:8px 0 0">Na start dostajesz szkic kwestii z KPI modelu — poprawisz go albo poprosisz Claude o nowy.</p>
+  <p class="text-muted text-sm" style="margin:8px 0 0">Na start dostajesz szkic tekstów z KPI modelu — poprawisz go albo poprosisz Claude o nowy.</p>
   {% else %}
   <p class="text-muted text-sm" style="margin:0">Prezentacje tworzy Projektant — tutaj możesz oglądać gotowe filmy.</p>
   {% endif %}

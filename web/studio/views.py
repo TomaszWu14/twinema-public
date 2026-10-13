@@ -5,7 +5,6 @@ from types import SimpleNamespace
 from django import forms
 from django.conf import settings
 from django.contrib import messages
-from django.core.files.base import ContentFile
 from django.db import transaction
 from django.db.models import Prefetch
 from django.http import FileResponse, Http404, HttpResponse, JsonResponse, QueryDict
@@ -21,12 +20,12 @@ from twin.models import WarehouseModel
 from twin.shared import hall_feature_dict
 from twin.views.warehouse_blender import _scene_from_request
 
-from . import script_ai, tts, youtube
+from . import script_ai, youtube
 from .api import END_S, TITLE_S
+from .captions import build_srt, offsets, shot_cues
 from .deck import build_deck
-from .models import RENDER_RESOLUTION, MontageJob, Presentation, Shot, VoiceTrack
-from .script import TARGET_WORDS, WORDS_PER_SECOND, kpi_facts, template_script
-from .voice import build_srt, cues, duration, offsets, words
+from .models import RENDER_RESOLUTION, MontageJob, Presentation, Shot
+from .script import TARGET_WORDS, kpi_facts, template_script
 
 
 def model_kpi(wm):
@@ -48,11 +47,9 @@ def _replace_shots(p, shots):
 class PresentationForm(forms.ModelForm):
     class Meta:
         model = Presentation
-        fields = ["model", "title", "voice_id"]
+        fields = ["model", "title"]
         widgets = {"model": forms.Select(attrs={"class": "form-control"}),
-                   "title": forms.TextInput(attrs={"class": "form-control", "maxlength": 200}),
-                   "voice_id": forms.TextInput(attrs={"class": "form-control", "maxlength": 64,
-                                                      "placeholder": "domyślny"})}
+                   "title": forms.TextInput(attrs={"class": "form-control", "maxlength": 200})}
 
 
 ShotFormSet = forms.modelformset_factory(
@@ -86,8 +83,8 @@ def presentation_create(request):
     p.created_by = request.user
     p.save()
     _replace_shots(p, template_script(model_kpi(p.model)))
-    messages.success(request, f"Utworzono prezentację „{p}” ze szkicem kwestii z KPI modelu — popraw tekst "
-                              "i zatwierdź go przed nagraniem lektora.")
+    messages.success(request, f"Utworzono prezentację „{p}” ze szkicem tekstów z KPI modelu — popraw je "
+                              "i zatwierdź przed renderem.")
     return redirect("studio:detail", pk=p.pk)
 
 
@@ -95,17 +92,14 @@ def presentation_create(request):
 def presentation_detail(request, pk):
     p = get_object_or_404(Presentation.objects.select_related("model"), pk=pk)
     formset = ShotFormSet(queryset=p.shots.all()) if p.is_draft else None
-    shots = list(p.shots.select_related("voice", "render", "still"))
+    shots = list(p.shots.select_related("render", "still"))
     n_words = sum(len(s.text.split()) for s in shots)
-    voiced = [s for s in shots if s.voice_ok]
     montage = p.montages.first()
     jobs = [j for s in shots for j in (s.render, s.still) if j]
     return render(request, "studio/detail.html", {
         "p": p, "formset": formset, "shots": shots, "facts": kpi_facts(model_kpi(p.model)),
         "ai_enabled": script_ai.enabled(), "claude_model": settings.CLAUDE_MODEL,
-        "tts_enabled": tts.enabled(), "voice": p.effective_voice,
-        "voiced_count": len(voiced), "all_voiced": bool(shots) and len(voiced) == len(shots),
-        "audio_seconds": round(sum(s.voice.duration_s for s in voiced)),
+        "film_seconds": round(sum(s.duration_s for s in shots)),
         "renders_done": sum(1 for s in shots if s.render_current and s.render.status == "done"),
         "stills_done": sum(1 for s in shots if s.still and s.still.status == "done" and s.still.preset == s.preset),
         "can_montage": montage_ready(shots), "montage": montage,
@@ -113,7 +107,7 @@ def presentation_detail(request, pk):
         "busy": any(j.status in ("queued", "running") for j in jobs)
         or bool(montage and montage.status in ("queued", "running")),
         "worker_enabled": bool(settings.RENDER_WORKER_TOKEN),
-        "words": n_words, "seconds": round(n_words / WORDS_PER_SECOND), "target_words": TARGET_WORDS,
+        "words": n_words, "target_words": TARGET_WORDS,
         "steps": Presentation.STATUS_CHOICES,
         "step_index": [k for k, _ in Presentation.STATUS_CHOICES].index(p.status),
     })
@@ -143,7 +137,7 @@ def shots_save(request, pk):
     for shot in formset.deleted_objects:
         shot.delete()
     p.save(update_fields=["updated_at"])
-    messages.success(request, "Zapisano kwestie.")
+    messages.success(request, "Zapisano teksty.")
     return redirect("studio:detail", pk=pk)
 
 
@@ -159,10 +153,10 @@ def shots_ai(request, pk):
         messages.error(request, str(exc))
         return redirect("studio:detail", pk=pk)
     if not shots:
-        messages.error(request, "Szkic z AI nie zawierał żadnej poprawnej kwestii — obecne kwestie bez zmian.")
+        messages.error(request, "Szkic z AI nie zawierał żadnego poprawnego tekstu — obecne teksty bez zmian.")
         return redirect("studio:detail", pk=pk)
     _replace_shots(p, shots)
-    messages.success(request, f"Claude napisał szkic: {len(shots)} kwestii. Przeczytaj, popraw i zatwierdź.")
+    messages.success(request, f"Claude napisał szkic: {len(shots)} ujęć. Przeczytaj, popraw i zatwierdź.")
     for w in warnings:
         messages.warning(request, w)
     return redirect("studio:detail", pk=pk)
@@ -185,13 +179,12 @@ def approve(request, pk):
     if not _draft_or_back(request, p):
         return redirect("studio:detail", pk=pk)
     if not p.shots.exclude(text__regex=r"^\s*$").exists():
-        messages.error(request, "Dodaj co najmniej jedną kwestię, zanim zatwierdzisz tekst.")
+        messages.error(request, "Dodaj co najmniej jeden tekst ujęcia, zanim zatwierdzisz.")
         return redirect("studio:detail", pk=pk)
     p.shots.filter(text__regex=r"^\s*$").delete()
-    p.status, p.approved_at = ("audio" if p.all_voiced() else "approved"), timezone.now()
+    p.status, p.approved_at = "approved", timezone.now()
     p.save(update_fields=["status", "approved_at", "updated_at"])
-    messages.success(request, "Tekst zatwierdzony — wszystkie nagrania lektora są aktualne."
-                     if p.status == "audio" else "Tekst zatwierdzony — można nagrać lektora.")
+    messages.success(request, "Tekst zatwierdzony — można renderować ujęcia.")
     return redirect("studio:detail", pk=pk)
 
 
@@ -215,52 +208,14 @@ def presentation_delete(request, pk):
     return redirect("studio:list")
 
 
-@designer
-@require_POST
-def voice_shot(request, pk, shot_pk):
-    """Nagranie jednej kwestii (wywoływane po kolei z przeglądarki — krótkie żądania zamiast
-    jednego długiego). Ta sama kwestia + głos + model → gotowe audio z cache, bez wywołania API."""
-    p = get_object_or_404(Presentation, pk=pk)
-    shot = get_object_or_404(Shot, pk=shot_pk, presentation=p)
-    if p.status not in ("approved", "audio"):
-        return JsonResponse({"error": "Najpierw zatwierdź tekst."}, status=409)
-    key = shot.voice_key
-    vt, cached = VoiceTrack.objects.filter(key=key).first(), True
-    if vt is None:
-        cached = False
-        try:
-            audio, alignment = tts.synthesize(shot.text.strip(), p.effective_voice, settings.ELEVENLABS_MODEL)
-        except tts.TTSError as exc:
-            return JsonResponse({"error": str(exc)}, status=502)
-        vt = VoiceTrack(key=key, voice_id=p.effective_voice, model_id=settings.ELEVENLABS_MODEL,
-                        text=shot.text.strip(), duration_s=duration(alignment), alignment=alignment)
-        vt.audio.save(f"lektor_{key[:16]}.mp3", ContentFile(audio))
-    shot.voice = vt
-    shot.save(update_fields=["voice"])
-    done = p.all_voiced()
-    if done and p.status == "approved":
-        p.status = "audio"
-        p.save(update_fields=["status", "updated_at"])
-    return JsonResponse({"ok": True, "shot": shot.pk, "duration": vt.duration_s, "cached": cached, "done": done})
-
-
-@any_role
-def voice_file(request, pk):
-    vt = get_object_or_404(VoiceTrack, pk=pk)
-    resp = FileResponse(vt.audio.open("rb"), content_type="audio/mpeg")
-    resp["Content-Disposition"] = f'inline; filename="lektor_{vt.pk}.mp3"'
-    resp["X-Content-Type-Options"] = "nosniff"
-    return resp
-
-
 @any_role
 def subtitles(request, pk):
-    """Napisy całej narracji z czasami jak w zmontowanym filmie (przesunięte o planszę tytułową) — ten sam plik
-    co ścieżka w MP4, do wgrania na YouTube obok filmu."""
+    """Napisy filmu z czasami jak w zmontowanym MP4 (przesunięte o planszę tytułową) — te same, które są
+    wypalone w obrazie; na YouTube jako osobna ścieżka (tłumaczenie, wyszukiwanie)."""
     p = get_object_or_404(Presentation, pk=pk)
-    shots = list(p.shots.select_related("voice"))
-    if not shots or not all(s.voice_ok for s in shots):
-        messages.error(request, "Napisy będą dostępne po nagraniu lektora dla wszystkich kwestii.")
+    shots = list(p.shots.all())
+    if not shots:
+        messages.error(request, "Dodaj teksty ujęć — napisy powstają z nich.")
         return redirect("studio:detail", pk=pk)
     resp = HttpResponse(film_srt(shots, start_s=TITLE_S), content_type="application/x-subrip; charset=utf-8")
     resp["Content-Disposition"] = f'attachment; filename="twinema_prezentacja_{p.pk}.srt"'
@@ -273,11 +228,11 @@ def youtube_text(request, pk):
     from django.urls import reverse
 
     p = get_object_or_404(Presentation, pk=pk)
-    shots = list(p.shots.select_related("voice"))
-    if not shots or not all(s.voice_ok for s in shots):
-        messages.error(request, "Opis z rozdziałami będzie dostępny po nagraniu lektora dla wszystkich kwestii.")
+    shots = list(p.shots.all())
+    if not shots:
+        messages.error(request, "Dodaj teksty ujęć — opis z rozdziałami powstaje z nich.")
         return redirect("studio:detail", pk=pk)
-    chapter_list = youtube.chapters(TITLE_S, [(s.voice.duration_s, s.text) for s in shots], END_S)
+    chapter_list = youtube.chapters(TITLE_S, [(s.duration_s, s.text) for s in shots], END_S)
     demo_url = request.build_absolute_uri(reverse("core:demo")) if settings.DEMO_PUBLIC else ""
     text = youtube.description(p.title, chapter_list, demo_url=demo_url, app_name=settings.APP_NAME)
     resp = HttpResponse(text, content_type="text/plain; charset=utf-8")
@@ -286,9 +241,9 @@ def youtube_text(request, pk):
 
 
 def film_srt(shots, start_s=0.0):
-    """SRT narracji; start_s = długość planszy tytułowej przy montażu."""
-    starts = offsets([s.voice.duration_s for s in shots], start_s=start_s)
-    return build_srt([(t, cues(words(s.voice.alignment))) for t, s in zip(starts, shots, strict=True)])
+    """SRT filmu; start_s = długość planszy tytułowej przy montażu."""
+    starts = offsets([s.duration_s for s in shots], start_s=start_s)
+    return build_srt([(t, shot_cues(s.text, s.duration_s)) for t, s in zip(starts, shots, strict=True)])
 
 
 def _sha(obj):
@@ -302,12 +257,12 @@ def render_shots(request, pk):
     oba potrzebują tej samej sceny i kamery. Cache: scena + preset + długość/rodzaj + rozdzielczość →
     istniejące zlecenie (w kolejce, w toku albo gotowe) zamiast nowego."""
     p = get_object_or_404(Presentation.objects.select_related("model"), pk=pk)
-    if p.status not in ("audio", "render", "montage", "done") or not p.all_voiced():
-        messages.error(request, "Najpierw nagraj lektora dla wszystkich kwestii.")
+    if p.status not in ("approved", "render", "montage", "done") or not p.shots.exists():
+        messages.error(request, "Najpierw zatwierdź tekst.")
         return redirect("studio:detail", pk=pk)
     scene = _scene_from_request(SimpleNamespace(GET=QueryDict("")), p.model)
     created = reused = 0
-    for n, shot in enumerate(p.shots.select_related("voice", "render", "still"), start=1):
+    for n, shot in enumerate(p.shots.select_related("render", "still"), start=1):
         for field, kind, key in (("render", "video", _sha([scene, shot.preset, shot.render_seconds, RENDER_RESOLUTION])),
                                  ("still", "still", _sha([scene, shot.preset, "still", RENDER_RESOLUTION]))):
             current = getattr(shot, field)
@@ -326,7 +281,7 @@ def render_shots(request, pk):
             setattr(shot, field, job)
             setattr(shot, f"{field}_key", key)
             shot.save(update_fields=[field, f"{field}_key"])
-    if p.status == "audio":
+    if p.status == "approved":
         p.status = "render"
         p.save(update_fields=["status", "updated_at"])
     messages.success(request, f"Render ujęć i kadrów: {created} nowych zleceń w kolejce, {reused} z gotowych renderów."
@@ -334,8 +289,12 @@ def render_shots(request, pk):
     return redirect("studio:detail", pk=pk)
 
 
+CAPTION_STYLE = 1        # zmiana wyglądu napisów w montażu → podbij, żeby stare filmy nie wróciły z cache
+
+
 def montage_input_key(p, shots):
-    return _sha([p.title, settings.APP_NAME, [(s.render_id, s.voice.key) for s in shots]])
+    """Wejście montażu: tytuł, klipy i teksty (napisy są w obrazie, więc poprawka tekstu = nowy film)."""
+    return _sha([p.title, settings.APP_NAME, CAPTION_STYLE, [(s.render_id, s.text.strip()) for s in shots]])
 
 
 def montage_ready(shots):
@@ -346,7 +305,7 @@ def montage_ready(shots):
 @require_POST
 def montage_create(request, pk):
     p = get_object_or_404(Presentation, pk=pk)
-    shots = list(p.shots.select_related("voice", "render"))
+    shots = list(p.shots.select_related("render"))
     if not montage_ready(shots):
         messages.error(request, "Montaż ruszy, gdy wszystkie ujęcia mają gotowy, aktualny render.")
         return redirect("studio:detail", pk=pk)
@@ -388,7 +347,7 @@ def status_json(request, pk):
 
 @any_role
 def deck_pdf(request, pk):
-    """Deck PDF: tytuł → liczby z KPI → ujęcie na stronę (kadr + kwestia) → koniec.
+    """Deck PDF: tytuł → liczby z KPI → ujęcie na stronę (kadr + tekst) → koniec.
     Brak gotowego kadru → miejsce zastępcze (deck da się pobrać na każdym etapie)."""
     p = get_object_or_404(Presentation.objects.select_related("model"), pk=pk)
     slides = []

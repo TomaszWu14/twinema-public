@@ -82,7 +82,7 @@ Otwórz http://127.0.0.1:8090/ i zaloguj się kontem administratora albo `demo` 
 <details>
 <summary>Testy, historia zadań, render, wdrożenie</summary>
 
-**Testy** — 685 testów (logika symulacji, ML i geometrii bez bazy) + lint:
+**Testy** — 676 testów (logika symulacji, ML i geometrii bez bazy) + lint:
 
 ```bash
 cd web && python manage.py check && python manage.py test && ruff check ..
@@ -94,10 +94,10 @@ cd web && python manage.py check && python manage.py test && ruff check ..
 
 **Render i film (opcjonalnie):** worker na PC z Blenderem 4.x odpytuje serwer — na serwerze ustaw
 `RENDER_WORKER_TOKEN` (≥ 32 znaki), na PC: `TWINEMA_URL`, `TWINEMA_WORKER_TOKEN` i `python tools/render_worker.py`.
-Montaż filmu wymaga ffmpeg; lektor i szkic narracji — kluczy `ELEVENLABS_API_KEY` i `ANTHROPIC_API_KEY`.
-Głos jest normalizowany do −14 LUFS (YouTube), opcjonalny podkład muzyczny: `TWINEMA_MUSIC` / `--music` u workera.
-Przy gotowym filmie Studio daje MP4, napisy SRT z czasami jak w filmie (na YouTube wgrywa się je osobno)
-i „Opis na YouTube” z rozdziałami. Wszystkie zmienne: [`.env.example`](.env.example).
+Film nie ma lektora: tekst ujęcia jest wypalony w obrazie jako napis, a długość ujęcia to czas na jego
+przeczytanie. Montaż wymaga ffmpeg ≥ 6.1 u workera; opcjonalny podkład muzyczny: `TWINEMA_MUSIC` / `--music`
+(normalizowany do −14 LUFS, jak na YouTube). Szkic tekstów z Claude — klucz `ANTHROPIC_API_KEY`.
+Przy gotowym filmie Studio daje MP4, napisy SRT i „Opis na YouTube” z rozdziałami. Wszystkie zmienne: [`.env.example`](.env.example).
 
 **Wdrożenie (Docker + Coolify):** obraz z `Dockerfile`, port 8000, healthcheck `/health/`. `DEMO_SEED=true`
 odpala `seed_demo` przy każdym starcie (idempotentnie): hala, scenariusz, stany, symulacja obu dni i prezentacja 3D
@@ -112,12 +112,12 @@ odczyt), a `DEMO_VIDEO_URL` dodaje tam przycisk filmu.
 | Element | Rola | Dlaczego |
 |---|---|---|
 | Python 3.13, Django 5.2 LTS | aplikacja, ORM, panel administracyjny, role | wydanie LTS — wsparcie bezpieczeństwa do 2028; jeden monolit, jedno wdrożenie |
-| Czysty Python w logice | symulacja zdarzeniowa, ML, geometria, walidacja układu | testowalne bez bazy i bez Django — 685 testów w CI ([D11](docs/06-decyzje.md)) |
+| Czysty Python w logice | symulacja zdarzeniowa, ML, geometria, walidacja układu | testowalne bez bazy i bez Django — 676 testów w CI ([D11](docs/06-decyzje.md)) |
 | pydantic-settings | konfiguracja ze zmiennych środowiskowych | błąd konfiguracji zatrzymuje start zamiast działać na złych ustawieniach |
 | PostgreSQL 17 (lokalnie SQLite) | baza | puste `DATABASE_URL` = SQLite, więc start lokalny i CI bez serwera bazy |
 | three.js, ECharts | scena 3D, edytor, animacja dnia, wykresy | pobierane przy budowie z sumą SHA-256 — bez zależności od CDN w działaniu ([D12](docs/06-decyzje.md)) |
 | Blender 4.x (bez okna) na osobnym PC | render ujęć do filmu i decku | serwer nie ma GPU; worker sam odpytuje serwer, więc serwer nie otwiera portów ([D5](docs/06-decyzje.md)) |
-| ElevenLabs, Anthropic Claude (opcjonalnie) | lektor, szkic narracji | na zewnątrz idzie tylko tekst kwestii i zagregowane liczby ([D13](docs/06-decyzje.md)) |
+| Anthropic Claude (opcjonalnie) | szkic tekstów filmu | na zewnątrz idą tylko zagregowane liczby ([D13](docs/06-decyzje.md)) |
 | openpyxl + defusedxml | import i eksport xlsx | odczyt XLSX bez podatności XXE |
 | django-axes, gitleaks, ruff | bezpieczeństwo i jakość | blokada zgadywania haseł, skan sekretów przed commitem, lint w CI |
 | Docker + Coolify | wdrożenie demo | \<DO UZUPEŁNIENIA: dlaczego Coolify\> |
@@ -126,7 +126,7 @@ odczyt), a `DEMO_VIDEO_URL` dodaje tam przycisk filmu.
 
 - **Dane tylko z plików** (xlsx/csv z systemu magazynowego) — bez integracji na żywo, świadomie ([D1](docs/06-decyzje.md)).
 - **Narzędzie ocenia warianty, nie projektuje samo** — układ rysuje projektant, system sprawdza i symuluje.
-- **Film z lektorem** — zbudowany i przetestowany jednostkowo, ale nie przeszedł pełnej próby z prawdziwym lektorem i renderem.
+- **Film** — bez lektora (napisy w obrazie + opcjonalna muzyka, [D14](docs/06-decyzje.md)); montaż sprawdzony na prawdziwym ffmpeg, ale bez pełnej próby z renderem z Blendera.
 - **Render** wymaga Blendera na osobnym PC; bez workera zlecenia czekają w kolejce.
 - **Długie obliczenia** (symulacja, szkic AI) liczone w żądaniu — przy dużych scenariuszach ryzyko limitu czasu serwera.
 - Pełna lista i znane problemy: [07-ograniczenia.md](docs/07-ograniczenia.md).

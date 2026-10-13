@@ -10,8 +10,9 @@ sys.path.insert(0, str(settings.BASE_DIR.parent / "tools"))
 import twinema_montage as m  # noqa: E402
 
 MANIFEST = {"title": "Nowe centrum — 100% gotowe", "subtitle": "TWINEMA", "end_title": "TWINEMA",
-            "resolution": "1920x1080", "title_s": 3.0, "end_s": 3.0, "srt": "1\n00:00:03,000 --> 00:00:04,000\nA.\n",
-            "shots": [{"duration": 4.25}, {"duration": 6.0}]}
+            "resolution": "1920x1080", "title_s": 3.0, "end_s": 3.0,
+            "shots": [{"duration": 4.25, "captions": [[0.4, 2.0, "Hala z góry."], [2.0, 3.65, "Druga\nlinia."]]},
+                      {"duration": 6.0, "captions": []}]}
 
 
 class TimelineTests(TestCase):
@@ -31,15 +32,28 @@ class EscapingTests(TestCase):
 
 
 class CommandTests(TestCase):
-    def test_shot_holds_last_frame_pads_audio_and_cuts_to_voice(self):
-        cmd = m.shot_cmd("ffmpeg", "c.mp4", "a.mp3", "o.mp4", 4.25, "1920x1080")
+    def test_shot_holds_last_frame_silent_audio_and_cuts_to_length(self):
+        cmd = m.shot_cmd("ffmpeg", "c.mp4", "o.mp4", 4.25, "1920x1080")
         vf = cmd[cmd.index("-vf") + 1]
         self.assertIn("tpad=stop_mode=clone:stop_duration=4.250", vf)
         self.assertIn("scale=1920:1080", vf)
-        self.assertEqual(cmd[cmd.index("-af") + 1], f"{m.LOUDNESS},apad")       # równy poziom głosu (≈ −14 LUFS)
+        self.assertNotIn("drawtext", vf)
+        self.assertIn("anullsrc=r=44100:cl=stereo", cmd)                      # bez lektora — cisza
+        self.assertNotIn("-af", cmd)
         self.assertEqual(cmd[cmd.index("-t") + 1], "4.250")
         self.assertIn("yuv420p", cmd)
         self.assertEqual(cmd[-1], "o.mp4")
+
+    def test_shot_burns_captions_with_timing(self):
+        cmd = m.shot_cmd("ffmpeg", "c.mp4", "o.mp4", 4.25, "1920x1080", "C:/F/f.ttf",
+                         [("C:/w/cap_0.txt", 0.4, 2.0), ("C:/w/cap_1.txt", 2.0, 3.65)])
+        vf = cmd[cmd.index("-vf") + 1]
+        self.assertEqual(vf.count("drawtext="), 2)
+        self.assertIn(r"fontfile='C\:/F/f.ttf':textfile='C\:/w/cap_0.txt':expansion=none", vf)
+        self.assertIn("enable='between(t,0.400,2.000)'", vf)
+        self.assertIn("fontsize=45:", vf)                                      # 1080 × 0,042
+        self.assertIn("box=1:boxcolor=black@0.6:boxborderw=17:", vf)
+        self.assertLess(vf.index("tpad"), vf.index("drawtext"))                # napis także na trzymanej klatce
 
     def test_card_uses_textfile_without_expansion(self):
         cmd = m.card_cmd("ffmpeg", "t.mp4", 3.0, "1280x720", "C:/F/f.ttf", [("C:/w/title.txt", 0.06, "white", 0)])
@@ -48,35 +62,34 @@ class CommandTests(TestCase):
         self.assertIn("color=c=0x0f1115:s=1280x720:d=3.0:r=25", cmd)
         self.assertIn("anullsrc=r=44100:cl=stereo", cmd)
 
-    def test_plan_builds_all_parts_and_soft_subtitles(self):
+    def test_plan_builds_all_parts_and_caption_files(self):
         with tempfile.TemporaryDirectory() as tmp:
             files, cmds, final = m.plan(MANIFEST, tmp, "ffmpeg", "font.ttf")
         self.assertEqual(len(cmds), 5)                         # tytuł, 2 ujęcia, koniec, concat
         self.assertEqual(final, os.path.join(tmp, "film.mp4"))
         self.assertEqual(files[os.path.join(tmp, "title.txt")], MANIFEST["title"])   # tekst w pliku, nie w filtrze
-        self.assertEqual(files[os.path.join(tmp, "subs.srt")], MANIFEST["srt"])
+        self.assertEqual(files[os.path.join(tmp, "cap_000_01.txt")], "Druga\nlinia.")
+        self.assertEqual(sum(1 for f in files if os.path.basename(f).startswith("cap_")), 2)
         self.assertEqual(files[os.path.join(tmp, "parts.txt")].count("file '"), 4)
+        self.assertEqual(cmds[1][cmds[1].index("-vf") + 1].count("drawtext="), 2)
+        self.assertNotIn("drawtext", cmds[2][cmds[2].index("-vf") + 1])      # ujęcie bez napisów
         concat = cmds[-1]
-        for flag in ("mov_text", "+faststart", "language=pol"):
-            self.assertIn(flag, concat)
+        self.assertIn("+faststart", concat)
+        self.assertNotIn("mov_text", concat)                   # napisy są w obrazie
         self.assertEqual(concat[-1], final)
         self.assertTrue(all(isinstance(c, list) and all(isinstance(x, str) for x in c) for c in cmds))
 
-
-    def test_plan_with_music_mixes_under_voice_and_keeps_video(self):
+    def test_plan_with_music_replaces_silence_and_keeps_video(self):
         with tempfile.TemporaryDirectory() as tmp:
             _files, cmds, _final = m.plan(MANIFEST, tmp, "ffmpeg", "font.ttf", music="C:/m/podklad.mp3")
         concat = cmds[-1]
-        self.assertIn("C:/m/podklad.mp3", concat)
         self.assertEqual(concat[concat.index("C:/m/podklad.mp3") - 3:concat.index("C:/m/podklad.mp3")],
                          ["-stream_loop", "-1", "-i"])                     # zapętlona pod całym filmem
-        mix = concat[concat.index("-filter_complex") + 1]
-        self.assertIn(f"volume={m.MUSIC_GAIN}", mix)
-        self.assertIn("afade=t=out:st=13.750:d=2.5", mix)                  # 16,25 s filmu − wygaszenie
-        self.assertIn("normalize=0", mix)
+        af = concat[concat.index("-filter_complex") + 1]
+        self.assertTrue(af.startswith(f"[1:a]{m.LOUDNESS},"))               # muzyka na poziomie YouTube
+        self.assertIn("afade=t=out:st=13.750:d=2.5", af)                     # 16,25 s filmu − wygaszenie
         self.assertEqual(concat[concat.index("-c:v") + 1], "copy")
         self.assertEqual(concat[concat.index("-t") + 1], "16.250")
-        self.assertIn("mov_text", concat)
 
     def test_plan_without_music_copies_audio(self):
         with tempfile.TemporaryDirectory() as tmp:

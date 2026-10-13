@@ -287,12 +287,11 @@ flowchart LR
         d7["Udostępnij: link wewn., publiczny 1–90 dni"]
     end
     subgraph S800["800 Studio"]
-        a8["Model, tytuł, głos → Utwórz"]
+        a8["Model, tytuł → Utwórz"]
     end
     subgraph S801["801 Prezentacja filmowa"]
-        b8["Kwestie (szkic): Zapisz, Szkic z szablonu, Szkic z Claude"]
+        b8["Teksty ujęć (szkic): Zapisz, Szkic z szablonu, Szkic z Claude"]
         c8["Zatwierdź tekst / Wróć do edycji"]
-        d8["Nagraj lektora (AJAX)"]
         e8["Renderuj ujęcia i kadry"]
         f8["Zmontuj film, MP4, PDF, SRT"]
     end
@@ -377,11 +376,11 @@ flowchart LR
 | 701 | Prezentacja — odtwarzacz i edytor | scena, slajdy, udostępnianie | Zapisz / link / Usuń | 701 / 701 / 700 |
 | 702 | Pokaz publiczny | scena, slajdy | — | (logo → 1) |
 | 800 | Studio | formularz, lista filmów | Utwórz | 801 |
-| 801 | Prezentacja filmowa | kwestie, lektor, render, montaż, deck | etapy pipeline'u | 801 / pliki / 800 |
+| 801 | Prezentacja filmowa | teksty ujęć, render, montaż z napisami, deck | etapy pipeline'u | 801 / pliki / 800 |
 | 900 | Render 3D | formularz zlecenia, lista, worker | Dodaj / Usuń | 900 |
 
 Pliki (bez ekranu): 203 wzór CSV, 404 segmenty CSV, 508 wzór sprzętu, 605/607 xlsx, 606 zdarzenia JSON,
-802 MP4, 803 PDF, 804 SRT, 805 MP3, 901 PNG/MP4.
+802 MP4, 803 PDF, 804 SRT, 805 opis na YouTube (TXT), 901 PNG/MP4.
 
 ## Ścieżki alternatywne
 

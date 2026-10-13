@@ -10,7 +10,7 @@ from django.urls import reverse
 
 from core.roles import GROUP_DESIGNER, GROUP_VIEWER
 from render.models import RenderJob
-from studio.models import MontageJob, Presentation, Shot, VoiceTrack
+from studio.models import MontageJob, Presentation, Shot
 from twin.models import WarehouseModel
 
 TOKEN = "t" * 40
@@ -18,12 +18,7 @@ MP4 = b"\x00\x00\x00\x18ftypmp42" + b"\x00" * 64
 MEDIA = tempfile.mkdtemp(prefix="twinema_test_montage_")
 
 
-def _voice(text, seconds):
-    n = len(text)
-    vt = VoiceTrack(key="", voice_id="g", model_id="m", text=text, duration_s=seconds, alignment={
-        "characters": list(text), "character_start_times_seconds": [i * seconds / n for i in range(n)],
-        "character_end_times_seconds": [(i + 1) * seconds / n for i in range(n)]})
-    return vt
+LONG = " ".join(["słowo"] * 22)         # 22 / 2,2 + 1,5 = 11,5 s ujęcia
 
 
 @override_settings(MEDIA_ROOT=MEDIA, RENDER_WORKER_TOKEN=TOKEN, APP_NAME="TWINEMA")
@@ -39,14 +34,9 @@ class RenderMontageTests(TestCase):
         self.user = User.objects.create_user("proj", password="x")
         self.user.groups.add(Group.objects.create(name=GROUP_DESIGNER))
         self.client.force_login(self.user)
-        self.p = Presentation.objects.create(model=self.wm, title="Film", status="audio", voice_id="lektor-testowy")
-        for i, (preset, text, sec) in enumerate([("przelot", "Pierwsza kwestia.", 4.2), ("plan", "Druga.", 1.0)]):
-            shot = Shot.objects.create(presentation=self.p, order=i, preset=preset, text=text)
-            vt = _voice(text, sec)
-            vt.key = shot.voice_key
-            vt.audio.save(f"a{i}.mp3", ContentFile(b"ID3audio"))
-            shot.voice = vt
-            shot.save()
+        self.p = Presentation.objects.create(model=self.wm, title="Film", status="approved")
+        for i, (preset, text) in enumerate([("przelot", LONG), ("plan", "Druga.")]):
+            Shot.objects.create(presentation=self.p, order=i, preset=preset, text=text)
 
     def _render(self):
         return self.client.post(reverse("studio:render_shots", args=[self.p.pk]))
@@ -57,13 +47,13 @@ class RenderMontageTests(TestCase):
             job.status = "done"
             job.save()
 
-    def test_render_creates_jobs_with_voice_length_and_status(self):
+    def test_render_creates_jobs_with_text_length_and_status(self):
         self._render()
         jobs = list(RenderJob.objects.order_by("pk"))
         self.assertEqual([(j.preset, j.kind, j.resolution) for j in jobs],
                          [("przelot", "video", "1920x1080"), ("przelot", "still", "1920x1080"),
                           ("plan", "video", "1920x1080"), ("plan", "still", "1920x1080")])
-        self.assertEqual([jobs[0].seconds, jobs[2].seconds], [5, 2])
+        self.assertEqual([jobs[0].seconds, jobs[2].seconds], [12, 5])         # 11,5 s → 12; minimum 5 s
         self.assertEqual([jobs[0].title, jobs[1].title], ["Film — ujęcie 1", "Film — kadr 1"])
         self.p.refresh_from_db()
         self.assertEqual(self.p.status, "render")
@@ -72,9 +62,9 @@ class RenderMontageTests(TestCase):
         self._render()
         self._render()                                        # drugi klik — nic nowego
         self.assertEqual(RenderJob.objects.count(), 4)        # 2 klipy + 2 kadry
-        other = Presentation.objects.create(model=self.wm, title="Inny film", status="audio", voice_id="lektor-testowy")
+        other = Presentation.objects.create(model=self.wm, title="Inny film", status="approved")
         s = self.p.shots.first()
-        copy = Shot.objects.create(presentation=other, order=0, preset=s.preset, text=s.text, voice=s.voice)
+        copy = Shot.objects.create(presentation=other, order=0, preset=s.preset, text=s.text)
         self.client.post(reverse("studio:render_shots", args=[other.pk]))
         copy.refresh_from_db()
         self.assertEqual((copy.render_id, copy.still_id), (s.render_id, s.still_id))   # z innej prezentacji
@@ -95,10 +85,19 @@ class RenderMontageTests(TestCase):
         self.assertNotEqual(s2.still_id, s.still_id)
         self.assertEqual(s2.render_id, s.render_id)
 
-    def test_render_blocked_without_voice(self):
-        Shot.objects.update(voice=None)
+    def test_render_blocked_in_draft(self):
+        Presentation.objects.filter(pk=self.p.pk).update(status="draft")
         self._render()
         self.assertFalse(RenderJob.objects.exists())
+
+    def test_longer_text_needs_new_clip_same_length_keeps_it(self):
+        self._render()
+        Shot.objects.filter(preset="plan").update(text="Inne krótkie.")          # nadal 5 s — klip zostaje
+        self._render()
+        self.assertEqual(RenderJob.objects.count(), 4)
+        Shot.objects.filter(preset="plan").update(text=LONG)                       # 12 s — nowy klip
+        self._render()
+        self.assertEqual(RenderJob.objects.count(), 5)
 
     def test_viewer_cannot_render_or_montage(self):
         viewer = User.objects.create_user("zarzad", password="x")
@@ -134,15 +133,15 @@ class RenderMontageTests(TestCase):
         self.assertEqual(self._api("studio:api_claim", token="zly" * 12).status_code, 403)
         man = self._api("studio:api_claim", worker="pc").json()
         self.assertEqual((man["id"], man["resolution"], man["title_s"]), (job.pk, "1920x1080", 3.0))
-        self.assertEqual([s["duration"] for s in man["shots"]], [4.2, 1.0])
-        self.assertTrue(man["srt"].startswith("1\n00:00:03,000 --> "))          # przesunięte o planszę
+        self.assertEqual([s["duration"] for s in man["shots"]], [11.5, 5.0])
+        self.assertEqual(man["shots"][1]["captions"], [[0.4, 4.4, "Druga."]])     # napisy na osi ujęcia
+        self.assertEqual(" ".join(c[2].replace("\n", " ") for c in man["shots"][0]["captions"]), LONG)
+        self.assertNotIn("audio_url", man["shots"][0])
         self.assertEqual(self._api("studio:api_claim").status_code, 204)        # jeden worker naraz
         claim = man["claim"]
         self.assertEqual(self._api("studio:api_clip", job.pk, 0, method="get", claim="inny").status_code, 403)
         clip = self._api("studio:api_clip", job.pk, 0, method="get", claim=claim)
         self.assertEqual(b"".join(clip.streaming_content), MP4)
-        audio = self._api("studio:api_audio", job.pk, 1, method="get", claim=claim)
-        self.assertEqual(b"".join(audio.streaming_content), b"ID3audio")
         self.assertEqual(self._api("studio:api_clip", job.pk, 5, method="get", claim=claim).status_code, 404)
         bad = self._api("studio:api_result", job.pk, claim=claim, file=SimpleUploadedFile("f.mp4", b"nie-mp4" * 4))
         self.assertEqual(bad.status_code, 400)
@@ -156,6 +155,9 @@ class RenderMontageTests(TestCase):
         self.assertEqual(self.client.get(reverse("studio:film_file", args=[job.pk]))["Content-Type"], "video/mp4")
         self.client.post(reverse("studio:montage_create", args=[self.p.pk]))   # ten sam materiał — cache
         self.assertEqual(MontageJob.objects.count(), 1)
+        Shot.objects.filter(preset="plan").update(text="Poprawiony.")             # napis w obrazie — nowy montaż
+        self.client.post(reverse("studio:montage_create", args=[self.p.pk]))
+        self.assertEqual(MontageJob.objects.count(), 2)
 
     def test_worker_fail_shows_log_and_allows_retry(self):
         job = self._queued_montage()
@@ -172,3 +174,22 @@ class RenderMontageTests(TestCase):
         d = self.client.get(reverse("studio:status_json", args=[self.p.pk])).json()
         self.assertTrue(d["active"])
         self.assertEqual(d["state"], "render|queued,queued|queued,queued|")
+
+    def test_subtitles_and_youtube_text_from_shot_texts(self):
+        srt = self.client.get(reverse("studio:subtitles", args=[self.p.pk]))
+        self.assertEqual(srt["Content-Type"], "application/x-subrip; charset=utf-8")
+        body = srt.content.decode()
+        self.assertTrue(body.startswith("1\n00:00:03,400 --> "))                  # plansza 3 s + wejście 0,4 s
+        self.assertIn("00:00:14,900 --> 00:00:18,900\nDruga.", body)              # 3 + 11,5 + 0,4
+        yt = self.client.get(reverse("studio:youtube", args=[self.p.pk]))
+        self.assertEqual(yt["Content-Type"], "text/plain; charset=utf-8")
+        self.assertTrue(yt.content.decode().startswith("Film\n"))
+        Shot.objects.all().delete()
+        self.assertRedirects(self.client.get(reverse("studio:subtitles", args=[self.p.pk])),
+                             reverse("studio:detail", args=[self.p.pk]))
+
+    def test_detail_without_voice_step(self):
+        page = self.client.get(reverse("studio:detail", args=[self.p.pk]))
+        self.assertNotContains(page, "Lektor")
+        self.assertContains(page, "Renderuj ujęcia i kadry")
+        self.assertContains(page, "ujęcie 11,5 s")

@@ -4,15 +4,13 @@
     modelu, materiałów, lokalizacji) wolno wysłać do modelu językowego.
   • `template_script` — szkic bez AI: te same fakty ułożone w kwestie pod presety kamery.
   • `clean_draft` — walidacja szkicu (z AI albo z pliku): znane presety, niepuste kwestie, limity.
-  • `estimate_seconds` — szacowana długość kwestii czytanej przez lektora (przed TTS).
 """
 import re
 
 PRESETS = ("przelot", "orbita", "przejazd", "plan", "ogolny")
 MIN_SHOTS, MAX_SHOTS = 3, 12
 MAX_SHOT_CHARS = 600
-WORDS_PER_SECOND = 2.4          # ≈ 145 słów/min — spokojne tempo lektora PL
-TARGET_WORDS = (300, 420)       # ≈ 2–3 min filmu
+TARGET_WORDS = (150, 260)       # napisy czyta się wolniej niż słucha lektora: ≈ 1,5–2,5 min filmu
 
 
 def _num(x, digits=0):
@@ -91,8 +89,3 @@ def clean_draft(shots):
         out = out[:MAX_SHOTS]
     return out, warnings
 
-
-def estimate_seconds(text):
-    """Szacunek przed nagraniem; po TTS długość ujęcia = długość audio."""
-    words = len(text.split())
-    return round(words / WORDS_PER_SECOND, 1) if words else 0.0

@@ -54,15 +54,15 @@ które wynikają z kodu.
 
 - **Kontekst:** render w Blenderze wymaga GPU; serwer aplikacji go nie ma.
 - **Rozważane opcje:** Celery + Redis albo tabela zleceń + worker na PC odpytujący serwer po HTTPS.
-- **Dlaczego ta:** „Serwer bez GPU i bez otwartych portów do Redisa — wystarczy HTTPS. PC wyłączony = zlecenia czekają w kolejce” ([PLAN.md](PLAN.md), decyzja D6). Celery miało dojść, jeśli TTS lub montaż po stronie serwera tego wymagają — nie doszło.
+- **Dlaczego ta:** „Serwer bez GPU i bez otwartych portów do Redisa — wystarczy HTTPS. PC wyłączony = zlecenia czekają w kolejce” ([PLAN.md](PLAN.md), decyzja D6). Celery miało dojść, jeśli TTS lub montaż po stronie serwera tego wymagają — nie doszło (lektora ostatecznie usunięto, D14).
 - **Skutki:** token workera i jednorazowy klucz przejęcia (N-02); zlecenie „w toku” wraca do kolejki po 120 min, ale tylko przy kolejnym zgłoszeniu workera; bez workera zlecenia czekają bez końca ([07](07-ograniczenia.md)).
 
 ### D6. Prezentacja 3D w przeglądarce przed filmem
 
-- **Kontekst:** po zbudowaniu Studia (film z lektorem) trzeba było wybrać kierunek dalszych prac.
+- **Kontekst:** po zbudowaniu Studia (wtedy jeszcze film z lektorem) trzeba było wybrać kierunek dalszych prac.
 - **Rozważane opcje:** dopracować film i montaż albo edytor layoutu i pokaz w przeglądarce.
 - **Dlaczego ta:** „Film i montaż odstawione na bok; główny cel = pokazać w przeglądarce, jak może wyglądać przyszły layout” ([PLAN.md](PLAN.md), priorytet od 2026-10-05; [ZALOZENIA.md](ZALOZENIA.md)).
-- **Skutki:** powstały edytor 2D/3D, animacja dnia i prezentacja 3D z publicznym linkiem; Studio jest zbudowane i przetestowane jednostkowo, ale nie przeszło pełnej próby z prawdziwym lektorem i renderem.
+- **Skutki:** powstały edytor 2D/3D, animacja dnia i prezentacja 3D z publicznym linkiem; Studio jest zbudowane i przetestowane jednostkowo, ale nie przeszło pełnej próby z renderem z Blendera.
 
 ### D7. Rola Podgląd bez danych źródłowych
 
@@ -108,7 +108,14 @@ które wynikają z kodu.
 
 ### D13. Do AI tylko zagregowane liczby, tekst zatwierdza człowiek
 
-- **Kontekst:** Studio może poprosić Claude o szkic narracji filmu.
+- **Kontekst:** Studio może poprosić Claude o szkic tekstów filmu.
 - **Rozważane opcje:** nieudokumentowane.
-- **Dlaczego ta:** `web/studio/script.py`: zdania z ZAGREGOWANYMI liczbami — „Tylko to (bez nazw modelu, materiałów, lokalizacji) wolno wysłać do modelu językowego”; `web/studio/models.py`: „nic nie idzie do lektora ani renderu przed akceptacją”. Powód (ochrona danych, kontrola treści) nie jest zapisany wprost.
-- **Skutki:** prompt zawiera tylko zdania z KPI modelu (R-34); status „tekst zatwierdzony” jest bramką przed lektorem (R-32).
+- **Dlaczego ta:** `web/studio/script.py`: zdania z ZAGREGOWANYMI liczbami — „Tylko to (bez nazw modelu, materiałów, lokalizacji) wolno wysłać do modelu językowego”; `web/studio/models.py`: „nic nie idzie do renderu przed akceptacją”. Powód (ochrona danych, kontrola treści) nie jest zapisany wprost.
+- **Skutki:** prompt zawiera tylko zdania z KPI modelu (R-34); status „tekst zatwierdzony” jest bramką przed renderem (R-32).
+
+### D14. Film bez lektora: napisy w obrazie i opcjonalna muzyka
+
+- **Kontekst:** film miał lektora ElevenLabs (nagranie kwestii, długość ujęcia = długość nagrania, napisy z czasów słów). Pierwszy prawdziwy film wymagałby płatnego klucza, wyboru głosu i odsłuchu każdej poprawki.
+- **Rozważane opcje:** lektor obowiązkowy; lektor opcjonalny obok wersji z napisami (dwie ścieżki w kodzie); film tylko z napisami; rezygnacja z filmu na rzecz prezentacji 3D.
+- **Dlaczego ta:** decyzja właściciela projektu (2026-10-13) — film tylko z napisami i muzyką, jedna ścieżka w kodzie, bez zewnętrznej usługi i kosztu za znak.
+- **Skutki:** długość ujęcia liczona z tekstu (`studio/captions.py`: tempo czytania 2,2 słowa/s + 1,5 s, 5–60 s); worker wypala napisy w obrazie (ffmpeg ≥ 6.1) i pod całym filmem kładzie muzykę z `TWINEMA_MUSIC` albo ciszę; poprawka tekstu = nowy montaż, a nowy render tylko przy zmianie długości ujęcia. Migracja `studio.0005` usuwa nagrania (`VoiceTrack`) i etap „Lektor”; stare pliki MP3 zostają w `media/voice/`.

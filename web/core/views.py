@@ -31,7 +31,7 @@ MODULES = [
      "url": "ml:home", "apps": {"ml"}},
     {"key": "render", "name": "Render", "desc": "Blender: ujęcia i animacje przepływów (worker na PC).",
      "url": "render:jobs", "apps": {"render"}},
-    {"key": "studio", "name": "Studio", "desc": "Scenariusz, lektor, montaż — film i deck.",
+    {"key": "studio", "name": "Studio", "desc": "Scenariusz, napisy, montaż — film i deck.",
      "url": "studio:list", "apps": {"studio"}},
 ]
 

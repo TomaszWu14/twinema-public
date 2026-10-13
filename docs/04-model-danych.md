@@ -207,7 +207,6 @@ erDiagram
     WarehouseModel ||--o{ Presentation : "CASCADE"
     Presentation ||--o{ Shot : "ujęcia"
     Presentation ||--o{ MontageJob : "montaże"
-    VoiceTrack |o--o{ Shot : "nagranie (cache po hashu)"
     RenderJob |o--o{ Shot : "klip / kadr (SET_NULL)"
     RenderJob {
         string preset
@@ -218,18 +217,12 @@ erDiagram
     }
     Presentation {
         string status "draft..done"
-        string voice_id
     }
     Shot {
         int order
         string preset
         text text "600 znaków tylko w HTML"
         string render_key
-    }
-    VoiceTrack {
-        string key UK
-        float duration_s
-        json alignment
     }
     MontageJob {
         string input_key
@@ -253,7 +246,7 @@ Pole `created_by` / `uploaded_by` (FK do `User`, SET_NULL) mają: ImportLog, Sce
 | Scenariusz | `Scenario`, `ScenarioDay`, `InboundStream`, `OutboundStream`, `Shift`, `ScenarioFleet` | założenia wolumenów niezależne od layoutu: ten sam scenariusz testuje różne hale |
 | Wynik | `ScenarioRun` | KPI średnia + P95, oś czasu, wąskie gardła, zdarzenia do animacji |
 | Prezentacja | `Showcase` | slajdy 3D + publiczny link z wygaśnięciem |
-| Film | `Presentation`, `Shot`, `VoiceTrack`, `RenderJob`, `MontageJob` | pipeline: tekst → lektor → render → montaż; cache po hashach |
+| Film | `Presentation`, `Shot`, `RenderJob`, `MontageJob` | pipeline: tekst → render → montaż z napisami w obrazie (długość ujęcia z tekstu); cache po hashach |
 
 ## Reguły integralności: baza czy aplikacja
 
@@ -271,7 +264,7 @@ Pole `created_by` / `uploaded_by` (FK do `User`, SET_NULL) mają: ImportLog, Sce
 | Stan wskazuje istniejący materiał i lokalizację | ❌ (stringi, świadomie) | brak — sieroty możliwe |
 | Typ lokalizacji ↔ typ regału | ❌ (string `warehouse_type == code`) | implicit |
 | Długość klipu 2–60 s | ❌ | formularz (`render/views.py:34`) |
-| Kwestia lektora ≤ 600 znaków | ❌ | tylko `maxlength` w HTML (`studio/views.py:57-61`) |
+| Tekst ujęcia ≤ 600 znaków | ❌ | tylko `maxlength` w HTML (`studio/views.py:57-61`) |
 | Statusy Studio „tylko do przodu” | ❌ | docstring (`studio/models.py:3`) — a `reopen` cofa z każdego stanu |
 
 ## Niespójności i brakujące ograniczenia
