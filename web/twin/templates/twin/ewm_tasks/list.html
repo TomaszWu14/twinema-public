@@ -57,12 +57,12 @@
           <div class="wt-map">
             Domyślnie wg <b>rodzaju procesu magazynowego</b>: <code>1xxx</code>, <code>9010</code> → przyjęcie / odłożenie;
             <code>2xxx</code> → wydanie / załadunek, a gdy kolejka zawiera „PICK” → kompletacja;
-            <code>3010–3012</code>, <code>301D</code>, <code>3100</code> → uzupełnienie; pozostałe → przesunięcie.
+            <code>3010</code>, <code>3020</code> → uzupełnienie; pozostałe → przesunięcie.
             Bez rodzaju procesu decyduje działanie (PTWY/PICK/REPL) albo kategoria procesu.
             Wózek = kolumna <b>Zasób</b>, a gdy jest pusta — użytkownik potwierdzający.
           </div>
           <label>Nadpisania (linia na proces: <code>kod = rodzaj</code>)
-            <textarea name="kind_map" class="form-control" placeholder="2010 = wydanie&#10;3040 = przesunięcie&#10;21GL = kompletacja"></textarea>
+            <textarea name="kind_map" class="form-control" placeholder="2010 = wydanie&#10;3040 = przesunięcie&#10;Z100 = kompletacja"></textarea>
           </label>
         </details>
       </div>

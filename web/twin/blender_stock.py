@@ -6,7 +6,7 @@
   • PickerActivityBatch — liczba pobrań z lokalizacji i klasa ABC SKU (wg liczby pobrań).
 
 Kod lokalizacji jest parsowany tą samą konwencją co mapa 3D (`_parse_loc_code`):
-litera EWM = poziom w stosie (ui.views.core.ewm_levels), legacy J/K/… = kolumna w boku.
+litera EWM = poziom w stosie (twin.ewm_levels), legacy J/K/… = kolumna w boku.
 Lokalizacje spoza regałów modelu są liczone w `stats.unmapped`, nie znikają po cichu.
 """
 import re
@@ -31,11 +31,10 @@ class SlotLocator:
 
     def __init__(self, racks, codes, levels=None):
         self.by_key = {(r["zone"], r["rack_id"]): r for r in racks}
-        # Poziom z mastera/mapy wygrywa z dekodowaniem litery (w B0 litera = poziom:
-        # A=1, B=2, C=3…; w konwencji mapy B = kolumna 1 na poziomie 1).
+        # Poziom z mastera/mapy wygrywa z dekodowaniem litery (twin.ewm_levels).
         self.levels = {k.strip().upper(): v for k, v in (levels or {}).items() if v}
-        # Jeśli master choć raz przeczy dekodowaniu litery, cała hala ma konwencję
-        # „litera = poziom" (B0) → jedna pozycja w boku (D/-1/-2 to głębokość/podział).
+        # Jeśli master choć raz przeczy dekodowaniu litery, hala ma inną konwencję liter
+        # → poziom z mastera, jedna pozycja w boku (-1/-2 to podział miejsca).
         self.letter_is_level = any(
             (p := parse_code(c)) and self.levels.get(c.strip().upper(), p[4]) != p[4]
             for c in codes)
@@ -92,7 +91,7 @@ class SlotLocator:
         x, y = rack_point(rack, along, rack["depth"] / 2)
         lvl = min(max(1, level), max(1, rack["n_levels"]))
         u_d = rack_axes(rack["angle"])[1]
-        # Półki B/C/D (poz. 1) i części G/H (poz. 2) leżą JEDNA NAD DRUGĄ w otworze poziomu.
+        # Półki P/Q/R (poz. 1) i części S/T (poz. 2) leżą JEDNA NAD DRUGĄ w otworze poziomu.
         slot_ewm = None if self.letter_is_level else code_slot(code)
         n_sh = shelves_in_opening(slot_ewm)
         shelf_h = rack["level_h"] / n_sh

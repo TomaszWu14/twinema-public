@@ -29,7 +29,7 @@ class ServiceTests(TestCase):
         self.assertEqual(LocationOverride.objects.count(), overrides)
         rack = wm.racks.get(rack_id="08")
         self.assertEqual(rack.bay_numbers, "10-47,50")
-        self.assertEqual(rack.template.name, "3 pal. · A X Y Z · 0052/0010")
+        self.assertEqual(rack.template.name, "3 pal. · A B C D · 0020/0010")
 
         report = ewm_service.compliance_for_model(wm, batch)
         status = {a["aisle"]: a["status"] for a in report["aisles"]}

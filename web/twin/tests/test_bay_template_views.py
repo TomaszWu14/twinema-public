@@ -24,7 +24,7 @@ class BayTemplateViewTests(TestCase):
 
     def test_list_for_viewer_without_edit_buttons(self):
         BayTemplate.objects.create(name="3 pal. · A X", pallets_per_beam=3,
-                                   levels=[{"letter": "A", "height_mm": 1500, "ewm_type": "0052", "split": False}])
+                                   levels=[{"letter": "A", "height_mm": 1500, "ewm_type": "0020", "split": False}])
         self.client.force_login(self.viewer)
         r = self.client.get(reverse("twin:bay_template_list"))
         self.assertEqual(r.status_code, 200)
@@ -35,20 +35,20 @@ class BayTemplateViewTests(TestCase):
     def test_create_with_split_level(self):
         self.client.force_login(self.admin)
         post = {"name": "Kompletacja", "pallets_per_beam": "3", "beam_mm": "2700", "depth_mm": "1100", "notes": ""}
-        post.update(level_post([("b", "400", "0052", "0", "300"), ("C", "400", "0052", "1", "300"),
+        post.update(level_post([("b", "400", "0020", "0", "300"), ("C", "400", "0020", "1", "300"),
                                 ("", "", "", "0", "")]))
         r = self.client.post(reverse("twin:bay_template_new"), post)
         self.assertRedirects(r, reverse("twin:bay_template_list"))
         t = BayTemplate.objects.get(name="Kompletacja")
         self.assertEqual(t.level_label, "B C½")
-        self.assertEqual(t.levels[1], {"letter": "C", "height_mm": 400, "ewm_type": "0052", "split": True,
+        self.assertEqual(t.levels[1], {"letter": "C", "height_mm": 400, "ewm_type": "0020", "split": True,
                                        "max_kg": 300})
 
     def test_beam_mm_overflow_value_is_clamped_not_500(self):
         self.client.force_login(self.admin)
         post = {"name": "Nieskończoność", "pallets_per_beam": "3", "beam_mm": "inf", "depth_mm": "1100",
                 "notes": ""}
-        post.update(level_post([("A", "400", "0052", "0", "300"), ("", "", "", "0", "")]))
+        post.update(level_post([("A", "400", "0020", "0", "300"), ("", "", "", "0", "")]))
         r = self.client.post(reverse("twin:bay_template_new"), post)
         self.assertRedirects(r, reverse("twin:bay_template_list"))
         self.assertEqual(BayTemplate.objects.get(name="Nieskończoność").beam_mm, 0)

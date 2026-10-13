@@ -26,11 +26,11 @@ class WarehouseModelPasteTests(TestCase):
         self.assertContains(r, "Wklej adresy")
 
     def test_vertical_places_racks_along_y_with_angle_90(self):
-        self._post("B0-01-300A\nB0-01-300X\nB0-01-301A\nB0-02-300A",
+        self._post("B0-01-300A\nB0-01-300B\nB0-01-301A\nB0-02-300A",
                    orientation="vertical", start_x=5, start_y=2)
         r1 = WarehouseModelRack.objects.get(model=self.wm, zone="B0", rack_id="01")
         r2 = WarehouseModelRack.objects.get(model=self.wm, zone="B0", rack_id="02")
-        # B0-01: boczki {300,301} = 2, poziomy max(A=1, X=2) = 2
+        # B0-01: boczki {300,301} = 2, poziomy max(A=1, B=2) = 2
         self.assertEqual((r1.n_bays, r1.n_levels), (2, 2))
         self.assertEqual((r2.n_bays, r2.n_levels), (1, 1))
         self.assertEqual(r1.angle_deg, 90)
@@ -74,13 +74,13 @@ class WarehouseModelPasteTests(TestCase):
         self.assertEqual((r.x_m, r.y_m, r.angle_deg), (2, 3, 0))
 
     def test_lowercase_and_csv_columns_tolerated(self):
-        self._post("b0-01-300a,jakiś opis\nB0-01-300X\tinna kolumna")
+        self._post("b0-01-300a,jakiś opis\nB0-01-300B\tinna kolumna")
         r = WarehouseModelRack.objects.get(model=self.wm, zone="B0", rack_id="01")
         self.assertEqual((r.n_bays, r.n_levels), (1, 2))
 
-    def test_shelves_bcd_do_not_add_levels(self):
-        # B/C/D to półki w otworze poziomu 1 — nie osobne poziomy (dawniej B=2, C=3, D=4).
-        self._post("B0-01-300B\nB0-01-300C\nB0-01-300D\nB0-01-300X\nB0-01-300Y")
+    def test_shelves_pqr_do_not_add_levels(self):
+        # P/Q/R to półki w otworze poziomu 1 — nie osobne poziomy; B = 2, C = 3.
+        self._post("B0-01-300P\nB0-01-300Q\nB0-01-300R\nB0-01-300B\nB0-01-300C")
         r = WarehouseModelRack.objects.get(model=self.wm, zone="B0", rack_id="01")
         self.assertEqual(r.n_levels, 3)
 

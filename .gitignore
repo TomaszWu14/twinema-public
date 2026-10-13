@@ -27,3 +27,9 @@ docs/HANDOFF.md
 docs/PROMPT_NASTEPNA_SESJA.md
 .githooks/
 .graphifyignore
+
+# Śmieci systemów i IDE
+.DS_Store
+Thumbs.db
+.run/
+node_modules/

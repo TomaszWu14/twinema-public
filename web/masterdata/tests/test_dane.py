@@ -34,12 +34,12 @@ class ImportServiceTests(TestCase):
 
     def test_locations_create_new_active_master(self):
         old = WarehouseLocationMasterBatch.objects.create(name="stary", is_active=True)
-        services.import_file("locations", "lok.csv", _csv("Lokalizacja;Typ\nB0-01-100A;0052\nB0-01-100Y;0010\n"))
+        services.import_file("locations", "lok.csv", _csv("Lokalizacja;Typ\nB0-01-100A;0020\nB0-01-100C;0010\n"))
         old.refresh_from_db()
         self.assertFalse(old.is_active)
         batch = WarehouseLocationMasterBatch.objects.get(is_active=True)
         self.assertEqual(dict(batch.locations.values_list("location_code", "level")),
-                         {"B0-01-100A": 1, "B0-01-100Y": 3})        # poziom z litery kodu
+                         {"B0-01-100A": 1, "B0-01-100C": 3})        # poziom z litery kodu
 
     def test_latest_stock_import_is_current_stock(self):
         services.import_file("stock", "s1.csv", _csv("Lokalizacja;Materiał;Ilość\nL1;M1;1\n"))
@@ -77,7 +77,7 @@ class DemoStockTests(SimpleTestCase):
         codes = [s["location_code"] for s in demo_stock([rack], fill=1.0)]
         self.assertEqual(len(codes), 2 * 3 * 3)                        # 3 palety na belce × 3 poziomy
         self.assertEqual(len(set(codes)), len(codes))
-        self.assertIn("V-001-102Y", codes)                             # gniazdo 10, pozycja 2, poziom 3
+        self.assertIn("V-001-102C", codes)                            # gniazdo 10, pozycja 2, poziom 3
 
     def test_fill_and_seed_are_deterministic(self):
         rack = {"zone": "V", "rack_id": "001", "n_bays": 20, "n_levels": 5, "width": 18}
