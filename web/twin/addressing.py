@@ -9,16 +9,6 @@ import re
 from collections import defaultdict
 
 CODE_RE = re.compile(r"^([A-Z0-9]+)-([A-Z0-9]+)-(\d{2})(\d)([A-Z])(?:-([12]))?$")
-# Kolejność liter od podłogi w górę (B0: A–D/S = poziom 1 — B/C/D to półki jedna nad drugą,
-# X/G/H/T = 2 — G i H to X podzielone pionowo, G niżej; Y/U = 3, Z/V = 4, W = 5).
-# Musi być zgodna z ui.views.core.ewm_levels.letter_slot (pilnuje tego test).
-LETTER_ORDER = "ABCDSXGHTYUZVW"
-
-
-def letter_rank(letter):
-    """Klucz sortowania liter poziomów: znane litery wg LETTER_ORDER, obce na końcu."""
-    i = LETTER_ORDER.find(letter)
-    return (i if i >= 0 else len(LETTER_ORDER), letter)
 
 
 def parse_code(code):

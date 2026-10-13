@@ -2,7 +2,7 @@
 
 Wynik burzy mózgów z właścicielem (2026-10-05, 25 + 10 + 9 pytań). Dokument jest źródłem prawdy dla etapów
 po F5: edytor layoutu, scenariusze (plan przyjęć/wydań), symulacja dnia i animacja „jak może wyglądać przyszły
-layout”. Liczby mają odpowiadać realnej pracy magazynu — zawsze edytowalne, zwykle jako **min / średnio / max**.
+layout”. Liczby to syntetyczne rzędy wielkości typowe dla centrum dystrybucyjnego — zawsze edytowalne, zwykle jako **min / średnio / max**.
 
 Priorytet po F5: film i montaż odstawione; najważniejsze jest budowanie layoutu i jego animacja w przeglądarce.
 Kolejność: **E1 silnik edytora → scenariusz (plan przyjęć i wydań) → E2 edytor 2D → E3 podgląd 3D → tryb

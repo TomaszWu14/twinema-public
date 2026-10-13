@@ -15,9 +15,10 @@ class ParseCodeTests(SimpleTestCase):
     def test_letter_encodes_column_and_level_like_3d_map(self):
         self.assertEqual(parse_code("B0-01-300A"), ("B0", "01", "300", 0, 1))
         self.assertEqual(parse_code("b0-01-300k"), ("B0", "01", "300", 2, 2))   # legacy K = kol. 2, poz. 2
-        self.assertEqual(parse_code("B0-01-100Z"), ("B0", "01", "100", 0, 4))
-        # EWM: B/C/D = półki poziomu 1 w JEDNYM stosie (kolumna 0), nie kolumny obok siebie
-        self.assertEqual(parse_code("B0-01-300C"), ("B0", "01", "300", 0, 1))
+        self.assertEqual(parse_code("B0-01-100D"), ("B0", "01", "100", 0, 4))
+        self.assertEqual(parse_code("B0-01-300C"), ("B0", "01", "300", 0, 3))
+        # EWM: P/Q/R = półki poziomu 1 w JEDNYM stosie (kolumna 0), nie kolumny obok siebie
+        self.assertEqual(parse_code("B0-01-300Q"), ("B0", "01", "300", 0, 1))
 
     def test_four_part_builder_code(self):
         self.assertEqual(parse_code("B0-01-100-2X"), ("B0", "01", "100", 0, 2))
@@ -44,7 +45,7 @@ class SlotLocatorTests(SimpleTestCase):
         self.assertGreater(abs(c["x"] - a["x"]), a["w"])
 
     def test_master_level_overrides_letter(self):
-        # B0: litera = poziom (B = 2), a nie kolumna 1 na poziomie 1
+        # master zgodny z literą (A = 1, B = 2, C = 3) — jedna kolumna boku, rosnące poziomy
         codes = ["B0-01-100A", "B0-01-100B", "B0-01-100C"]
         loc = SlotLocator([RACK], codes, levels={"B0-01-100A": 1, "B0-01-100B": 2, "B0-01-100C": 3})
         a, b, c = (loc.slot(k) for k in codes)
@@ -53,10 +54,10 @@ class SlotLocatorTests(SimpleTestCase):
         self.assertAlmostEqual(c["z"] - a["z"], 2 * RACK["level_h"])
 
     def test_halves_split_the_cell_side_by_side(self):
-        # Połówki (…C-1 / …C-2 = miejsce 80 cm podzielone na dwa) nie mogą lądować w jednym punkcie.
-        codes = ["B0-01-300B", "B0-01-300C-1", "B0-01-300C-2", "B0-01-300D"]
+        # Połówki (…Q-1 / …Q-2 = miejsce 80 cm podzielone na dwa) nie mogą lądować w jednym punkcie.
+        codes = ["B0-01-300P", "B0-01-300Q-1", "B0-01-300Q-2", "B0-01-300R"]
         loc = SlotLocator([RACK], codes)
-        c1, c2, whole = loc.slot("B0-01-300C-1"), loc.slot("B0-01-300C-2"), loc.slot("B0-01-300D")
+        c1, c2, whole = loc.slot("B0-01-300Q-1"), loc.slot("B0-01-300Q-2"), loc.slot("B0-01-300R")
         self.assertEqual((c1["half"], c2["half"]), (1, 2))
         self.assertNotIn("half", whole)
         self.assertLess(c1["w"], whole["w"])                      # połówka węższa niż całe miejsce (~40 cm)
@@ -64,9 +65,9 @@ class SlotLocatorTests(SimpleTestCase):
         for s in (c1, c2):
             self.assertTrue(_inside((s["x"], s["y"]), RACK, 0.0))
 
-    def test_shelves_bcd_stack_vertically_in_level_one(self):
-        # B/C/D = półki JEDNA NAD DRUGĄ w otworze poziomu 1 (ten sam x, rosnące z), X nad nimi.
-        codes = ["B0-01-300B", "B0-01-300C", "B0-01-300D", "B0-01-300X"]
+    def test_shelves_pqr_stack_vertically_in_level_one(self):
+        # P/Q/R = półki JEDNA NAD DRUGĄ w otworze poziomu 1 (ten sam x, rosnące z), B nad nimi.
+        codes = ["B0-01-300P", "B0-01-300Q", "B0-01-300R", "B0-01-300B"]
         loc = SlotLocator([RACK], codes)
         b, c, d, x = (loc.slot(k) for k in codes)
         self.assertEqual({b["x"], c["x"], d["x"], x["x"]}, {b["x"]})
@@ -76,10 +77,10 @@ class SlotLocatorTests(SimpleTestCase):
         self.assertLess(d["z"], x["z"])
         self.assertAlmostEqual(c["z"] - b["z"], RACK["level_h"] / 3)
 
-    def test_gh_split_x_vertically(self):
-        # G/H = miejsce X podzielone pionowo: G niżej, H wyżej, oba na poziomie 2.
-        loc = SlotLocator([RACK], ["B0-01-300G", "B0-01-300H"])
-        g, h = loc.slot("B0-01-300G"), loc.slot("B0-01-300H")
+    def test_st_split_level_two_vertically(self):
+        # S/T = miejsce poziomu 2 podzielone pionowo: S niżej, T wyżej, oba na poziomie 2.
+        loc = SlotLocator([RACK], ["B0-01-300S", "B0-01-300T"])
+        g, h = loc.slot("B0-01-300S"), loc.slot("B0-01-300T")
         self.assertEqual((g["level"], h["level"]), (2, 2))
         self.assertEqual(g["x"], h["x"])
         self.assertAlmostEqual(h["z"] - g["z"], RACK["level_h"] / 2)
