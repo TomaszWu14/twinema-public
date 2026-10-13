@@ -1,10 +1,13 @@
 from django.conf import settings
 
+from .demo import DEMO_USER
 from .roles import GROUP_ADMIN, GROUP_DESIGNER
 
 
 def branding(request):
-    return {"app_name": settings.APP_NAME}
+    user = getattr(request, "user", None)
+    return {"app_name": settings.APP_NAME, "demo_public": settings.DEMO_PUBLIC,
+            "is_demo_guest": bool(user and user.is_authenticated and user.get_username() == DEMO_USER)}
 
 
 def user_roles(request):

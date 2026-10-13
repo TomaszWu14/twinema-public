@@ -82,7 +82,7 @@ Otwórz http://127.0.0.1:8090/ i zaloguj się kontem administratora albo `demo` 
 <details>
 <summary>Testy, historia zadań, render, wdrożenie</summary>
 
-**Testy** — 666 testów (logika symulacji, ML i geometrii bez bazy) + lint:
+**Testy** — 685 testów (logika symulacji, ML i geometrii bez bazy) + lint:
 
 ```bash
 cd web && python manage.py check && python manage.py test && ruff check ..
@@ -95,10 +95,15 @@ cd web && python manage.py check && python manage.py test && ruff check ..
 **Render i film (opcjonalnie):** worker na PC z Blenderem 4.x odpytuje serwer — na serwerze ustaw
 `RENDER_WORKER_TOKEN` (≥ 32 znaki), na PC: `TWINEMA_URL`, `TWINEMA_WORKER_TOKEN` i `python tools/render_worker.py`.
 Montaż filmu wymaga ffmpeg; lektor i szkic narracji — kluczy `ELEVENLABS_API_KEY` i `ANTHROPIC_API_KEY`.
-Wszystkie zmienne: [`.env.example`](.env.example).
+Głos jest normalizowany do −14 LUFS (YouTube), opcjonalny podkład muzyczny: `TWINEMA_MUSIC` / `--music` u workera.
+Przy gotowym filmie Studio daje MP4, napisy SRT z czasami jak w filmie (na YouTube wgrywa się je osobno)
+i „Opis na YouTube” z rozdziałami. Wszystkie zmienne: [`.env.example`](.env.example).
 
 **Wdrożenie (Docker + Coolify):** obraz z `Dockerfile`, port 8000, healthcheck `/health/`. `DEMO_SEED=true`
-odpala `seed_demo` przy każdym starcie (idempotentnie); `seed_demo --reset` odtwarza dane demo.
+odpala `seed_demo` przy każdym starcie (idempotentnie): hala, scenariusz, stany, symulacja obu dni i prezentacja 3D
+z publicznym linkiem; `seed_demo --reset` odtwarza dane demo. `DEMO_PUBLIC=true` otwiera demo bez logowania:
+`/` prowadzi na **`/demo/`** („Obejrzyj prezentację 3D”, „Wejdź do systemu” — konto `demo` w roli Podgląd, tylko
+odczyt), a `DEMO_VIDEO_URL` dodaje tam przycisk filmu.
 
 </details>
 
@@ -107,7 +112,7 @@ odpala `seed_demo` przy każdym starcie (idempotentnie); `seed_demo --reset` odt
 | Element | Rola | Dlaczego |
 |---|---|---|
 | Python 3.13, Django 5.2 LTS | aplikacja, ORM, panel administracyjny, role | wydanie LTS — wsparcie bezpieczeństwa do 2028; jeden monolit, jedno wdrożenie |
-| Czysty Python w logice | symulacja zdarzeniowa, ML, geometria, walidacja układu | testowalne bez bazy i bez Django — 666 testów w CI ([D11](docs/06-decyzje.md)) |
+| Czysty Python w logice | symulacja zdarzeniowa, ML, geometria, walidacja układu | testowalne bez bazy i bez Django — 685 testów w CI ([D11](docs/06-decyzje.md)) |
 | pydantic-settings | konfiguracja ze zmiennych środowiskowych | błąd konfiguracji zatrzymuje start zamiast działać na złych ustawieniach |
 | PostgreSQL 17 (lokalnie SQLite) | baza | puste `DATABASE_URL` = SQLite, więc start lokalny i CI bez serwera bazy |
 | three.js, ECharts | scena 3D, edytor, animacja dnia, wykresy | pobierane przy budowie z sumą SHA-256 — bez zależności od CDN w działaniu ([D12](docs/06-decyzje.md)) |

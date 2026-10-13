@@ -26,5 +26,6 @@ urlpatterns = [
     path("studio/<int:pk>/usun/", views.presentation_delete, name="delete"),
     path("studio/<int:pk>/lektor/<int:shot_pk>/", views.voice_shot, name="voice_shot"),
     path("studio/<int:pk>/napisy.srt", views.subtitles, name="subtitles"),
+    path("studio/<int:pk>/youtube.txt", views.youtube_text, name="youtube"),
     path("studio/lektor/<int:pk>.mp3", views.voice_file, name="voice_file"),
 ]

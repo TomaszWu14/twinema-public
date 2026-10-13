@@ -21,7 +21,8 @@ from twin.models import WarehouseModel
 from twin.shared import hall_feature_dict
 from twin.views.warehouse_blender import _scene_from_request
 
-from . import script_ai, tts
+from . import script_ai, tts, youtube
+from .api import END_S, TITLE_S
 from .deck import build_deck
 from .models import RENDER_RESOLUTION, MontageJob, Presentation, Shot, VoiceTrack
 from .script import TARGET_WORDS, WORDS_PER_SECOND, kpi_facts, template_script
@@ -254,14 +255,33 @@ def voice_file(request, pk):
 
 @any_role
 def subtitles(request, pk):
-    """Napisy całej narracji (ujęcia jedno po drugim). Montaż w F5c przesunie je o planszę tytułową."""
+    """Napisy całej narracji z czasami jak w zmontowanym filmie (przesunięte o planszę tytułową) — ten sam plik
+    co ścieżka w MP4, do wgrania na YouTube obok filmu."""
     p = get_object_or_404(Presentation, pk=pk)
     shots = list(p.shots.select_related("voice"))
     if not shots or not all(s.voice_ok for s in shots):
         messages.error(request, "Napisy będą dostępne po nagraniu lektora dla wszystkich kwestii.")
         return redirect("studio:detail", pk=pk)
-    resp = HttpResponse(film_srt(shots), content_type="application/x-subrip; charset=utf-8")
+    resp = HttpResponse(film_srt(shots, start_s=TITLE_S), content_type="application/x-subrip; charset=utf-8")
     resp["Content-Disposition"] = f'attachment; filename="twinema_prezentacja_{p.pk}.srt"'
+    return resp
+
+
+@any_role
+def youtube_text(request, pk):
+    """Tytuł, opis i rozdziały filmu do wklejenia w YouTube Studio (oś czasu jak w montażu)."""
+    from django.urls import reverse
+
+    p = get_object_or_404(Presentation, pk=pk)
+    shots = list(p.shots.select_related("voice"))
+    if not shots or not all(s.voice_ok for s in shots):
+        messages.error(request, "Opis z rozdziałami będzie dostępny po nagraniu lektora dla wszystkich kwestii.")
+        return redirect("studio:detail", pk=pk)
+    chapter_list = youtube.chapters(TITLE_S, [(s.voice.duration_s, s.text) for s in shots], END_S)
+    demo_url = request.build_absolute_uri(reverse("core:demo")) if settings.DEMO_PUBLIC else ""
+    text = youtube.description(p.title, chapter_list, demo_url=demo_url, app_name=settings.APP_NAME)
+    resp = HttpResponse(text, content_type="text/plain; charset=utf-8")
+    resp["Content-Disposition"] = f'attachment; filename="twinema_youtube_{p.pk}.txt"'
     return resp
 
 

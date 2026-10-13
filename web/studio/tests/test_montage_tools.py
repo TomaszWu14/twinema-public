@@ -36,7 +36,7 @@ class CommandTests(TestCase):
         vf = cmd[cmd.index("-vf") + 1]
         self.assertIn("tpad=stop_mode=clone:stop_duration=4.250", vf)
         self.assertIn("scale=1920:1080", vf)
-        self.assertEqual(cmd[cmd.index("-af") + 1], "apad")
+        self.assertEqual(cmd[cmd.index("-af") + 1], f"{m.LOUDNESS},apad")       # równy poziom głosu (≈ −14 LUFS)
         self.assertEqual(cmd[cmd.index("-t") + 1], "4.250")
         self.assertIn("yuv420p", cmd)
         self.assertEqual(cmd[-1], "o.mp4")
@@ -63,7 +63,40 @@ class CommandTests(TestCase):
         self.assertTrue(all(isinstance(c, list) and all(isinstance(x, str) for x in c) for c in cmds))
 
 
+    def test_plan_with_music_mixes_under_voice_and_keeps_video(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            _files, cmds, _final = m.plan(MANIFEST, tmp, "ffmpeg", "font.ttf", music="C:/m/podklad.mp3")
+        concat = cmds[-1]
+        self.assertIn("C:/m/podklad.mp3", concat)
+        self.assertEqual(concat[concat.index("C:/m/podklad.mp3") - 3:concat.index("C:/m/podklad.mp3")],
+                         ["-stream_loop", "-1", "-i"])                     # zapętlona pod całym filmem
+        mix = concat[concat.index("-filter_complex") + 1]
+        self.assertIn(f"volume={m.MUSIC_GAIN}", mix)
+        self.assertIn("afade=t=out:st=13.750:d=2.5", mix)                  # 16,25 s filmu − wygaszenie
+        self.assertIn("normalize=0", mix)
+        self.assertEqual(concat[concat.index("-c:v") + 1], "copy")
+        self.assertEqual(concat[concat.index("-t") + 1], "16.250")
+        self.assertIn("mov_text", concat)
+
+    def test_plan_without_music_copies_audio(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            _files, cmds, _final = m.plan(MANIFEST, tmp, "ffmpeg", "font.ttf")
+        self.assertNotIn("-filter_complex", cmds[-1])
+        self.assertEqual(cmds[-1][cmds[-1].index("-c:a") + 1], "copy")
+
+
 class FindTests(TestCase):
+    def test_music_from_env_or_empty(self):
+        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as fh:
+            path = fh.name
+        try:
+            with mock.patch.dict(os.environ, {"TWINEMA_MUSIC": path}):
+                self.assertEqual(m.find_music(), path)
+            with mock.patch.dict(os.environ, {"TWINEMA_MUSIC": "/nie/ma.mp3"}):
+                self.assertEqual(m.find_music(), "")
+        finally:
+            os.unlink(path)
+
     def test_env_overrides_and_missing_returns_empty(self):
         with tempfile.NamedTemporaryFile(suffix=".exe", delete=False) as fh:
             path = fh.name
