@@ -23,18 +23,54 @@ zarządu z linkiem, który nie ujawnia danych źródłowych.
 
 ## Dokumentacja analityczna
 
+Dokumentacja przedwdrożeniowa procesów, danych, ekranów i integracji — odtworzona z kodu, językiem biznesowym.
+
 | Dokument | Co zawiera |
 |---|---|
-| [01 — Problem i zakres](docs/01-problem-i-zakres.md) | problem, interesariusze, co jest w zakresie, co poza nim i dlaczego |
-| [02 — Proces](docs/02-proces.md) | proces projektowania hali przed i po wdrożeniu, aktorzy, punkty decyzyjne (Mermaid) |
-| [03 — User flow](docs/03-user-flow.md) | mapa ~55 ekranów i przejść, ścieżki alternatywne i ślepe (Mermaid + tabela) |
-| [04 — Model danych](docs/04-model-danych.md) | ERD 32 encji, opis encji, reguły integralności: co pilnuje baza, a co aplikacja |
-| [05 — Wymagania](docs/05-wymagania.md) | 35 wymagań funkcjonalnych i 7 niefunkcjonalnych z kryteriami akceptacji i miejscem w kodzie |
-| [06 — Decyzje](docs/06-decyzje.md) | dziennik 13 decyzji: kontekst, opcje, uzasadnienie, skutki — ze wskazaniem źródła |
-| [07 — Ograniczenia](docs/07-ograniczenia.md) | czego system nie robi, znane problemy, co dalej |
+| [00 — Przegląd](docs/00-przeglad.md) | cel biznesowy, zakres, aktorzy, mapa procesów, SIPOC, założenia do potwierdzenia |
+| [P1 — Dane podstawowe](docs/01-procesy/P1-dane-podstawowe.md) | import materiałów, mastera lokalizacji i stanów, kartoteka, dane demo |
+| [P2 — Historia ruchów i prognoza](docs/01-procesy/P2-historia-ruchow-i-prognoza.md) | import zadań, dzień projektowy, kalibracja, prognoza, modele ML |
+| [P3 — Model hali](docs/01-procesy/P3-model-hali.md) | utworzenie, edycja i walidacja układu, odwzorowanie adresowania |
+| [P4 — Katalog sprzętu](docs/01-procesy/P4-katalog-sprzetu.md) | sprzęt, osprzęt, krzywa udźwigu, import, stawki kosztowe |
+| [P5 — Scenariusz i symulacja](docs/01-procesy/P5-scenariusz-i-symulacja.md) | scenariusz, symulacja dnia, wąskie gardła, porównanie |
+| [P6 — Prezentacja 3D](docs/01-procesy/P6-prezentacja-3d.md) | slajdy, link wewnętrzny i publiczny |
+| [P7 — Film i deck](docs/01-procesy/P7-film-i-deck.md) | tekst, zatwierdzenie, render, montaż z napisami, deck PDF |
+| [P8 — Dostęp i demo](docs/01-procesy/P8-dostep-i-demo.md) | role, logowanie, publiczne demo z wejściem gościa |
+| [Model danych](docs/02-dane/model-danych.md) | ERD, słownik encji z cyklem życia, glosariusz, skutki usuwania |
+| [User flow](docs/03-user-flow/user-flow.md) | mapa ekranów, przejścia, warunki dostępu |
+| [Integracje](docs/04-integracje.md) | diagram kontekstu, tabela interfejsów |
+| [Decyzje i ograniczenia](docs/05-decyzje-i-ograniczenia.md) | dziennik decyzji, wymagania niefunkcjonalne, ograniczenia, dług techniczny, do anonimizacji |
 
-Materiały z okresu budowy: [założenia z burzy mózgów](docs/ZALOZENIA.md) (44 decyzje),
-[plan faz](docs/PLAN.md), [ADR-0001](docs/adr/0001-kopia-nie-przeniesienie.md), [pochodzenie kodu](PROVENANCE.md).
+Proces główny — od danych do decyzji o układzie magazynu:
+
+```mermaid
+flowchart TD
+    subgraph PROJ["Projektant"]
+        S([Potrzeba decyzji o układzie magazynu]) --> P1[P1 Wczytaj dane podstawowe]
+        P1 --> P2[P2 Wyznacz dzień projektowy]
+        P4[P4 Przygotuj katalog sprzętu] --> P3
+        P2 --> P3[P3 Zaprojektuj układ hali]
+        P3 --> P5[P5 Zasymuluj dzień pracy]
+        P5 --> G{Czy układ obsłuży dzień szczytowy?}
+        G -- nie --> P3
+        G -- tak --> P6[P6 Przygotuj prezentację 3D]
+        P6 --> P7[P7 Przygotuj film i deck]
+    end
+    subgraph ZAR["Zarząd: Podgląd lub gość"]
+        O[Obejrzyj pokaz i wyniki]
+        E([Decyzja o układzie podjęta])
+    end
+    P6 --> O
+    P7 --> O
+    O --> E
+```
+
+P1, P2 i P4 można wykonać w dowolnej kolejności; P2 i P7 są opcjonalne; P8 (dostęp i role) obejmuje wszystkie
+procesy. Opis: [przegląd](docs/00-przeglad.md#proces-główny-end-to-end).
+
+Materiały z okresu budowy: [założenia z burzy mózgów](docs/ZALOZENIA.md),
+[plan faz](docs/PLAN.md), [ADR-0001](docs/adr/0001-kopia-nie-przeniesienie.md), [pochodzenie kodu](PROVENANCE.md),
+[zrzuty ekranu](docs/screenshots/README.md).
 
 ## Jak uruchomić
 
@@ -112,24 +148,24 @@ odczyt), a `DEMO_VIDEO_URL` dodaje tam przycisk filmu.
 | Element | Rola | Dlaczego |
 |---|---|---|
 | Python 3.13, Django 5.2 LTS | aplikacja, ORM, panel administracyjny, role | wydanie LTS — wsparcie bezpieczeństwa do 2028; jeden monolit, jedno wdrożenie |
-| Czysty Python w logice | symulacja zdarzeniowa, ML, geometria, walidacja układu | testowalne bez bazy i bez Django — 676 testów w CI ([D11](docs/06-decyzje.md)) |
+| Czysty Python w logice | symulacja zdarzeniowa, ML, geometria, walidacja układu | testowalne bez bazy i bez Django — 676 testów w CI ([D11](docs/05-decyzje-i-ograniczenia.md#d11-logika-obliczeniowa-bez-django)) |
 | pydantic-settings | konfiguracja ze zmiennych środowiskowych | błąd konfiguracji zatrzymuje start zamiast działać na złych ustawieniach |
 | PostgreSQL 17 (lokalnie SQLite) | baza | puste `DATABASE_URL` = SQLite, więc start lokalny i CI bez serwera bazy |
-| three.js, ECharts | scena 3D, edytor, animacja dnia, wykresy | pobierane przy budowie z sumą SHA-256 — bez zależności od CDN w działaniu ([D12](docs/06-decyzje.md)) |
-| Blender 4.x (bez okna) na osobnym PC | render ujęć do filmu i decku | serwer nie ma GPU; worker sam odpytuje serwer, więc serwer nie otwiera portów ([D5](docs/06-decyzje.md)) |
-| Anthropic Claude (opcjonalnie) | szkic tekstów filmu | na zewnątrz idą tylko zagregowane liczby ([D13](docs/06-decyzje.md)) |
+| three.js, ECharts | scena 3D, edytor, animacja dnia, wykresy | pobierane przy budowie z sumą SHA-256 — bez zależności od CDN w działaniu ([D12](docs/05-decyzje-i-ograniczenia.md#d12-biblioteki-js-w-repozytorium-nie-z-cdn)) |
+| Blender 4.x (bez okna) na osobnym PC | render ujęć do filmu i decku | serwer nie ma GPU; worker sam odpytuje serwer, więc serwer nie otwiera portów ([D5](docs/05-decyzje-i-ograniczenia.md#d5-kolejka-renderów-bez-celery-worker-odpytuje-serwer)) |
+| Anthropic Claude (opcjonalnie) | szkic tekstów filmu | na zewnątrz idą tylko zagregowane liczby ([D13](docs/05-decyzje-i-ograniczenia.md#d13-do-ai-tylko-zagregowane-liczby-tekst-zatwierdza-człowiek)) |
 | openpyxl + defusedxml | import i eksport xlsx | odczyt XLSX bez podatności XXE |
 | django-axes, gitleaks, ruff | bezpieczeństwo i jakość | blokada zgadywania haseł, skan sekretów przed commitem, lint w CI |
 | Docker + Coolify | wdrożenie demo | \<DO UZUPEŁNIENIA: dlaczego Coolify\> |
 
 ## Zakres i ograniczenia
 
-- **Dane tylko z plików** (xlsx/csv z systemu magazynowego) — bez integracji na żywo, świadomie ([D1](docs/06-decyzje.md)).
+- **Dane tylko z plików** (xlsx/csv z systemu magazynowego) — bez integracji na żywo, świadomie ([D1](docs/05-decyzje-i-ograniczenia.md#d1-dane-tylko-z-plików-bez-integracji-na-żywo)).
 - **Narzędzie ocenia warianty, nie projektuje samo** — układ rysuje projektant, system sprawdza i symuluje.
-- **Film** — bez lektora (napisy w obrazie + opcjonalna muzyka, [D14](docs/06-decyzje.md)); montaż sprawdzony na prawdziwym ffmpeg, ale bez pełnej próby z renderem z Blendera.
+- **Film** — bez lektora (napisy w obrazie + opcjonalna muzyka, [D14](docs/05-decyzje-i-ograniczenia.md#d14-film-bez-lektora-napisy-w-obrazie-i-opcjonalna-muzyka)); montaż sprawdzony na prawdziwym ffmpeg, ale bez pełnej próby z renderem z Blendera.
 - **Render** wymaga Blendera na osobnym PC; bez workera zlecenia czekają w kolejce.
 - **Długie obliczenia** (symulacja, szkic AI) liczone w żądaniu — przy dużych scenariuszach ryzyko limitu czasu serwera.
-- Pełna lista i znane problemy: [07-ograniczenia.md](docs/07-ograniczenia.md).
+- Pełna lista i znane problemy: [decyzje i ograniczenia](docs/05-decyzje-i-ograniczenia.md#znane-ograniczenia).
 
 ## Kontekst projektu
 
