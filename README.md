@@ -69,8 +69,21 @@ P1, P2 i P4 można wykonać w dowolnej kolejności; P2 i P7 są opcjonalne; P8 (
 procesy. Opis: [przegląd](docs/00-przeglad.md#proces-główny-end-to-end).
 
 Materiały z okresu budowy: [założenia z burzy mózgów](docs/ZALOZENIA.md),
-[plan faz](docs/PLAN.md), [ADR-0001](docs/adr/0001-kopia-nie-przeniesienie.md), [pochodzenie kodu](PROVENANCE.md),
+[plan faz](docs/PLAN.md), [pochodzenie kodu](PROVENANCE.md),
 [zrzuty ekranu](docs/screenshots/README.md).
+
+## Proces zespołu: analiza, rozwój, bezpieczeństwo
+
+Projekt jest prowadzony jak przez trzyosobowy zespół — **[BA]** analityk, **[DEV]** developer, **[SEC]**
+bezpieczeństwo — z Product Ownerem akceptującym zakres, ryzyka i każdy merge. Proces, Definition of Ready/Done
+i konwencje: [CONTRIBUTING.md](CONTRIBUTING.md); zgłaszanie podatności: [SECURITY.md](SECURITY.md);
+zmiany: [CHANGELOG.md](CHANGELOG.md); stan wyjściowy: [audyt](docs/AUDYT.md).
+
+| Obszar | Dokumenty |
+|---|---|
+| [BA] Analiza | [wizja](docs/analiza/WIZJA.md) · [interesariusze](docs/analiza/INTERESARIUSZE.md) · [procesy AS-IS/TO-BE](docs/analiza/PROCESY.md) · [wymagania FR/NFR](docs/analiza/WYMAGANIA.md) · [backlog MoSCoW](docs/analiza/HISTORYJKI.md) · [słownik](docs/analiza/SLOWNIK.md) · [założenia](docs/analiza/ZALOZENIA.md) · [macierz śledzenia](docs/analiza/SLEDZENIE.md) |
+| [DEV] Architektura | [C4: kontekst i kontenery](docs/architektura/ARCHITEKTURA.md) · [model danych](docs/architektura/MODEL_DANYCH.md) · [API](docs/architektura/API.md) · [ADR](docs/architektura/adr/) · [strategia testów](docs/testy/STRATEGIA_TESTOW.md) · [runbook](docs/operacje/RUNBOOK.md) |
+| [SEC] Bezpieczeństwo | [klasyfikacja danych](docs/bezpieczenstwo/KLASYFIKACJA_DANYCH.md) · [threat model STRIDE](docs/bezpieczenstwo/THREAT_MODEL.md) · [rejestr ryzyk](docs/bezpieczenstwo/RYZYKA.md) · [RODO](docs/bezpieczenstwo/RODO.md) · [checklista ASVS](docs/bezpieczenstwo/CHECKLISTA_ASVS.md) |
 
 ## Jak uruchomić
 

@@ -227,8 +227,8 @@ także na liście E-900. Ekran sam odświeża status zleceń.
 | E-205 Edycja materiału | poprawić dane materiału | wymiary, cechy, klasy, ABC | zapisz | Projektant |
 | E-206 Nośniki i klasy | utrzymać słowniki palet | nośniki, klasy wysokości i wagi | zapisz | Projektant |
 | E-500 Katalog sprzętu | przeglądać sprzęt | filtr typu i producenta, plik importu | otwórz, dodaj, importuj, stawki | lista: każda rola; dodawanie i import: Projektant |
-| E-501 Formularz sprzętu | wpisać parametry | typ, nazwa, parametry, osprzęt, koszty | zapisz, anuluj | Projektant; klasa systemowa: tylko Administrator |
-| E-505 Karta sprzętu | obejrzeć parametry i krzywą udźwigu | — | edytuj, kopiuj, usuń | każda rola; akcje: Projektant (usuwanie klas systemowych zablokowane) |
+| E-501 Formularz sprzętu | wpisać parametry | typ, nazwa, parametry, osprzęt, koszty | zapisz, anuluj | Projektant; edycja własnego modelu: jego autor albo Administrator; klasa systemowa: tylko Administrator |
+| E-505 Karta sprzętu | obejrzeć parametry i krzywą udźwigu | — | edytuj, kopiuj, usuń | każda rola; kopiowanie: Projektant; edycja i usuwanie: autor modelu albo Administrator (klas systemowych nie da się usunąć) |
 | E-506 Stawki kosztowe | utrzymać widełki kosztów | od, do | zapisz | Projektant |
 
 ### Historia ruchów, projektowanie i ML

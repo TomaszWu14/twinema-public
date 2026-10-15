@@ -23,6 +23,7 @@ trafiają do sekcji „Unreleased”.
 - Strategia testów (`docs/testy/`) i runbook operacyjny (`docs/operacje/`).
 - CI: pip-audit i bandit jako kontrole blokujące, semgrep i trivy jako raport, raport pokrycia testami;
   Dependabot dla pip, GitHub Actions i obrazów Docker.
+- `tblib` w zależnościach deweloperskich — testy równoległe pokazują pełny traceback błędu.
 
 ### Changed
 - Komunikat po usunięciu sprzętu podaje, ile grup floty mieszanej usunięto razem z nim (US-002).
@@ -30,6 +31,8 @@ trafiają do sekcji „Unreleased”.
 
 ### Security
 - Własny model sprzętu edytuje i usuwa tylko jego autor albo Administrator; import z pliku nie nadpisuje
-  cudzego modelu (US-001).
+  cudzego modelu (US-001). Uwaga przy wdrożeniu: modele bez autora (np. dodane w panelu administracyjnym albo
+  po usunięciu konta autora) może odtąd zmieniać tylko Administrator.
 - Stanowisko renderujące odmawia połączenia bez HTTPS z serwerem innym niż lokalny, żeby token nie szedł
   otwartym tekstem (US-003).
+  Uwaga przy wdrożeniu: stanowisko łączące się dotąd po `http://` z adresem w sieci lokalnej musi przejść na `https://`.

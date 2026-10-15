@@ -1,0 +1,48 @@
+# Backlog historyjek
+
+**[BA]** · priorytety MoSCoW — propozycja do akceptacji PO. Pilne poprawki bezpieczeństwa z
+[audytu](../AUDYT.md) są na początku. Historyjki funkcji już istniejących: procesy P1–P8 (WF-…).
+
+| ID | Historyjka | Priorytet | Źródło | Status |
+|---|---|---|---|---|
+| US-001 | Jako Projektant chcę, aby mój model sprzętu mogli zmieniać i usuwać tylko ja i Administrator, aby nikt nie zepsuł mi parametrów floty | Must | R-03, T-4 | **zrobione** (ten PR) |
+| US-002 | Jako Projektant chcę po usunięciu sprzętu wiedzieć, ile grup floty mieszanej zniknęło, aby nie stracić założeń scenariusza bez wiedzy | Must | W8 w P4, T-6 | **zrobione** (ten PR) |
+| US-003 | Jako Administrator chcę, aby stanowisko renderujące łączyło się z serwerem tylko po HTTPS, aby token nie wyciekł | Must | R-17 | **zrobione** (ten PR) |
+| US-010 | Jako PO chcę usunąć z historii repozytorium dane rzeczywistego obiektu i prywatny e-mail, aby publiczne repozytorium nie ujawniało danych firmowych | Must | R-01, A-8, A-9 | czeka na decyzję PO |
+| US-011 | Jako Administrator chcę ostrzeżenia przy starcie, gdy demo publiczne jest włączone na instancji z danymi spoza demo, aby nie udostępnić ich światu | Must | R-02 | do realizacji |
+| US-012 | Jako pracownik magazynu chcę, aby mój login z historii zadań był pseudonimizowany przy imporcie, aby nikt nie oceniał mojej wydajności bez podstawy | Must (po decyzji PO) | R-06, RODO CP-4 | czeka na decyzję PO |
+| US-004 | Jako Projektant chcę przed usunięciem hali, scenariusza lub sprzętu zobaczyć listę obiektów usuwanych razem z nimi, aby nie stracić wyników i prezentacji | Must | T-5 | do realizacji |
+| US-009 | Jako Administrator chcę kopii zapasowej bazy i plików z procedurą odtworzenia, aby po awarii odzyskać dane | Must | R-10, T-16 | procedura w RUNBOOK; automatyzacja do realizacji |
+| US-013 | Jako PO chcę, aby każdy merge do `main` wymagał mojego zatwierdzenia, aby żadna zmiana nie trafiła na produkcję bez akceptacji | Must | R-09 | czeka na decyzję PO |
+| US-007 | Jako Administrator chcę, aby długie obliczenia szły w tle i nie mogła ich uruchamiać rola Podgląd, aby nikt nie zablokował serwera | Should | R-07, T-1 | do realizacji |
+| US-005 | Jako Administrator chcę wymuszonej polityki CSP, aby ograniczyć skutki ewentualnego XSS | Should | R-04 | do realizacji (wymaga testu UI) |
+| US-006 | Jako Administrator chcę ustawić liczbę zaufanych proxy, aby blokady logowania nie dało się obejść podmianą adresu | Should | R-05 | do realizacji |
+| US-008 | Jako Administrator chcę dziennika operacji wrażliwych, aby wiedzieć, kto usunął dane albo udostępnił link | Should | R-08 | do realizacji |
+| US-014 | Jako SEC chcę, aby semgrep i trivy blokowały PR po triażu pierwszych wyników, aby nowe ustalenia nie przechodziły | Should | R-18 | do realizacji |
+| US-019 | Jako Podgląd chcę widzieć w menu tylko moduły, do których mam dostęp, aby nie trafiać na stronę braku uprawnień | Should | T-3 | do realizacji |
+| US-023 | Jako PO chcę progu pokrycia testami w CI, aby jakość nie spadała | Should | NFR-015 | czeka na decyzję PO (próg) |
+| US-024 | Jako Projektant chcę, aby import zadań w tle przetrwał restart serwera, aby nie powtarzać importu | Should | T-2 | do realizacji |
+| US-017 | Jako Administrator chcę drugiego składnika logowania i haseł ≥ 12 znaków dla kont uprzywilejowanych, aby utrudnić przejęcie konta | Could | R-11, ASVS V2 | czeka na decyzję PO |
+| US-018 | Jako SEC chcę akcji CI przypiętych skrótem commita, aby podmiana tagu nie wpuściła obcego kodu | Could | R-16 | do realizacji |
+| US-015 | Jako Administrator chcę limitu prób dla zleceń renderu odrzucanych przez serwer, aby zlecenie nie krążyło bez końca | Could | R-14, T-11 | do realizacji |
+| US-020 | Jako gość chcę zrozumiałej strony, gdy link jest nieaktywny, aby wiedzieć, co się stało | Could | T-8 | do realizacji |
+| US-021 | Jako Projektant chcę, aby po błędzie walidacji formularz zachował wpisane dane, aby nie wpisywać ich od nowa | Could | T-10 | do realizacji |
+| US-022 | Jako Projektant chcę unikalnych nazw własnych modeli sprzętu, aby import nie kończył się błędem | Could | T-7 | do realizacji |
+| US-025 | Jako Projektant chcę wiedzieć, że wynik przypięty do prezentacji został usunięty, aby nie pokazać zarządowi niepełnego pokazu | Could | T-9 | do realizacji |
+| US-016 | Jako PO chcę osobnych sesji gości demo z ograniczeniem czasu, aby rozróżniać wizyty | Won't (na teraz) | R-13 | — |
+
+## Kryteria akceptacji historyjek zrealizowanych w tym PR
+
+**US-001**
+- *Given* model sprzętu autora A, *When* Projektant B otwiera edycję albo wysyła usunięcie, *Then* dostaje 403, a model zostaje bez zmian.
+- *Given* model bez autora (konto usunięte), *When* Projektant próbuje go edytować lub usunąć, *Then* 403; *When* Administrator — *Then* edycja działa.
+- *Given* model autora A, *When* Projektant B otwiera kartę, *Then* nie widzi przycisków „Edytuj” i „Usuń”, ale może skopiować model.
+- *Given* plik importu z nazwą cudzego modelu, *When* Projektant B importuje, *Then* wiersz jest pominięty z powodem „model innego użytkownika”; *When* importuje Administrator, *Then* model jest zaktualizowany.
+
+**US-002**
+- *Given* sprzęt używany w jednej grupie floty mieszanej, *When* autor go usuwa, *Then* komunikat mówi „Usunięto też grupy floty mieszanej z tym sprzętem: 1.”
+
+**US-003**
+- *Given* adres serwera `http://` inny niż komputer lokalny, *When* startuje stanowisko renderujące, *Then* kończy pracę z komunikatem o braku HTTPS.
+- *Given* adres pliku podany w zleceniu bez HTTPS, *When* stanowisko ma go pobrać, *Then* odmawia przed wysłaniem tokenu.
+- *Given* schemat inny niż http(s) (np. `file:`), *When* stanowisko dostaje taki adres, *Then* odmawia.

@@ -128,19 +128,22 @@ flowchart TD
     subgraph PROJ["Projektant"]
         X0([Próba zmiany katalogu]) --> X1{Jakiego rodzaju pozycja?}
         X1 -- "własny model" --> X5[Edytuj albo usuń model]
-        X2[Skopiuj klasę jako własny model]
+        X2[Skopiuj pozycję jako własny model]
     end
     subgraph SYS["System"]
         X3{Czy użytkownik jest Administratorem?}
-        X3 -- nie --> X4[Odmów edycji]
+        X3 -- nie --> X4[Odmów zmiany]
         X3 -- tak --> X6[Pozwól edytować klasę]
-        X7[Odłącz sprzęt od regałów i scenariuszy]
+        X10{Czy użytkownik jest autorem albo Administratorem?}
+        X10 -- nie --> X4
+        X10 -- tak --> X7[Odłącz sprzęt od regałów i scenariuszy]
         X8[Usuń grupy floty mieszanej z tym sprzętem]
         X9([Zmiana zapisana])
     end
     X1 -- "klasa systemowa" --> X3
     X4 --> X2
-    X5 --> X7 --> X8 --> X9
+    X5 --> X10
+    X7 --> X8 --> X9
     X6 --> X9
     X2 --> X9
 ```
@@ -154,14 +157,15 @@ flowchart TD
 | W5. Plik bez wymaganych kolumn | brak kolumn „Typ” i „Nazwa” | komunikat z odesłaniem do wzoru | import nie startuje |
 | W6. Wiersz odrzucony | brak nazwy, nieznany typ, brak udźwigu, wartość nieliczbowa lub ujemna, zły format krzywej, nieznany osprzęt | wiersz pominięty, ostrzeżenie z numerem wiersza i powodem (do 20 pozycji i licznik pozostałych) | pozostałe wiersze importują się |
 | W7. Nazwa klasy systemowej w pliku | wiersz ma nazwę identyczną z klasą systemową | wiersz pominięty z prośbą o zmianę nazwy | klasa systemowa nienaruszona |
-| W8. Usunięcie własnego modelu używanego w projektach | model przypisany do regałów, floty jednorodnej scenariusza lub grupy floty mieszanej | regały i flota jednorodna tracą przypisanie (wracają do ustawień ogólnych); **grupy floty mieszanej z tym sprzętem są usuwane** | komunikat mówi tylko o powrocie do ustawień ogólnych — nie ostrzega o usunięciu grup floty (zob. [Znane ograniczenia](../05-decyzje-i-ograniczenia.md#znane-ograniczenia)) |
+| W8. Usunięcie własnego modelu używanego w projektach | model przypisany do regałów, floty jednorodnej scenariusza lub grupy floty mieszanej | regały i flota jednorodna tracą przypisanie (wracają do ustawień ogólnych); **grupy floty mieszanej z tym sprzętem są usuwane** | komunikat podaje, ile grup floty mieszanej usunięto (US-002); usunięcie następuje bez ekranu potwierdzenia (zob. [Znane ograniczenia](../05-decyzje-i-ograniczenia.md#znane-ograniczenia)) |
 | W9. Brak klasy ogólnej typu przy imporcie | dla typu nie ma klasy systemowej | braki nie są uzupełniane; prędkości jazdy domyślnie 5 km/h | model działa z wartościami zastępczymi |
 | W10. Błędna stawka | wartość ujemna albo „do” < „od” | stawka zaznaczona, komunikat „Popraw zaznaczone stawki” | żadna stawka z formularza nie jest zapisana |
+| W11. Zmiana cudzego modelu | Projektant nie jest autorem własnego modelu (albo model nie ma autora) | strona braku uprawnień (403); w imporcie wiersz pominięty z powodem | model bez zmian; ścieżka zastępcza: kopia jako własny model (US-001) |
 
 ## Reguły biznesowe
 
 - **BR-401:** każda pozycja katalogu ma typ z listy 11 typów: wózek paletowy elektryczny, wózek czołowy, reach truck, VNA / wózek systemowy, AGV paletowy, AMR, wózek podnośnikowy, wózek do kompletacji, ciągnik, przenośnik, sorter.
-- **BR-402:** klasa systemowa → edytuje ją tylko Administrator i nie można jej usunąć; własny model → tworzy, edytuje i usuwa Projektant lub Administrator; rola Podgląd → tylko przegląda katalog.
+- **BR-402:** klasa systemowa → edytuje ją tylko Administrator i nie można jej usunąć; własny model → tworzy każdy Projektant, a edytuje i usuwa jego autor albo Administrator (model bez autora — tylko Administrator; US-001, [ADR-0003](../architektura/adr/0003-wlasnosc-modeli-sprzetu.md)); inni Projektanci mogą go skopiować; rola Podgląd → tylko przegląda katalog.
 - **BR-403:** kopia pozycji → powstaje własny model z dopiskiem „(kopia)” w nazwie, z parametrami źródła, przypisany do kopiującego; kopia klasy systemowej nie jest klasą systemową.
 - **BR-404:** prędkości jazdy z ładunkiem i bez ładunku muszą być dodatnie; udźwig nominalny jest wymagany.
 - **BR-405:** krzywa redukcji udźwigu to lista punktów [wysokość m, udźwig kg] o wartościach nieujemnych; poniżej pierwszego punktu obowiązuje udźwig nominalny, między punktami — interpolacja liniowa, powyżej ostatniego — wartość ostatniego punktu.
@@ -169,7 +173,7 @@ flowchart TD
 - **BR-407:** import przyjmuje plik xlsx/csv do 5 MB z kolumnami „Typ” i „Nazwa”; pozostałe kolumny są opcjonalne i rozpoznawane także po nazwach zastępczych (np. „model”, „marka”, „udźwig”).
 - **BR-408:** wiersz bez nazwy, z nieznanym typem lub osprzętem, bez udźwigu, z wartością nieliczbową lub ujemną albo z krzywą w złym formacie → odrzucony z powodem; reszta pliku jest importowana.
 - **BR-409:** brakujące w wierszu prędkości, czasy, alejka, bateria, wymiary → uzupełniane z klasy systemowej tego typu o najniższym udźwigu; w uwagach zapisuje się, które pola i z której klasy pochodzą.
-- **BR-410:** wiersz o nazwie istniejącego własnego modelu → aktualizuje go; nowa nazwa → tworzy model; nazwa klasy systemowej → wiersz pominięty.
+- **BR-410:** wiersz o nazwie istniejącego własnego modelu importującego → aktualizuje go; nazwa modelu innego autora albo modelu bez autora → wiersz pominięty z powodem „model innego użytkownika” (Administrator może aktualizować każdy); nowa nazwa → tworzy model; nazwa klasy systemowej → wiersz pominięty.
 - **BR-411:** do regału paletowego można przypisać reach truck, wózek czołowy, podnośnikowy lub do kompletacji; do regału VNA — wózek VNA; regał półkowy obsługuje kompletacja ręczna bez sprzętu z katalogu. Generator hali i dane demo dobierają najmniejszą klasę systemową, która sięga najwyższej belki (gdy żadna nie sięga — najwyższą).
 - **BR-412:** w scenariuszu flota jest jednorodna (jeden model sprzętu × liczba sztuk) albo mieszana (grupy: model × sztuk). Rola grupy w symulacji wynika z typu: VNA → regały VNA, wózki regałowe → regały paletowe, AGV/AMR/wózek paletowy/ciągnik → transport poziomy; przenośnik i sorter nie są flotą.
 - **BR-413:** czas ruchu palety = dojazd pusty i jazda z ładunkiem na średnią drogę z układu hali + podniesienie i opuszczenie na średnią wysokość belki + pobranie i odłożenie; bez przyspieszeń i zakrętów (rząd wielkości).

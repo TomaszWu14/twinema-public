@@ -30,14 +30,14 @@ w trakcie prac. Gdy nie — opisano tylko kontekst i skutki wynikające z kodu.
 
 - **Kontekst:** dane magazynu są w systemie magazynowym. System ma służyć do projektowania, nie do bieżącej pracy.
 - **Rozważane opcje:** w dokumentach rozważono sposób przejęcia kodu (D2); integracja przez API z systemem magazynowym nie jest opisana jako rozważona opcja.
-- **Uzasadnienie:** dane płyną wyłącznie przez importy plików — brak zależności między wdrożeniami ([ADR-0001](adr/0001-kopia-nie-przeniesienie.md)).
+- **Uzasadnienie:** dane płyną wyłącznie przez importy plików — brak zależności między wdrożeniami ([ADR-0001](architektura/adr/0001-kopia-nie-przeniesienie.md)).
 - **Konsekwencje:** każdy import ma raport odrzuceń; dane mogą być nieaktualne — aktualizacja oznacza ponowny import; model danych musi tolerować kody, których nie ma w drugim zbiorze (D9).
 
 ### D2. Kopia kodu zamiast przeniesienia albo wspólnej biblioteki
 
 - **Kontekst:** część kodu (modelowanie hali, symulacja, eksport sceny 3D) powstała we wcześniejszym projekcie autora.
 - **Rozważane opcje:** przeniesienie, kopia, wspólna biblioteka.
-- **Uzasadnienie:** źródło działa dalej bez zmian; wspólna biblioteka dopiero wtedy, gdy oba projekty realnie edytują te same pliki ([ADR-0001](adr/0001-kopia-nie-przeniesienie.md)).
+- **Uzasadnienie:** źródło działa dalej bez zmian; wspólna biblioteka dopiero wtedy, gdy oba projekty realnie edytują te same pliki ([ADR-0001](architektura/adr/0001-kopia-nie-przeniesienie.md)).
 - **Konsekwencje:** poprawki nie wracają automatycznie do źródła; w kopii zostały pozostałości nazewnictwa z projektu źródłowego (sekcja [Do anonimizacji](#do-anonimizacji)).
 
 ### D3. Scenariusz niezależny od układu hali
@@ -163,13 +163,12 @@ w trakcie prac. Gdy nie — opisano tylko kontekst i skutki wynikające z kodu.
 ### Uprawnienia i nawigacja
 
 - Menu i część przycisków są widoczne dla roli Podgląd, choć prowadzą do strony braku uprawnień (zadania magazynowe w menu, wklejanie adresów, elementy hali, współrzędne, typy regałów, kroki 1–2 w Projektowaniu).
-- Każdy Projektant może edytować i usuwać własne modele sprzętu innych Projektantów — brak sprawdzenia autora.
 - Symulacja dnia i kalibracja liczą się także dla roli Podgląd, a porównanie modeli nie — intencja nieustalona ([Z-3](00-przeglad.md#założenia-wymagające-potwierdzenia)).
 - Wszyscy goście demo współdzielą jedno konto.
 
 ### Dane i spójność
 
-- Usunięcie sprzętu kasuje grupy floty mieszanej scenariuszy, a komunikat mówi, że scenariusze „wracają do ustawień ogólnych” ([P4](01-procesy/P4-katalog-sprzetu.md), W8).
+- Usunięcie sprzętu kasuje grupy floty mieszanej scenariuszy bez ekranu potwierdzenia; komunikat po fakcie podaje ich liczbę ([P4](01-procesy/P4-katalog-sprzetu.md), W8). Czy grupy mają być usuwane, czy odłączane — [Z-4](00-przeglad.md#założenia-wymagające-potwierdzenia).
 - Usunięcie modelu hali kaskadowo usuwa wyniki symulacji, prezentacje 3D, prezentacje filmowe i zlecenia renderu; ekran potwierdzenia wspomina tylko regały i nie wyświetla nazwy modelu.
 - Zachowywanych jest 20 ostatnich wyników na scenariusz — starsze znikają także z prezentacji 3D, bez informacji.
 - Dane demo nadpisują stan bieżący magazynu (najnowszy import stanów wygrywa).
@@ -195,14 +194,16 @@ w trakcie prac. Gdy nie — opisano tylko kontekst i skutki wynikające z kodu.
 
 ## Dług techniczny i prace przed wdrożeniem produkcyjnym
 
+Pozycje T-n mają odpowiedniki w [backlogu](analiza/HISTORYJKI.md) (kolumna „Źródło”), ryzyka — w [rejestrze ryzyk](bezpieczenstwo/RYZYKA.md).
+
 | Nr | Praca | Powód | Priorytet |
 |---|---|---|---|
 | T-1 | Przenieść symulację, import danych, ML i szkic z AI do kolejki zadań w tle | limit 120 s żądania; ryzyko przerwania obliczeń (D10) | wysoki |
 | T-2 | Zastąpić wątek importu zadań trwałą kolejką z ponawianiem | import „wisi” po restarcie serwera | wysoki |
 | T-3 | Ukryć przed rolą Podgląd moduły i przyciski bez dostępu | mylące ścieżki ślepe | wysoki |
-| T-4 | Sprawdzanie autora przy edycji i usuwaniu własnego sprzętu | Projektant może zmienić cudzy model | wysoki |
+| T-4 | ~~Sprawdzanie autora przy edycji i usuwaniu własnego sprzętu~~ — zrobione (US-001) | Projektant mógł zmienić cudzy model | — |
 | T-5 | Ekrany potwierdzenia usunięcia z listą obiektów usuwanych kaskadowo (model hali, scenariusz, sprzęt) | nieodwracalna utrata wyników i prezentacji | wysoki |
-| T-6 | Poprawić komunikat i zachowanie przy usuwaniu sprzętu używanego we flocie mieszanej (ostrzec albo odłączać zamiast usuwać) | komunikat niezgodny z działaniem | wysoki |
+| T-6 | Zachowanie przy usuwaniu sprzętu używanego we flocie mieszanej: ostrzec przed usunięciem albo odłączać zamiast usuwać (komunikat poprawiony w US-002) | grupy floty znikają bez potwierdzenia | wysoki |
 | T-7 | Unikalna nazwa własnego modelu sprzętu w bazie | błąd importu przy duplikatach | średni |
 | T-8 | Własne strony „nie znaleziono” i „błąd serwera” | wygasły link publiczny bez wyjaśnienia | średni |
 | T-9 | Informacja, że wynik przypięty do prezentacji 3D został usunięty (limit 20) | prezentacja traci dane bez ostrzeżenia | średni |
@@ -224,7 +225,7 @@ celowo nie są tu przytaczane** — podano tylko lokalizację i rodzaj danych.
 | A-1 | `LICENSE` | imię i nazwisko autora | potwierdzić, czy ma zostać (wymóg licencji) |
 | A-2 | `README.md`, `docs/PLAN.md` | nazwa konta autora w serwisie kodu i nazwa prywatnego repozytorium | zastąpić opisem ogólnym |
 | A-3 | `README.md`, `.github/workflows/ci.yml`, `tools/render_worker.py` (opis uruchomienia) | domena autora | zastąpić przykładową domeną |
-| A-4 | `PROVENANCE.md`, `docs/PLAN.md`, `docs/adr/0001-kopia-nie-przeniesienie.md` | nazwa prywatnego projektu źródłowego | zastąpić określeniem „projekt źródłowy” |
+| A-4 | `PROVENANCE.md`, `docs/PLAN.md`, `docs/architektura/adr/0001-kopia-nie-przeniesienie.md` | nazwa prywatnego projektu źródłowego | zastąpić określeniem „projekt źródłowy” |
 | A-5 | `web/twin/models.py` (komentarz przy masterze lokalizacji), `web/twin/blender_stock.py`, `web/twin/blender_scene.py` | nazwy aplikacji i bloków z projektu źródłowego | usunąć z komentarzy |
 | A-6 | `web/twin/ewm_levels.py`, `web/twin/locations.py` | oznaczenia poziomów z obiektu źródłowego | potwierdzić, czy to konwencja ogólna, czy specyfika obiektu |
 | A-7 | dane przykładowe w testach i generatorach | kod hali z obiektu źródłowego | zastąpić neutralnym kodem |

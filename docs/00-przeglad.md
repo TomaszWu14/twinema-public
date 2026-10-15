@@ -114,6 +114,10 @@ procesy i nie jest pokazany jako krok.
 | Diagram przepływu ekranów | UF-{n} | UF-6 |
 | Interfejs | I-{n} | I-6 |
 | Decyzja | D{n} | D14 |
+| Decyzja architektoniczna (ADR) | NNNN | ADR-0003 |
+| Wymaganie funkcjonalne / niefunkcjonalne (indeks) | FR-nnn / NFR-nnn | FR-019 |
+| Historyjka backlogu | US-nnn | US-001 |
+| Ryzyko | R-nn | R-02 |
 | Dług techniczny | T-{n} | T-1 |
 | Miejsce do anonimizacji | A-{n} | A-8 |
 | Założenie do potwierdzenia | Z-{n} | Z-6 |
@@ -127,6 +131,11 @@ procesy i nie jest pokazany jako krok.
 | [03-user-flow/user-flow.md](03-user-flow/user-flow.md) | mapa ekranów, przejścia, warunki dostępu |
 | [04-integracje.md](04-integracje.md) | diagram kontekstu, tabela interfejsów |
 | [05-decyzje-i-ograniczenia.md](05-decyzje-i-ograniczenia.md) | decyzje, ograniczenia, dług techniczny, do anonimizacji |
+| [AUDYT.md](AUDYT.md) | stan projektu z perspektyw BA, DEV i SEC, top 10 ryzyk |
+| [analiza/](analiza/) | wizja, interesariusze, AS-IS/TO-BE, wymagania FR/NFR, backlog, słownik, założenia, śledzenie |
+| [architektura/](architektura/) | C4, model danych (widok techniczny), API, ADR |
+| [bezpieczenstwo/](bezpieczenstwo/) | klasyfikacja danych, threat model, rejestr ryzyk, RODO, ASVS |
+| [testy/](testy/STRATEGIA_TESTOW.md), [operacje/](operacje/RUNBOOK.md) | strategia testów, runbook |
 
 ## Założenia wymagające potwierdzenia
 
@@ -138,7 +147,7 @@ punkty wymagają decyzji albo informacji od właściciela biznesowego.
 | Z-1 | Stan obecny i uzasadnienie biznesowe | brak opisu pracy przed wdrożeniem | jak dziś przygotowuje się wariant, ile to trwa, jakie są koszty błędnej decyzji |
 | Z-2 | Odbiorcy i właściciele procesów w organizacji | role techniczne: Administrator, Projektant, Podgląd; odbiorcy (zarząd, osoba z zewnątrz) zakładani, niezweryfikowani | kto konkretnie pełni role i kto jest właścicielem każdego procesu |
 | Z-3 | Uprawnienia roli Podgląd do obliczeń | Podgląd może liczyć symulację dnia i kalibrację, ale nie porównanie modeli | czy Podgląd ma uruchamiać jakiekolwiek obliczenia |
-| Z-4 | Skutek usunięcia sprzętu dla floty mieszanej | grupy floty są usuwane, komunikat mówi o powrocie do ustawień ogólnych | które zachowanie jest zamierzone |
+| Z-4 | Skutek usunięcia sprzętu dla floty mieszanej | grupy floty są usuwane bez potwierdzenia; komunikat po fakcie podaje ich liczbę (US-002) | czy grupy usuwać, czy odłączać, i czy wymagać potwierdzenia |
 | Z-5 | Wolumeny danych produkcyjnych | limity: 300 000 wierszy / 25 MB na plik danych, 300 MB na plik zadań | rzeczywista liczba materiałów, lokalizacji i zadań w obiektach docelowych |
 | Z-6 | Czas obliczeń | symulacja, import danych, ML i szkic z AI liczą się w trakcie żądania z limitem 120 s | czy przy rzeczywistych danych mieszczą się w limicie; czy wymagane jest liczenie w tle |
 | Z-7 | Format eksportu z systemu magazynowego | kolumny rozpoznawane po nazwach polskich, angielskich i technicznych | z jakiego systemu i w jakim układzie przychodzą eksporty; czy zawsze mają wymagane kolumny |
