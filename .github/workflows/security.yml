@@ -1,6 +1,9 @@
 name: Security
 
-# gitleaks blokuje (wyciek sekretu = czerwony run); pip-audit informacyjnie.
+# Bramka bezpieczeństwa PR → main (ADR-0002, docs/architektura/adr/0002-narzedzia-jakosci-i-bezpieczenstwa.md).
+#   blokują:   gitleaks (sekrety), pip-audit (podatne zależności), bandit (SAST, waga ≥ średnia)
+#   raportują: semgrep (OWASP, Django), trivy (Dockerfile + obraz) — wyniki jako artefakty;
+#              po triażu pierwszych wyników przechodzą na blokujące (decyzja PO, docs/bezpieczenstwo/RYZYKA.md)
 on:
   pull_request:
     branches: [main]
@@ -26,12 +29,77 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   pip-audit:
-    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
-      - run: pip install pip-audit && pip-audit -r requirements.txt --desc
-        continue-on-error: true
+      - run: pip install pip-audit==2.9.0
+      - name: Zależności runtime bez znanych podatności
+        run: pip-audit -r requirements.txt --desc
+
+  bandit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: pip install bandit==1.8.6
+      - name: SAST — blokuje ustalenia o wadze i pewności co najmniej średniej
+        run: |
+          bandit -r web tools -x '*/tests/*,*/migrations/*' -f json -o bandit.json || true
+          bandit -r web tools -x '*/tests/*,*/migrations/*' --severity-level medium --confidence-level medium
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bandit
+          path: bandit.json
+
+  semgrep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: semgrep/semgrep:1.95.0
+    steps:
+      - uses: actions/checkout@v4
+      - name: SAST — reguły OWASP Top 10 i Django (raport)
+        run: semgrep scan --config p/owasp-top-ten --config p/django --sarif --output semgrep.sarif --metrics off || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: semgrep
+          path: semgrep.sarif
+
+  trivy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Konfiguracja (Dockerfile) — raport
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: config
+          scan-ref: .
+          format: table
+          output: trivy-config.txt
+          exit-code: '0'
+      - name: Budowa obrazu
+        run: DOCKER_BUILDKIT=1 docker build -t twinema:scan .
+      - name: Obraz — podatności wysokie i krytyczne z dostępną poprawką (raport)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: twinema:scan
+          format: table
+          output: trivy-image.txt
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '0'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy
+          path: trivy-*.txt

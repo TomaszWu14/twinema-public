@@ -1,2 +1,7 @@
 -r requirements.txt
 ruff==0.16.9
+# Bezpieczeństwo i jakość — te same wersje co w CI (.github/workflows/security.yml, ci.yml)
+bandit==1.8.6        # SAST
+pip-audit==2.9.0     # SCA: podatności zależności
+coverage==7.6.10     # pokrycie testami (raport, próg ustala PO)
+tblib==3.0.0         # czytelne błędy testów przy --parallel (bez niego runner gubi traceback)

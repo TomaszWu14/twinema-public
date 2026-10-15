@@ -62,6 +62,33 @@ jobs:
           DJANGO_SSL_REDIRECT: 'true'
         run: python manage.py check --deploy --fail-level WARNING
 
+  coverage:
+    # Raport pokrycia (bez progu — próg ustala PO, docs/testy/STRATEGIA_TESTOW.md). SQLite, testy równolegle.
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - name: Testy pod pomiarem pokrycia
+        working-directory: web
+        env:
+          DJANGO_SECRET_KEY: ci-test-secret
+          DJANGO_DEBUG: 'true'
+          DJANGO_ALLOWED_HOSTS: '*'
+        run: |
+          coverage run --rcfile=../pyproject.toml manage.py test --noinput -v 0 --parallel 4
+          coverage combine --rcfile=../pyproject.toml -q
+          coverage report --rcfile=../pyproject.toml | tee coverage.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: web/coverage.txt
+
   auto-merge:
     needs: test
     if: >-
