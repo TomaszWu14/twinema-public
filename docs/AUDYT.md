@@ -32,7 +32,7 @@ gardła, koszty, prezentacja 3D z linkiem publicznym, film z napisami, demo publ
 |---|---|---|
 | Architektura | ✅ | monolit Django 5.2 LTS, 8 aplikacji z czytelnym podziałem; logika obliczeniowa bez bazy ([ARCHITEKTURA](architektura/ARCHITEKTURA.md)) |
 | Testy | ✅ | 676 testów Python + testy JS, CI na PostgreSQL; testy ról i 403 |
-| Pokrycie | ⚠️ | pomiar w tym PR: POKRYCIE_ŁĄCZNE; brak progu (Z-28) |
+| Pokrycie | ⚠️ | pomiar w tym PR: **92,7%** łącznie (linie i gałęzie), logika domenowa (`scenario/sim`, `ml`, `twin/layout.py`, `twin/design_*`) ok. **97%**; najsłabiej: stanowisko renderujące (23%); brak progu w CI (Z-28) |
 | Lint | ⚠️ | ruff z wąskim zestawem reguł (F, E9, B); brak formatowania i typowania |
 | Konfiguracja | ✅ | typowane zmienne środowiskowe, walidacja przy starcie |
 | Kontener | ✅ | obraz slim, wieloetapowy, użytkownik nie-root, przypięte wersje zależności |
@@ -72,7 +72,7 @@ haseł; scena dla Podglądu bez danych źródłowych; do AI tylko zagregowane li
 |---|---|
 | pip-audit 2.9.0 (`requirements.txt`) | brak znanych podatności |
 | bandit 1.8.6 (`web/`, `tools/`, bez testów i migracji) | 0 wysokich; 3 średnie — oceniono jako fałszywe alarmy lub naprawiono (B310: dodano ograniczenie schematu), oznaczone pojedynczo; 19 niskich (generatory losowe w symulacji i danych demo, `assert` w ML, `subprocess` w stanowisku) — bez działań |
-| Testy (Django, SQLite) | 676 / 676 zielonych przed zmianami; po zmianach — w opisie PR |
+| Testy (Django, SQLite) | 676 / 676 zielonych przed zmianami; **686 / 686** po zmianach (10 nowych testów US-001…US-003) |
 | semgrep, trivy | nie uruchomiono lokalnie (brak dostępu do rejestru reguł i demona Dockera) — pierwsze wyniki z CI tego PR |
 
 ## Kolejne kroki
