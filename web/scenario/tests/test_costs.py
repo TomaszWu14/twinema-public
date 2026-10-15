@@ -163,8 +163,8 @@ class CostViewsTests(TestCase):
         self.assertEqual((float(rates[0].low), float(rates[0].high)), (10.0, 20.0))
 
     def test_equipment_form_cost_range_validation(self):
-        eq = Equipment.objects.filter(is_system=False).first() or Equipment.objects.create(
-            kind="reach", name="Mój reach", speed_loaded_kmh=10, speed_empty_kmh=11, capacity_kg=1500)
+        eq = Equipment.objects.create(kind="reach", name="Mój reach", speed_loaded_kmh=10, speed_empty_kmh=11,
+                                      capacity_kg=1500, created_by=self.designer)   # US-001: edytuje autor
         resp = self.client.post(reverse("equipment:edit", args=[eq.pk]), {
             "kind": "reach", "name": "Mój reach", "speed_loaded_kmh": 10, "speed_empty_kmh": 11, "capacity_kg": 1500,
             "lift_curve": "[]", "cost_purchase": 200000, "cost_purchase_max": 100000})

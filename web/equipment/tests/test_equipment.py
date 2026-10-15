@@ -99,3 +99,57 @@ class CatalogViewTests(TestCase):
     def test_hub_links_catalog(self):
         self.client.force_login(self.users["zarzad"])
         self.assertContains(self.client.get(reverse("core:home")), reverse("equipment:list"))
+
+
+class OwnModelAuthorizationTests(TestCase):
+    """US-001 (SEC): własny model sprzętu zmienia i usuwa tylko jego autor albo administrator."""
+
+    def setUp(self):
+        self.users = {}
+        for name, group in (("adm", GROUP_ADMIN), ("autor", GROUP_DESIGNER), ("inny", GROUP_DESIGNER),
+                            ("zarzad", GROUP_VIEWER)):
+            u = User.objects.create_user(name, password="x")
+            u.groups.add(Group.objects.get_or_create(name=group)[0])
+            self.users[name] = u
+        self.own = Equipment.objects.create(kind="reach", name="Mój reach", capacity_kg=1500, speed_loaded_kmh=10,
+                                            speed_empty_kmh=11, created_by=self.users["autor"])
+        self.orphan = Equipment.objects.create(kind="reach", name="Bez autora", capacity_kg=1500,
+                                               speed_loaded_kmh=10, speed_empty_kmh=11)
+
+    def _status(self, who, route, eq, method="get"):
+        self.client.force_login(self.users[who])
+        return getattr(self.client, method)(reverse(route, args=[eq.pk])).status_code
+
+    def test_other_designer_and_viewer_get_403(self):
+        for who in ("inny", "zarzad"):
+            self.assertEqual(self._status(who, "equipment:edit", self.own), 403, who)
+            self.assertEqual(self._status(who, "equipment:delete", self.own, "post"), 403, who)
+        self.assertTrue(Equipment.objects.filter(pk=self.own.pk).exists())
+
+    def test_model_without_author_only_admin(self):
+        self.assertEqual(self._status("autor", "equipment:edit", self.orphan), 403)
+        self.assertEqual(self._status("autor", "equipment:delete", self.orphan, "post"), 403)
+        self.assertEqual(self._status("adm", "equipment:edit", self.orphan), 200)
+
+    def test_detail_hides_actions_for_other_designer(self):
+        self.client.force_login(self.users["inny"])
+        page = self.client.get(reverse("equipment:detail", args=[self.own.pk]))
+        self.assertNotContains(page, reverse("equipment:edit", args=[self.own.pk]))
+        self.assertNotContains(page, reverse("equipment:delete", args=[self.own.pk]))
+        self.assertContains(page, "Kopiuj jako własny model")             # kopia nadal dozwolona
+
+    def test_author_and_admin_can_delete(self):
+        self.assertEqual(self._status("autor", "equipment:edit", self.own), 200)
+        self.assertEqual(self._status("autor", "equipment:delete", self.own, "post"), 302)
+        self.assertEqual(self._status("adm", "equipment:delete", self.orphan, "post"), 302)
+        self.assertFalse(Equipment.objects.filter(is_system=False).exists())
+
+    def test_delete_message_reports_removed_fleet_groups(self):
+        """US-002: komunikat po usunięciu mówi prawdę o usuniętych grupach floty mieszanej."""
+        from scenario.models import Scenario, ScenarioFleet
+        sc = Scenario.objects.create(name="S")
+        ScenarioFleet.objects.create(scenario=sc, equipment=self.own, units=2)
+        self.client.force_login(self.users["autor"])
+        r = self.client.post(reverse("equipment:delete", args=[self.own.pk]), follow=True)
+        self.assertContains(r, "Usunięto też grupy floty mieszanej z tym sprzętem: 1.")
+        self.assertFalse(ScenarioFleet.objects.filter(scenario=sc).exists())

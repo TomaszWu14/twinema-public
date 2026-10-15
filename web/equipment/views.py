@@ -73,8 +73,11 @@ RateFormSet = forms.modelformset_factory(CostRate, form=RateForm, extra=0)
 
 
 def _can_edit(user, eq):
-    """Klasy systemowe zmienia tylko administrator; własne modele — Projektant i administrator."""
-    return has_role(user, GROUP_ADMIN) if eq.is_system else True
+    """Klasy systemowe zmienia tylko administrator; własny model — jego autor albo administrator.
+    Model bez autora (konto usunięte) — tylko administrator."""
+    if has_role(user, GROUP_ADMIN):
+        return True
+    return not eq.is_system and eq.created_by_id is not None and eq.created_by_id == user.pk
 
 
 def _curve(eq):
@@ -180,11 +183,14 @@ def catalog_copy(request, pk):
 @require_POST
 def catalog_delete(request, pk):
     eq = get_object_or_404(Equipment, pk=pk)
-    if eq.is_system:
+    if eq.is_system or not _can_edit(request.user, eq):
         return render(request, "core/403.html", status=403)
-    name = eq.name
+    name, groups = eq.name, eq.scenario_fleets.count()
     eq.delete()
-    messages.success(request, f"Usunięto „{name}” (regały i scenariusze z tym sprzętem wracają do ustawień ogólnych).")
+    msg = f"Usunięto „{name}” — regały i flota jednorodna scenariuszy z tym sprzętem wracają do ustawień ogólnych."
+    if groups:
+        msg += f" Usunięto też grupy floty mieszanej z tym sprzętem: {groups}."
+    messages.success(request, msg)
     return redirect("equipment:list")
 
 
