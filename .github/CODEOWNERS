@@ -1,0 +1,19 @@
+# Przypisanie obszarów do ról zespołu (opisowo).
+# Zespół ma jednego właściciela repozytorium, który pełni rolę Product Ownera i zatwierdza każdy merge,
+# dlatego reguły są komentarzami. Po dołączeniu kolejnych osób zamień je na aktywne wpisy, np.:
+#   /docs/analiza/   @<konto-BA>
+#
+# [BA]  analiza i wymagania
+#   /docs/analiza/            /docs/00-przeglad.md   /docs/01-procesy/   /docs/03-user-flow/
+#
+# [DEV] kod, architektura, CI, wdrożenie
+#   /web/   /tools/   /docs/architektura/   /docs/02-dane/   /docs/04-integracje.md   /docs/testy/
+#   /docs/operacje/   /Dockerfile   /docker-entrypoint.sh   /requirements*.txt   /.github/workflows/
+#
+# [SEC] bezpieczeństwo (przegląd każdego PR, prawo weta przy ryzyku wysokim i krytycznym)
+#   /SECURITY.md   /docs/bezpieczenstwo/   /.github/workflows/security.yml   /.github/dependabot.yml
+#   /web/core/roles.py   /web/core/middleware.py   /web/twinema/settings.py   /web/twinema/config.py
+#   /web/render/api.py   /web/studio/api.py   /web/studio/script_ai.py   /web/core/demo.py
+#
+# PO  decyzje, akceptacja ryzyk i wydań
+#   /CHANGELOG.md   /docs/05-decyzje-i-ograniczenia.md
