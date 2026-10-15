@@ -33,6 +33,7 @@ Wszystkie wybrane narzędzia są darmowe i open-source albo wbudowane w GitHub.
   Na start oznaczono trzy: stała w `mark_safe` (B308), adres stanowiska ograniczony do http(s) (B310),
   katalog tymczasowy dodatku Blendera na komputerze użytkownika (B108).
 - **Wersje narzędzi przypięte** w `requirements-dev.txt` i workflow; Dependabot aktualizuje pip, akcje GitHub i obrazy.
+  Trivy działa z obrazu `aquasec/trivy:<wersja>`, bo akcja `trivy-action` pod przypiętym tagiem okazała się niedostępna.
 
 ## Konsekwencje
 

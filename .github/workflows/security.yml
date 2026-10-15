@@ -75,29 +75,21 @@ jobs:
           path: semgrep.sarif
 
   trivy:
+    # Obraz trivy przypięty wersją (akcja trivy-action pod tagiem 0.28.0 nie jest już dostępna).
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    env:
+      TRIVY: aquasec/trivy:0.74.0
     steps:
       - uses: actions/checkout@v4
       - name: Konfiguracja (Dockerfile) — raport
-        uses: aquasecurity/trivy-action@0.28.0
-        with:
-          scan-type: config
-          scan-ref: .
-          format: table
-          output: trivy-config.txt
-          exit-code: '0'
+        run: docker run --rm -v "$PWD:/src" "$TRIVY" config --format table /src | tee trivy-config.txt
       - name: Budowa obrazu
         run: DOCKER_BUILDKIT=1 docker build -t twinema:scan .
       - name: Obraz — podatności wysokie i krytyczne z dostępną poprawką (raport)
-        uses: aquasecurity/trivy-action@0.28.0
-        with:
-          image-ref: twinema:scan
-          format: table
-          output: trivy-image.txt
-          severity: HIGH,CRITICAL
-          ignore-unfixed: true
-          exit-code: '0'
+        run: >-
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock "$TRIVY" image
+          --severity HIGH,CRITICAL --ignore-unfixed --exit-code 0 --format table twinema:scan | tee trivy-image.txt
       - uses: actions/upload-artifact@v4
         if: always()
         with:
