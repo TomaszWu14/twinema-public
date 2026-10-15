@@ -73,7 +73,7 @@ haseł; scena dla Podglądu bez danych źródłowych; do AI tylko zagregowane li
 | pip-audit 2.9.0 (`requirements.txt`) | brak znanych podatności |
 | bandit 1.8.6 (`web/`, `tools/`, bez testów i migracji) | 0 wysokich; 3 średnie — oceniono jako fałszywe alarmy lub naprawiono (B310: dodano ograniczenie schematu), oznaczone pojedynczo; 19 niskich (generatory losowe w symulacji i danych demo, `assert` w ML, `subprocess` w stanowisku) — bez działań |
 | Testy (Django, SQLite) | 676 / 676 zielonych przed zmianami; **686 / 686** po zmianach (10 nowych testów US-001…US-003) |
-| semgrep, trivy | nie uruchomiono lokalnie (brak dostępu do rejestru reguł i demona Dockera) — pierwsze wyniki z CI tego PR |
+| semgrep, trivy | nie uruchomiono lokalnie (brak dostępu do rejestru reguł i demona Dockera); w CI tego PR: semgrep — raport w artefakcie; trivy — system bazowy 0 podatności, 4 × HIGH w bibliotekach wbudowanych w `pip` → `pip` usunięty z obrazu (R-19) |
 
 ## Kolejne kroki
 

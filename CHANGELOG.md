@@ -30,6 +30,8 @@ trafiają do sekcji „Unreleased”.
 - ADR przeniesione do `docs/architektura/adr/`.
 
 ### Security
+- Obraz produkcyjny bez narzędzia `pip` — skan trivy wykazał w nim 4 podatności wysokie w bibliotekach
+  wbudowanych w `pip`; aplikacja ich nie używa, a instalację zależności wykonuje `uv` na etapie budowy.
 - Własny model sprzętu edytuje i usuwa tylko jego autor albo Administrator; import z pliku nie nadpisuje
   cudzego modelu (US-001). Uwaga przy wdrożeniu: modele bez autora (np. dodane w panelu administracyjnym albo
   po usunięciu konta autora) może odtąd zmieniać tylko Administrator.

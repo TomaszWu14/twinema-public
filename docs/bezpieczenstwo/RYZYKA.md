@@ -25,4 +25,5 @@ Wyjątki od zasad bezpieczeństwa są akceptacją ryzyka i wymagają wpisu tutaj
 | R-15 | Brak limitu kosztów usługi AI | 1 | 1 | 1 niska | akceptacja do 2027-01-31 (funkcja opcjonalna, na żądanie Projektanta) — **wymaga potwierdzenia PO** | PO | — | proponowana akceptacja |
 | R-16 | Akcje GitHub przypięte tagiem zamiast skrótu commita | 2 | 1 | 2 niska | poprawka: przypięcie skrótów (Dependabot aktualizuje) | DEV | US-018 | otwarte |
 | R-17 | Stanowisko renderujące mogło wysłać token po HTTP do zdalnego serwera | 2 | 1 | 2 niska | poprawka | DEV | US-003 | **zamknięte** (ten PR) |
+| R-19 | Obraz kontenera zawierał `pip` z wbudowanymi podatnymi bibliotekami (trivy: 4 × HIGH — msgpack, setuptools, urllib3); aplikacja ich nie używa | 2 | 1 | 2 niska | poprawka: obraz produkcyjny bez `pip` | DEV | — | zamknięte (ten PR, potwierdzenie w skanie trivy) |
 | R-18 | Skany semgrep i trivy na razie tylko raportują — nowe ustalenia nie blokują PR | 2 | 2 | 4 średnia | przejściowo: triaż pierwszych wyników, potem tryb blokujący | SEC | US-014 | otwarte |
