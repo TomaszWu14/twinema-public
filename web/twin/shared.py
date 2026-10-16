@@ -176,3 +176,10 @@ def save_hall_features(request, owner_field, owner_obj):
             if i < len(roles):                  # stary formularz bez kolumny roli — nie nadpisuj
                 feat.dock_role = roles[i] if roles[i] in valid_roles and kind in ("dock", "gate") else ""
             feat.save()
+
+
+def operator_key():
+    """Klucz pseudonimizacji loginów operatorów (US-012) — pochodna klucza aplikacji, nigdy w bazie ani w logach.
+    Zmiana DJANGO_SECRET_KEY zmienia pseudonimy nowych importów (stare partie zostają spójne w sobie)."""
+    from django.conf import settings
+    return hashlib.sha256(b"twinema.operator-pseudonym:" + settings.SECRET_KEY.encode()).digest()

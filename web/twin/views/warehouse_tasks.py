@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.views.decorators.cache import never_cache
 
 from twin.shared import (
-    _md_role, get_object_or_404, JsonResponse, messages, redirect, render, require_POST, WarehouseModel,
+    _md_role, get_object_or_404, JsonResponse, messages, operator_key, redirect, render, require_POST, WarehouseModel,
 )
 from twin.ewm_tasks import KIND_LABELS, Scan, parse_overrides
 from twin.ewm_tasks_import import EXTENSIONS, location_report, run_import, save_upload, upload_path
@@ -79,7 +79,7 @@ def ewm_tasks_preview(request):
     except ValueError as exc:
         messages.error(request, str(exc))
         return redirect("twin:ewm_tasks_list")
-    scan = Scan(upload_path(token), f.name, form["tz"], form["overrides"])
+    scan = Scan(upload_path(token), f.name, form["tz"], form["overrides"], operator_key())
     sample = []
     try:
         for row in scan:

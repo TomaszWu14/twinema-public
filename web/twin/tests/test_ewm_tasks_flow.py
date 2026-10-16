@@ -30,7 +30,7 @@ def _racks():
              "depth": 1.1, "level_h": 1.5, "n_bays": 4, "n_levels": 3} for i, y in ((1, 3.0), (2, 8.0))]
 
 
-def _row(minutes, kind, src, dst, resource="WOZEK01", user="JKOWAL"):
+def _row(minutes, kind, src, dst, resource="WOZEK01", user="OPER01"):
     return (T0 + timedelta(minutes=minutes), resource, user, kind, src, dst, "M1")
 
 
@@ -59,7 +59,7 @@ class ResolveMovesTests(SimpleTestCase):
 
     def test_agent_is_resource_or_user(self):
         rows = [_row(0, "putaway", "", "B0-01-100A", resource=""), _row(1, "putaway", "", "B0-01-100A")]
-        self.assertEqual([m[1] for m in resolve_moves(rows, self.loc, T0)[0]], ["JKOWAL", "WOZEK01"])
+        self.assertEqual([m[1] for m in resolve_moves(rows, self.loc, T0)[0]], ["OPER01", "WOZEK01"])
 
 
 class SceneFromTasksTests(SimpleTestCase):
@@ -118,7 +118,7 @@ class TasksEndpointAndImportTests(TestCase):
                 (20, "move", "B0-01-100A", "XX-99", "WOZEK01"), (50, "putaway", "GR-ZONE", "B0-02-100A", ""),
                 (150, "putaway", "GR-ZONE", "B0-01-200A", "WOZEK03")]):
             WarehouseTask.objects.create(batch=cls.batch, task_no=str(n), kind=kind, src_location=src, dst_location=dst,
-                                         resource=res, user="JKOWAL", confirmed_at=T0 + timedelta(minutes=m))
+                                         resource=res, user="OPER01", confirmed_at=T0 + timedelta(minutes=m))
 
     @classmethod
     def tearDownClass(cls):
@@ -144,7 +144,7 @@ class TasksEndpointAndImportTests(TestCase):
         self.client.force_login(self.md)
         sc = self._flow(wt=str(self.batch.pk), pallets="0").json()
         self.assertEqual({a["label"] for a in sc["agents"] if a["kind"] == "forklift"},
-                         {"WOZEK01", "WOZEK02", "JKOWAL"})
+                         {"WOZEK01", "WOZEK02", "OPER01"})
 
     def test_window_param_hours_and_scale(self):
         self.client.force_login(self.md)
@@ -254,3 +254,42 @@ class TasksEndpointAndImportTests(TestCase):
         self.client.force_login(self.md)
         self.client.post(reverse("twin:ewm_tasks_delete", args=[self.batch.pk]))
         self.assertFalse(WarehouseTask.objects.exists())
+
+
+class OperatorLoginNotStoredTests(TestCase):
+    """US-012 (RODO, R-06): import z kolumną użytkownika zapisuje w bazie pseudonim, nie login operatora."""
+
+    def test_import_stores_pseudonym(self):
+        from django.contrib.auth.models import Group
+
+        from core.roles import GROUP_DESIGNER
+        from twin.ewm_tasks import pseudonym
+        from twin.shared import operator_key
+        u = get_user_model().objects.create_user("md2", password="x")
+        u.groups.add(Group.objects.get_or_create(name=GROUP_DESIGNER)[0])
+        self.client.force_login(u)
+        csv = ("Zadanie magazynowe;Rodzaj procesu magazynowego;Źródłowe miejsce składowania;"
+               "Docelowe miejsce składowania;Data potwierdzenia;Czas potwierdzenia;Użytkownik\n"
+               "1;1010;GR-ZONE;B0-01-100A;02.03.2026;06:10:00;OPER01\n")
+        f = SimpleUploadedFile("wt.csv", csv.encode("utf-8"), content_type="text/csv")
+        preview = self.client.post(reverse("twin:ewm_tasks_preview"), {"file": f, "tz": "UTC"})
+        self.assertNotContains(preview, "OPER01")                                 # podgląd też bez loginu
+        self.client.post(reverse("twin:ewm_tasks_import"), {"token": preview.context["token"], "file_name": "wt.csv",
+                                                            "tz": "UTC", "name": "Pseudonimy"})
+        users = list(WarehouseTask.objects.filter(batch__name="Pseudonimy").values_list("user", flat=True))
+        self.assertEqual(users, [pseudonym("OPER01", operator_key())])
+
+    def test_migration_pseudonymizes_existing_tasks(self):
+        import importlib
+
+        from django.apps import apps
+
+        from twin.ewm_tasks import pseudonym
+        from twin.shared import operator_key
+        mig = importlib.import_module("twin.migrations.0008_pseudonimizacja_operatorow")
+        batch = WarehouseTaskBatch.objects.create(name="Stara", status="done")
+        WarehouseTask.objects.create(batch=batch, user="OPER07")
+        WarehouseTask.objects.create(batch=batch, user="")
+        mig.pseudonymize(apps, None)
+        mig.pseudonymize(apps, None)                                   # drugi przebieg nic nie zmienia
+        self.assertEqual(sorted(batch.tasks.values_list("user", flat=True)), ["", pseudonym("OPER07", operator_key())])

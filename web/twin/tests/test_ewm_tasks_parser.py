@@ -8,7 +8,7 @@ from django.test import SimpleTestCase
 
 from twin.ewm_tasks import (
     Scan, map_columns, map_kind, missing_required, parse_number, parse_overrides, parse_row,
-    parse_stamp,
+    parse_stamp, pseudonym,
 )
 
 PL_HEADERS = ["Zadanie magazynowe", "Rodzaj procesu magazynowego", "Źródłowe miejsce składowania",
@@ -95,14 +95,15 @@ class RowTests(SimpleTestCase):
     def _row(self, **over):
         base = dict(zip(PL_HEADERS, ["000100200300", "1010", "GR-ZONE", "B0-01-100A", "M1", "L1", "12,5",
                                      "KAR", "", "HU1", "180001", "02.03.2026", "06:00:00", "02.03.2026",
-                                     "06:10:00", "JKOWAL", "WOZEK01", "ZQ01/PUTAWAY"], strict=True))
+                                     "06:10:00", "OPER01", "WOZEK01", "ZQ01/PUTAWAY"], strict=True))
         base.update(over)
         return [base[h] for h in PL_HEADERS]
 
     def test_valid_row(self):
         r = parse_row(self._row(), self.cols, "UTC")
         self.assertEqual((r["kind"], r["src_location"], r["dst_location"]), ("putaway", "GR-ZONE", "B0-01-100A"))
-        self.assertEqual((r["qty"], r["unit"], r["resource"], r["user"]), (12.5, "KAR", "WOZEK01", "JKOWAL"))
+        self.assertEqual((r["qty"], r["unit"], r["resource"]), (12.5, "KAR", "WOZEK01"))
+        self.assertEqual(r["user"], pseudonym("OPER01"))                    # US-012: login operatora → pseudonim
         self.assertEqual(r["confirmed_at"], datetime(2026, 3, 2, 6, 10, tzinfo=dt_tz.utc))
         self.assertFalse(r["cancelled"])
 
@@ -205,3 +206,15 @@ class ScanFileTests(SimpleTestCase):
     def test_xls_rejected_with_hint(self):
         with self.assertRaisesRegex(ValueError, "xlsx"):
             Scan(self._file(".xls", b"x"), "stary.xls")
+
+
+class OperatorPseudonymTests(SimpleTestCase):
+    """US-012 (RODO, R-06, decyzja PO): login operatora nie trafia do bazy — tylko stały pseudonim."""
+
+    def test_stable_keyed_and_not_the_login(self):
+        a, b = pseudonym("oper01", b"k1"), pseudonym(" OPER01 ", b"k1")
+        self.assertEqual(a, b)                                          # wielkość liter i spacje bez znaczenia
+        self.assertTrue(a.startswith("OP-") and "OPER01" not in a)
+        self.assertNotEqual(a, pseudonym("OPER01", b"k2"))              # inny klucz → inny pseudonim
+        self.assertNotEqual(a, pseudonym("OPER02", b"k1"))
+        self.assertEqual(pseudonym("", b"k1"), "")

@@ -12,6 +12,7 @@ from pathlib import Path
 from django.conf import settings
 
 from .ewm_tasks import Scan
+from .shared import operator_key
 from .models_tasks import WarehouseTask, WarehouseTaskBatch
 
 log = logging.getLogger(__name__)
@@ -70,7 +71,7 @@ def run_import(batch_id, token):
         return batch
     batch.status = "running"
     batch.save(update_fields=["status"])
-    scan = Scan(path, batch.file_name, batch.tz, batch.kind_map)
+    scan = Scan(path, batch.file_name, batch.tz, batch.kind_map, operator_key())
     try:
         if scan.missing:
             raise ValueError("brak kolumn: " + ", ".join(scan.missing))
