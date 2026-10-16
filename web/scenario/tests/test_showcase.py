@@ -10,6 +10,7 @@ from core.roles import GROUP_DESIGNER, GROUP_VIEWER
 from scenario.models import Scenario, ScenarioRun, Showcase
 from scenario.showcase import SlideError, clean_slides, kpi_cards, summary_caption, template_slides
 from twin.models import WarehouseModel
+from core.jobs import run_pending
 
 
 class SlideTests(PureTestCase):
@@ -90,6 +91,7 @@ class ShowcaseViewTests(TestCase):
         self.wm.racks.create(zone="V", rack_id="001", n_bays=6, n_levels=4, x_m=30, y_m=10)
         self.client.post(reverse("scenario:simulate", args=[self.sc.pk]),
                          {"model": self.wm.pk, "day": "typical", "runs": 2})
+        run_pending()                                   # US-007: symulację liczy worker kolejki
         self.run = ScenarioRun.objects.get()
 
     def _create(self, **extra):

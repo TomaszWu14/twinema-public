@@ -14,14 +14,14 @@
 | US-004 | Jako Projektant chcę przed usunięciem hali, scenariusza lub sprzętu zobaczyć listę obiektów usuwanych razem z nimi, aby nie stracić wyników i prezentacji | Must | T-5 | **zrobione** (PR #68) |
 | US-009 | Jako Administrator chcę kopii zapasowej bazy i plików z procedurą odtworzenia, aby po awarii odzyskać dane | Must | R-10, T-16 | procedura w RUNBOOK; automatyzacja do realizacji |
 | US-013 | Jako PO chcę, aby każdy merge do `main` wymagał mojego zatwierdzenia, aby żadna zmiana nie trafiła na produkcję bez akceptacji | Must | R-09 | częściowo — auto-merge usunięty (PR #68); ochronę gałęzi ustawia PO |
-| US-007 | Jako Administrator chcę, aby długie obliczenia szły w tle i nie mogła ich uruchamiać rola Podgląd, aby nikt nie zablokował serwera | Should | R-07, T-1 | częściowo — Podgląd nie uruchamia obliczeń (PR #68); kolejka w tle — do realizacji |
+| US-007 | Jako Administrator chcę, aby długie obliczenia szły w tle i nie mogła ich uruchamiać rola Podgląd, aby nikt nie zablokował serwera | Should | R-07, T-1 | **zrobione** (PR #68, ADR-0004) — symulacja dnia i scenariusza, kalibracja; reszta długich operacji: T-1 |
 | US-005 | Jako Administrator chcę wymuszonej polityki CSP, aby ograniczyć skutki ewentualnego XSS | Should | R-04 | do realizacji (wymaga testu UI) |
 | US-006 | Jako Administrator chcę, aby nagłówek adresu klienta był brany pod uwagę tylko od proxy w sieci wewnętrznej, aby blokady logowania nie dało się obejść podmianą adresu | Should | R-05 | **zrobione** (PR #68) |
 | US-008 | Jako Administrator chcę dziennika operacji wrażliwych, aby wiedzieć, kto usunął dane albo udostępnił link | Should | R-08 | **zrobione** (PR #68) — retencja do potwierdzenia (Z-33) |
 | US-014 | Jako SEC chcę, aby semgrep i trivy blokowały PR po triażu pierwszych wyników, aby nowe ustalenia nie przechodziły | Should | R-18 | **zrobione** (PR #68) — [triaż](../bezpieczenstwo/TRIAZ_SKANOW.md) |
 | US-019 | Jako Podgląd chcę widzieć w menu tylko moduły, do których mam dostęp, aby nie trafiać na stronę braku uprawnień | Should | T-3 | **zrobione** (PR #68) |
 | US-023 | Jako PO chcę progu pokrycia testami w CI, aby jakość nie spadała | Should | NFR-015 | **zrobione** — próg 80% (PR #68) |
-| US-024 | Jako Projektant chcę, aby import zadań w tle przetrwał restart serwera, aby nie powtarzać importu | Should | T-2 | do realizacji |
+| US-024 | Jako Projektant chcę, aby import zadań w tle przetrwał restart serwera, aby nie powtarzać importu | Should | T-2 | **zrobione** (PR #68, ADR-0004) |
 | US-017 | Jako Administrator chcę drugiego składnika logowania i haseł ≥ 12 znaków dla kont uprzywilejowanych, aby utrudnić przejęcie konta | Could | R-11, ASVS V2 | czeka na decyzję PO |
 | US-018 | Jako SEC chcę akcji CI przypiętych skrótem commita, aby podmiana tagu nie wpuściła obcego kodu | Could | R-16 | **zrobione** (PR #68) |
 | US-015 | Jako Administrator chcę limitu prób dla zleceń renderu odrzucanych przez serwer, aby zlecenie nie krążyło bez końca | Could | R-14, T-11 | **zrobione** (PR #68) |
@@ -104,3 +104,13 @@
 - *Given* rola Projektant, Podgląd albo gość, *When* otwiera dziennik, *Then* 403; Administrator widzi ostatnie 200 wpisów z filtrem rodzaju.
 - *Given* usunięte konto autora, *Then* wpis zachowuje login.
 - *Given* wpis starszy niż okres przechowywania (domyślnie 365 dni), *When* startuje kontener, *Then* wpis jest usuwany.
+
+**US-007**
+- *Given* Projektant uruchamia symulację dnia, kalibrację albo symulację scenariusza, *When* wyśle formularz, *Then* odpowiedź przychodzi od razu, a obliczenie trafia do kolejki; ekran pokazuje stan („czeka w kolejce”, „liczymy w tle”) sprawdzany co 5 s bez przeładowania strony.
+- *Given* wynik obliczenia z tymi samymi danymi i parametrami, *When* ktokolwiek z dostępem otwiera ekran, *Then* widzi zapisany wynik bez ponownego liczenia.
+- *Given* rola Podgląd albo gość, *Then* nie zleca obliczeń (także śladu symulacji dla animacji 3D) — widzi tylko wynik zlecony przez Projektanta.
+- *Given* błąd w obliczeniu, *Then* ekran pokazuje komunikat bez szczegółów technicznych, a Projektant może zlecić obliczenie ponownie.
+
+**US-024**
+- *Given* plik zadań większy niż 5 MB, *When* Projektant potwierdzi import, *Then* import trafia do kolejki i kończy się bez udziału żądania.
+- *Given* worker padł w trakcie importu (restart), *When* minie `JOB_STALE_MIN`, *Then* import wraca do kolejki i kończy się bez zdublowanych wierszy; po 3 nieudanych próbach — błąd z komunikatem.

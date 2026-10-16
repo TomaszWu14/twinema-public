@@ -1,12 +1,10 @@
 # Import zadań magazynowych EWM (WT) z /SCWM/MON: lista importów → podgląd pliku (mapowanie
-# kolumn, próbka, błędy) → import (duże pliki przez Celery) → raport (statystyki, lokalizacje
+# kolumn, próbka, błędy) → import (duże pliki przez kolejkę zadań w bazie) → raport (statystyki, lokalizacje
 # spoza modelu). Zadania zasilają wózki w animacji przepływów widoku 3D modelu.
 import logging
-import threading
 from datetime import timedelta
 from pathlib import Path
 
-from django.db import connection
 from django.utils import timezone
 from django.views.decorators.cache import never_cache
 
@@ -16,34 +14,25 @@ from twin.shared import (
 from twin.ewm_tasks import KIND_LABELS, Scan, parse_overrides
 from twin.ewm_tasks_import import EXTENSIONS, location_report, run_import, save_upload, upload_path
 from twin.models_tasks import WarehouseTaskBatch
-from core import audit
+from core import audit, jobs
 from core.models import AuditEvent
 
 __all__ = ["ewm_tasks_list", "ewm_tasks_preview", "ewm_tasks_import", "ewm_tasks_detail",
            "ewm_tasks_status", "ewm_tasks_delete"]
 
 MAX_UPLOAD_MB = 300
-SYNC_MAX_BYTES = 5 * 1024 * 1024       # mniejsze pliki import od razu, większe w wątku w tle
+SYNC_MAX_BYTES = 5 * 1024 * 1024       # mniejsze pliki import od razu, większe przez kolejkę zadań (US-024)
 PREVIEW_ROWS = 2000
 SAMPLE_ROWS = 15
 TZ_VALUES = [tz for tz, _ in WarehouseTaskBatch.TZ_CHOICES]
-STALE_AFTER = timedelta(hours=6)       # „w tle” dłużej = proces padł (deploy/restart) — do ponowienia
+STALE_AFTER = timedelta(hours=6)       # „w tle” dłużej = worker nie działa — komunikat dla użytkownika
 
 log = logging.getLogger(__name__)
 
 
-def _run_in_thread(batch_id, token):
-    try:
-        run_import(batch_id, token)
-    finally:
-        connection.close()                 # wątek ma własne połączenie z bazą
-
-
-def _dispatch(batch_id, token):
-    """Duży plik → import w wątku w tle procesu web.
-    ponytail: wątek ginie przy restarcie kontenera (partia zostaje „w tle” → STALE_AFTER);
-    kolejka (Celery + Redis) dojdzie w F3 razem z renderem i TTS."""
-    threading.Thread(target=_run_in_thread, args=(batch_id, token), daemon=True).start()
+def _dispatch(batch_id, token, user):
+    """Duży plik → zadanie w kolejce w bazie (US-024): worker importuje go i po restarcie podejmuje od nowa."""
+    jobs.enqueue("twin.ewm_import", {"batch": batch_id, "token": token}, user=user)
 
 
 def _form(request):
@@ -122,7 +111,7 @@ def ewm_tasks_import(request):
     if path.stat().st_size <= SYNC_MAX_BYTES:
         run_import(batch.pk, token)
     else:
-        _dispatch(batch.pk, token)
+        _dispatch(batch.pk, token, request.user)
     return redirect("twin:ewm_tasks_detail", pk=batch.pk)
 
 

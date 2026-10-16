@@ -1,0 +1,17 @@
+{% load static %}
+{# Stan zadania z kolejki (US-007). Bez meta-refresh (WCAG 2.2.1): stan sprawdza core/js/job_status.js. #}
+{% if job.pending %}
+<div class="alert alert-info" id="job-progress" data-status-url="{% url 'core:job_status' job.pk %}"
+     style="margin-top:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+  <div style="flex:1 1 320px">
+    <div id="job-progress-live" role="status" aria-live="polite">{% if job.status == "queued" %}Obliczenie czeka w kolejce{% else %}Liczymy w tle{% endif %} —
+      stan sprawdzamy co 5 s bez przeładowania strony. Możesz ją zamknąć i wrócić później; wynik zostanie zapisany.</div>
+    <div id="job-progress-meta" class="text-muted text-sm"></div>
+  </div>
+  <button type="button" id="job-progress-toggle" class="btn btn-secondary">Wstrzymaj sprawdzanie</button>
+  <button type="button" id="job-refresh" class="btn btn-primary" hidden>Odśwież</button>
+</div>
+<script src="{% static 'core/js/job_status.js' %}" defer></script>
+{% elif job.status == "error" %}
+<div class="alert alert-error" role="alert" style="margin-top:16px">{{ job.message }}{% if may_compute %} Uruchom obliczenie ponownie.{% endif %}</div>
+{% endif %}

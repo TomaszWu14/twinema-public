@@ -39,4 +39,5 @@
 | NFR-015 | US-023 | CI: job `coverage` w `.github/workflows/ci.yml` (próg 80%) | ten PR (#68) |
 | NFR-010 (skany blokujące) | US-014, US-018 | `core/tests/test_csrf_forms.py`; CI: `.github/workflows/security.yml` | ten PR (#68) |
 | FR-022 | US-008 | `core/tests/test_audit.py` | ten PR (#68) |
-| NFR-011–014 | US-005, US-007, US-009 | — | planowane |
+| NFR-012 (kolejka zadań) | US-007, US-024 | `core/tests/test_jobs.py`, `twin/tests/test_design_sim.py`, `test_design_calibration.py`, `test_ewm_tasks_flow.py::…job_queue`, `…retried_without_duplicates`, `scenario/tests/test_sim_views.py` | ten PR (#68) |
+| NFR-011, NFR-013–014 | US-005, US-009 | — | planowane |

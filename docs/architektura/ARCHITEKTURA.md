@@ -34,7 +34,7 @@ flowchart TB
         PX["Proxy TLS<br/>Traefik"]
         subgraph CONT["Kontener aplikacji (Docker, użytkownik nie-root)"]
             GUN["Serwer aplikacji<br/>gunicorn + Django 5.2"]
-            THR["Wątek importu zadań<br/>w procesie aplikacji"]
+            THR["Worker kolejki zadań<br/>manage.py run_jobs"]
         end
         DB[("PostgreSQL 17")]
         MED[("Wolumen mediów<br/>importy, podkłady, rendery, filmy")]
@@ -46,17 +46,19 @@ flowchart TB
     PX --> GUN
     GUN --> DB
     GUN --> MED
-    GUN --> THR
+    GUN -- "zlecenie w tabeli zadań" --> DB
     THR --> DB
+    THR --> MED
 ```
 
 Diagram pokazuje, że cały ruch — przeglądarki i stanowiska — wchodzi przez proxy TLS do jednego kontenera
-aplikacji, a długie importy zadań działają w wątku tego samego procesu.
+aplikacji, a długie obliczenia i duże importy wykonuje worker kolejki w tym samym kontenerze — zlecenia i wyniki
+przekazuje przez bazę ([ADR-0004](adr/0004-kolejka-zadan-w-bazie.md)).
 
 | Kontener | Technologia | Odpowiedzialność |
 |---|---|---|
 | Serwer aplikacji | Python 3.13, Django 5.2 LTS, gunicorn (2 procesy × 4 wątki, limit 120 s), whitenoise | widoki, logika, API stanowiska, pliki statyczne |
-| Wątek importu zadań | `threading` w procesie gunicorna | import plików zadań > 5 MB w tle |
+| Worker kolejki zadań | `manage.py run_jobs` (proces obok gunicorna; `RUN_WORKER`) | symulacja dnia i scenariusza, kalibracja, import zadań > 5 MB; ponowienie po restarcie ([ADR-0004](adr/0004-kolejka-zadan-w-bazie.md)) |
 | Baza danych | PostgreSQL 17 (lokalnie i w testach SQLite) | wszystkie encje ([model danych](MODEL_DANYCH.md)) |
 | Wolumen mediów | system plików kontenera | pliki od użytkowników i wyniki renderu, wydawane przez widoki z kontrolą roli |
 | Przeglądarka | szablony Django, three.js, ECharts (dołączone do obrazu) | edytor 2D/3D, animacje, pokazy |

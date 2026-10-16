@@ -9,6 +9,7 @@ from django.urls import reverse
 from core.roles import GROUP_DESIGNER
 from scenario.models import Scenario, ScenarioRun, Showcase
 from twin.models import WarehouseModel
+from core.jobs import run_pending
 
 EVENTS_COL = '"scenario_scenariorun"."events"'
 
@@ -29,6 +30,7 @@ class R3Tests(TestCase):
         self.wm.racks.create(zone="V", rack_id="001", n_bays=6, n_levels=4, x_m=30, y_m=10)
         self.client.post(reverse("scenario:simulate", args=[self.sc.pk]),
                          {"model": self.wm.pk, "day": "typical", "runs": 2})
+        run_pending()                                   # US-007: symulację liczy worker kolejki
         self.run = ScenarioRun.objects.get()
 
     def _sql(self, url):
@@ -60,4 +62,5 @@ class R3Tests(TestCase):
         n1 = len(self._sql(url))
         self.client.post(reverse("scenario:simulate", args=[self.sc.pk]),
                          {"model": self.wm.pk, "day": "peak", "runs": 2})
+        run_pending()                                   # US-007: symulację liczy worker kolejki
         self.assertLessEqual(len(self._sql(url)), n1 + 3)

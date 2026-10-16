@@ -50,6 +50,10 @@
 
 {% if wm and not day %}
 <div class="alert alert-warning" style="margin-top:16px">Brak potwierdzonych zadań w tym imporcie — nie ma dnia projektowego.</div>
+{% elif job.pending or job.status == "error" %}
+{% include "core/_job_status.html" %}
+{% elif wm and not result and not may_compute %}
+<div class="alert alert-info" style="margin-top:16px">Dla tego modelu nie ma jeszcze policzonej kalibracji — poproś Projektanta.</div>
 {% elif result %}
 <div class="card" style="margin-top:16px"><div class="card-body">
   <div class="section-title">Współczynniki korekty</div>

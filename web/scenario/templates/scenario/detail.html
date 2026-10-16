@@ -141,6 +141,7 @@
 
 <section class="card" style="margin-top:16px" aria-labelledby="sc-sim-h"><div class="card-body">
   <h2 class="sc-sec" id="sc-sim-h">Symulacja dnia na hali</h2>
+  {% if job.pending or job.status == "error" %}{% include "core/_job_status.html" with may_compute=is_designer %}{% endif %}
   <p class="text-muted text-sm" style="margin:0 0 12px">Każde auto, kontener, paleta i paczka ze scenariusza w czasie dnia na wybranym layoucie: kolejki przy dokach, pola odkładcze, ludzie na zmianach, wózki z ładowaniem. Kilkanaście przebiegów z losowym rozrzutem (ziarno {{ sc.seed }} — wynik powtarzalny): średnia i najgorszy przypadek (P95).</p>
   {% if no_models %}
   <div class="empty-state" style="margin:0 0 12px">

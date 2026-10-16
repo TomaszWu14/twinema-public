@@ -8,6 +8,7 @@ from equipment.models import Equipment
 from scenario.models import Scenario, ScenarioRun
 from scenario.views_play import bottleneck_focus, layout_places, peak_index
 from twin.models import WarehouseModel
+from core.jobs import run_pending
 
 FLOOR = {"width": 80, "depth": 50}
 FEATS = [
@@ -77,6 +78,7 @@ class PlayViewTests(TestCase):
         self.wm.racks.create(zone="V", rack_id="001", n_bays=6, n_levels=4, x_m=30, y_m=10)
         self.client.post(reverse("scenario:simulate", args=[self.sc.pk]),
                          {"model": self.wm.pk, "day": "typical", "runs": 2})
+        run_pending()                                   # US-007: symulację liczy worker kolejki
         self.run = ScenarioRun.objects.get()
 
     def test_events_have_s4_extensions(self):

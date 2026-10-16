@@ -75,6 +75,8 @@
 <div class="alert alert-warning" style="margin-top:16px">Brak modeli hali — utwórz go w <a href="{% url 'twin:warehouse_model_generator' %}">Generatorze hali</a>.</div>
 {% elif not day %}
 <div class="alert alert-warning" style="margin-top:16px">Brak potwierdzonych zadań w tym imporcie — nie ma dnia projektowego.</div>
+{% elif ran and job.pending or ran and job.status == "error" %}
+{% include "core/_job_status.html" %}
 {% elif ran and not result and not may_compute %}
 <div class="alert alert-info" style="margin-top:16px">Dla tych parametrów nie ma jeszcze policzonego wyniku — poproś Projektanta o uruchomienie symulacji.</div>
 {% elif ran and not result %}

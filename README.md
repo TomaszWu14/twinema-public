@@ -104,6 +104,7 @@ python manage.py migrate
 python manage.py seed_demo              # role, hala demo, scenariusz, 3000 materiałów, stany, konto demo
 python manage.py createsuperuser
 python manage.py runserver 8090
+python manage.py run_jobs                # w drugim terminalu: worker kolejki (symulacje, duże importy)
 ```
 
 **PowerShell**
@@ -120,6 +121,7 @@ python manage.py migrate
 python manage.py seed_demo
 python manage.py createsuperuser
 python manage.py runserver 8090
+python manage.py run_jobs                # w drugim terminalu: worker kolejki (symulacje, duże importy)
 ```
 
 Otwórz http://127.0.0.1:8090/ i zaloguj się kontem administratora albo `demo` / `demo-haslo-123`

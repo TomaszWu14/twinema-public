@@ -50,6 +50,9 @@ class AppEnv(BaseSettings):
     DEMO_VIDEO_URL: str = ""           # adres filmu (np. YouTube) na stronie /demo/; puste = bez przycisku
 
     # ── Dziennik operacji wrażliwych (US-008) ──────────────────────────────
+    # ── Kolejka zadań w bazie (US-007, ADR-0004) ──────────────────────────────
+    JOB_STALE_MIN: int = 60            # zadanie „w toku” dłużej = worker padł → wraca do kolejki
+    RUN_WORKER: bool = True            # True = docker-entrypoint.sh uruchamia worker obok serwera
     AUDIT_RETENTION_DAYS: int = 365    # wpisy starsze usuwa `audit_prune` (przy starcie kontenera)
 
     # ── Obserwowalność ──────────────────────────────────────────────────────

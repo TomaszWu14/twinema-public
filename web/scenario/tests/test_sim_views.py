@@ -9,6 +9,7 @@ from django.urls import reverse
 from core.roles import GROUP_DESIGNER, GROUP_VIEWER
 from scenario.models import Scenario, ScenarioRun
 from twin.models import WarehouseModel
+from core.jobs import run_pending
 
 
 class SimViewTests(TestCase):
@@ -27,7 +28,11 @@ class SimViewTests(TestCase):
 
     def _run(self, **over):
         data = {"model": self.wm.pk, "day": "typical", "runs": 3, **over}
-        return self.client.post(reverse("scenario:simulate", args=[self.sc.pk]), data, follow=True)
+        r = self.client.post(reverse("scenario:simulate", args=[self.sc.pk]), data)
+        if r.status_code != 302:
+            return r
+        run_pending()                                   # US-007: symulację liczy worker kolejki
+        return self.client.get(r["Location"])
 
     def test_designer_runs_simulation_and_sees_result(self):
         r = self._run()

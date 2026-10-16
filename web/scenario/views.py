@@ -254,6 +254,8 @@ def scenario_detail(request, pk):
         memo[("run", sc.pk, r.model_id, r.day_kind)] = r
     sim_runs = [_sim_view(r, memo) for r in runs]
     ctx["sim_runs"] = sim_runs
+    from .views_sim import last_simulation_job
+    ctx["job"] = last_simulation_job(sc)                    # US-007: symulacja w kolejce / ostatni stan
     ctx["sim_charts"] = {f"sim-{v['run'].pk}": v["chart"] for v in sim_runs}
     if has_role(request.user, GROUP_ADMIN, GROUP_DESIGNER):
         # model z linku „Symuluj na tej hali” (widok modelu) > ostatnio symulowany > pierwszy

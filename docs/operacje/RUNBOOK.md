@@ -17,6 +17,9 @@ platformy, ruch z internetu wyłącznie przez proxy TLS (adres klienta z nagłó
 działania: ścieżka `/health/`, okres startowy co najmniej 120 s; trwały wolumen na media i — przy SQLite — na plik bazy.
 
 Zmienne środowiskowe: [.env.example](../../.env.example); walidacja przy starcie w `web/twinema/config.py`.
+Kontener uruchamia obok serwera worker kolejki zadań (`manage.py run_jobs`, ADR-0004); `RUN_WORKER=false`
+wyłącza go, gdy worker działa jako osobna usługa z tym samym obrazem i poleceniem `python manage.py run_jobs`.
+Zadanie „w toku” dłużej niż `JOB_STALE_MIN` wraca do kolejki. Stan zadań: tabela `core_job`.
 Kontener przy starcie usuwa też wpisy dziennika operacji starsze niż `AUDIT_RETENTION_DAYS` (US-008); dziennik ogląda Administrator pod `/dziennik/`.
 **Demo publiczne (`DEMO_PUBLIC=true`) tylko na osobnej instancji z danymi demo** (R-02). Gdy w bazie są dane spoza demo, kontener zapisuje przy starcie ostrzeżenie w logach, a Administrator widzi baner na stronie startowej (US-011).
 

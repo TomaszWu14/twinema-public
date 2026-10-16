@@ -6,6 +6,8 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 
+from core import jobs
+from core.models import Job
 from core.roles import any_role, designer
 from twin.models import WarehouseModel
 
@@ -91,18 +93,28 @@ def scenario_simulate(request, pk):
     if not form.is_valid():
         messages.error(request, f"Wybierz model hali i liczbę przebiegów (1–{services.MAX_RUNS}).")
         return redirect("scenario:detail", pk=pk)
-    sc.ensure_days(with_defaults=False)
     kinds = [k for k, _ in ScenarioDay.KIND_CHOICES] if form.cleaned_data["day"] == "both" \
         else [form.cleaned_data["day"]]
-    done = []
-    for day in sc.days.filter(kind__in=kinds).prefetch_related("inbound", "outbound"):
-        run = services.simulate(day, form.cleaned_data["model"], runs=form.cleaned_data["runs"], user=request.user)
-        n_err = sum(b["severity"] == "error" for b in run.result["bottlenecks"])
-        done.append(f"{day.get_kind_display().lower()}: {len(run.result['bottlenecks'])} wąskich gardeł"
-                    f"{f' ({n_err} krytycznych)' if n_err else ''}, {run.duration_s:g} s")
-    messages.success(request, f"Symulacja na „{form.cleaned_data['model']}” ({form.cleaned_data['runs']} "
-                              f"przebiegów) — " + "; ".join(done) + ".")
+    if pending_simulation(sc):
+        messages.warning(request, "Symulacja tego scenariusza już trwa — poczekaj na wynik.")
+        return redirect(reverse("scenario:detail", args=[pk]) + "#sc-sim-h")
+    # US-007: przebiegi liczy worker kolejki — żądanie nie czeka na wynik i nie przekracza limitu serwera
+    jobs.enqueue("scenario.sim", {"scenario": sc.pk, "model": form.cleaned_data["model"].pk, "kinds": kinds,
+                                  "runs": form.cleaned_data["runs"], "user": request.user.pk}, user=request.user)
+    messages.success(request, f"Symulacja na „{form.cleaned_data['model']}” ({form.cleaned_data['runs']} przebiegów) "
+                              "trwa w tle — wynik pojawi się poniżej.")
     return redirect(reverse("scenario:detail", args=[pk]) + "#sc-sim-h")
+
+
+def pending_simulation(sc):
+    """Symulacja scenariusza czekająca albo trwająca w kolejce (US-007) — albo None."""
+    return Job.objects.filter(kind="scenario.sim", params__scenario=sc.pk,
+                              status__in=[Job.QUEUED, Job.RUNNING]).first()
+
+
+def last_simulation_job(sc):
+    """Ostatnie zadanie symulacji scenariusza (stan i podsumowanie dla karty scenariusza)."""
+    return Job.objects.filter(kind="scenario.sim", params__scenario=sc.pk).order_by("-created_at", "-id").first()
 
 
 @any_role

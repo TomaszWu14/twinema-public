@@ -54,7 +54,7 @@ Dług techniczny: T-1…T-16 w [05-decyzje-i-ograniczenia.md](05-decyzje-i-ogran
 | 5 | Projektant zmieniał i usuwał cudze modele sprzętu (kontrola dostępu do obiektu) | średnia | R-03 | **naprawione** w tym PR (US-001) |
 | 6 | CSP tylko w trybie raportu, z `'unsafe-inline'` | średnia | R-04 | wymuszenie po teście UI (US-005) |
 | 7 | Zaufanie do `X-Forwarded-For` — obejście blokady logowania przy pominięciu proxy | średnia | R-05 | **naprawione** (US-006) |
-| 8 | Długie obliczenia uruchamiane GET-em także przez rolę Podgląd / gościa | średnia | R-07 | **częściowo** — obliczenia tylko dla Projektanta (Z-3); kolejka w tle (US-007) do realizacji |
+| 8 | Długie obliczenia uruchamiane GET-em także przez rolę Podgląd / gościa | średnia | R-07 | **naprawione** — obliczenia tylko dla Projektanta (Z-3); kolejka zadań w bazie (US-007) do realizacji |
 | 9 | Brak dziennika operacji wrażliwych | średnia | R-08 | **naprawione** (US-008) |
 | 10 | Auto-merge bez zatwierdzenia człowieka | średnia | R-09 | **częściowo** — auto-merge usunięty z CI; wymagane zatwierdzenie w ochronie gałęzi ustawia PO (US-013) |
 

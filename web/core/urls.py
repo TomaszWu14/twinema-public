@@ -13,4 +13,5 @@ urlpatterns = [
     path("demo/wejdz/", views.demo_enter, name="demo_enter"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("dziennik/", views.audit_log, name="audit_log"),
+    path("zadania/<int:pk>/stan/", views.job_status, name="job_status"),
 ]

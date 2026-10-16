@@ -9,6 +9,7 @@ from twin.blender_route import _inside
 from twin.design_sim import DAY_START_H, simulate
 from twin.design_sim_scene import CorridorRouter, build_sim_scene, window_legs
 from twin.tests.test_design_sim import FEATURES, GEN, RACKS, SimulationViewTests, _tasks
+from core.jobs import run_pending
 
 FLEET = {"agv": 3, "kombi": 3, "ept": 3}
 FLOOR = GEN["floor"]
@@ -98,7 +99,9 @@ class SimSceneViewTests(TestCase):
         self.assertTrue(sc["agents"])
 
     def test_simulation_page_links_hours_to_3d(self):
-        r = self.client.get(f"/magazyn/zadania-ewm/{self.batch.pk}/symulacja/",
-                            {"run": 1, "model": self.wm.pk})
+        url, q = f"/magazyn/zadania-ewm/{self.batch.pk}/symulacja/", {"run": 1, "model": self.wm.pk}
+        self.client.get(url, q)
+        run_pending()                                   # US-007: symulację liczy worker kolejki
+        r = self.client.get(url, q)
         self.assertContains(r, "Animuj w 3D")
         self.assertContains(r, f"/magazyn/model/{self.wm.pk}/view/?sim={self.batch.pk}")

@@ -2,14 +2,15 @@ from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import Http404
-from django.shortcuts import redirect, render
+from django.http import Http404, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
 from .demo import DEMO_USER, demo_showcase, exposure_reasons
-from .models import AuditEvent
-from .roles import GROUP_ADMIN, GROUP_DESIGNER, GROUP_VIEWER, admin_only, has_role
+from .models import AuditEvent, Job
+from .roles import GROUP_ADMIN, GROUP_DESIGNER, GROUP_VIEWER, admin_only, any_role, has_role
 
 # Moduły platformy w kolejności przepływu pracy — jedno źródło dla nawigacji w nagłówku i kafli strony
 # głównej (R4: te same nazwy). `apps` / `match` = kiedy pozycja jest aktywna (patrz `active_module`).
@@ -111,3 +112,11 @@ def audit_log(request):
     return render(request, "core/audit_log.html", {
         "events": events[:AUDIT_PAGE], "actions": AuditEvent.ACTIONS, "action": action, "limit": AUDIT_PAGE,
         "retention_days": settings.AUDIT_RETENTION_DAYS})
+
+
+@never_cache
+@any_role
+def job_status(request, pk):
+    """US-007: stan zadania z kolejki dla ekranu oczekiwania — bez wyniku i parametrów."""
+    job = get_object_or_404(Job, pk=pk)
+    return JsonResponse({"status": job.status, "status_display": job.get_status_display(), "pending": job.pending})

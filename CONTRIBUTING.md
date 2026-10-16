@@ -88,6 +88,7 @@ Uzasadnienie wyboru narzędzi: [ADR-0002](docs/architektura/adr/0002-narzedzia-j
 | SCA | pip-audit, Dependabot | `pip-audit -r requirements.txt` | blokuje |
 | Sekrety | gitleaks | pre-commit | blokuje |
 | Kontener | trivy (Dockerfile, obraz) | `trivy config .`, `trivy image twinema:scan` | blokuje (obraz: wysokie i krytyczne z poprawką) |
+| Worker kolejki (lokalnie) | kolejka zadań w bazie ([ADR-0004](docs/architektura/adr/0004-kolejka-zadan-w-bazie.md)) | `cd web && python manage.py run_jobs` (w testach: `core.jobs.run_pending()`) | — |
 | Wdrożenie | Django deploy check | `python manage.py check --deploy` | blokuje |
 
 ## Zgłaszanie

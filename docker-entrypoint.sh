@@ -29,6 +29,12 @@ fi
 $RUN python manage.py demo_exposure_check || true
 # Dziennik operacji: usuń wpisy starsze niż AUDIT_RETENTION_DAYS (US-008).
 $RUN python manage.py audit_prune || true
+# Worker kolejki zadań (symulacje, kalibracje, duże importy — US-007, US-024, ADR-0004) obok serwera.
+# RUN_WORKER=false, gdy worker działa jako osobna usługa (`python manage.py run_jobs`). Pętla podnosi go po awarii.
+case "${RUN_WORKER:-true}" in
+    false|0|no) echo "Worker kolejki: wyłączony (RUN_WORKER=${RUN_WORKER})." ;;
+    *) ( while true; do $RUN python manage.py run_jobs; echo "Worker kolejki zakończył pracę — restart za 5 s."; sleep 5; done ) & ;;
+esac
 
 exec $RUN gunicorn twinema.wsgi:application \
     --bind 0.0.0.0:8000 \

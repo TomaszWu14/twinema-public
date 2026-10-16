@@ -20,6 +20,8 @@ from twin.blender_stock import SlotLocator
 from twin.blender_tasks import resolve_moves
 from twin.models import WarehouseTask, WarehouseTaskBatch
 from twin.tests.test_ewm_tasks_refresh import META_REFRESH
+from core.jobs import run_pending
+from core.models import Job
 
 T0 = datetime(2026, 3, 2, 6, 0, tzinfo=dt_tz.utc)
 TMP_MEDIA = tempfile.mkdtemp(prefix="wt-media-")
@@ -216,23 +218,34 @@ class TasksEndpointAndImportTests(TestCase):
         again = self.client.post(reverse("twin:ewm_tasks_import"), {"token": ctx["token"]})
         self.assertRedirects(again, reverse("twin:ewm_tasks_list"), fetch_redirect_response=False)
 
-    def test_large_file_imports_in_background_thread(self):
-        """Duży plik → import w wątku w tle (bez blokowania żądania), partia kończy się „done”."""
-        class InlineThread:                                 # wątek „od razu” — deterministyczny test
-            def __init__(self, target, args, daemon):
-                self.target, self.args = target, args
-
-            def start(self):
-                with mock.patch("twin.views.warehouse_tasks.connection"):
-                    self.target(*self.args)
-
+    def test_large_file_imports_through_job_queue(self):
+        """US-024: duży plik → zadanie w kolejce w bazie (żądanie nie czeka), worker kończy partię „done”."""
         self.client.force_login(self.md)
         token = self._preview().context["token"]
-        with mock.patch("twin.views.warehouse_tasks.SYNC_MAX_BYTES", 0),                 mock.patch("twin.views.warehouse_tasks.threading.Thread", InlineThread):
+        with mock.patch("twin.views.warehouse_tasks.SYNC_MAX_BYTES", 0):
             r = self.client.post(reverse("twin:ewm_tasks_import"), {"token": token, "file_name": "wt.csv"})
         batch = WarehouseTaskBatch.objects.latest("pk")
         self.assertRedirects(r, reverse("twin:ewm_tasks_detail", args=[batch.pk]))
+        self.assertNotEqual(batch.status, "done")
+        self.assertEqual(Job.objects.get().kind, "twin.ewm_import")
+        run_pending()
+        batch.refresh_from_db()
         self.assertEqual((batch.status, batch.row_count), ("done", 2))
+
+    def test_import_interrupted_by_restart_is_retried_without_duplicates(self):
+        """US-024: worker padł w trakcie importu → zadanie wraca do kolejki, ponowienie nie dubluje wierszy."""
+        self.client.force_login(self.md)
+        token = self._preview().context["token"]
+        with mock.patch("twin.views.warehouse_tasks.SYNC_MAX_BYTES", 0):
+            self.client.post(reverse("twin:ewm_tasks_import"), {"token": token, "file_name": "wt.csv"})
+        batch = WarehouseTaskBatch.objects.latest("pk")
+        job = Job.objects.get()
+        batch.tasks.create(task_no="przerwany")                  # wiersz z przerwanej próby
+        Job.objects.filter(pk=job.pk).update(status=Job.RUNNING, attempts=1,
+                                             started_at=timezone.now() - timedelta(hours=2))
+        run_pending()
+        batch.refresh_from_db()
+        self.assertEqual((batch.status, batch.row_count, batch.tasks.count()), ("done", 2, 2))
 
     def test_stuck_background_import_marked_stale(self):
         self.client.force_login(self.md)

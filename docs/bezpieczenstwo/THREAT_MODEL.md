@@ -53,7 +53,7 @@ Oznaczenia statusu: ✅ zabezpieczone · ⚠️ częściowo · ❌ brak. Pozycje
 | STRIDE | Zagrożenie | Zabezpieczenie | Status |
 |---|---|---|---|
 | T | złośliwy XLSX (XXE, „billion laughs”) | openpyxl przez defusedxml | ✅ |
-| D | bardzo duży plik albo bomba ZIP | limity rozmiaru (5–300 MB), limit wierszy; import zadań > 5 MB w tle | ⚠️ R-07 |
+| D | bardzo duży plik albo bomba ZIP | limity rozmiaru (5–300 MB), limit wierszy; import zadań > 5 MB w kolejce zadań z limitem 3 prób (US-024) | ✅ |
 | T | podmiana pliku obrazu | walidacja Pillow, limit 10 MB i 12 000 px | ✅ |
 | I | pliki dostępne publicznie | media poza katalogiem publicznym, wydawane przez widoki z kontrolą roli | ✅ |
 | E | import przez rolę bez uprawnień | importy tylko dla Projektanta | ✅ |

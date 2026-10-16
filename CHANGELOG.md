@@ -40,6 +40,9 @@ trafiają do sekcji „Unreleased”.
   blokują PR po triażu pierwszych wyników (US-014, `docs/bezpieczenstwo/TRIAZ_SKANOW.md`).
 - Dziennik operacji wrażliwych dla Administratora: usunięcia, importy plików, linki publiczne — kto, co,
   kiedy, adres IP; retencja `AUDIT_RETENTION_DAYS` (domyślnie 365 dni) (US-008).
+- Kolejka zadań w bazie z workerem `run_jobs` (ADR-0004): symulacja dnia i scenariusza oraz kalibracja liczą się
+  w tle, a ekran pokazuje stan bez przeładowania (US-007); duży import zadań przetrwa restart i jest ponawiany
+  bez duplikatów (US-024). Wynik zapisany w bazie widzą wszystkie procesy serwera.
 - Procedura czyszczenia historii repozytorium (`docs/operacje/CZYSZCZENIE_HISTORII.md`, R-01) — wykonuje PO.
 
 ### Security
@@ -56,7 +59,7 @@ trafiają do sekcji „Unreleased”.
 - Symulację dnia i kalibrację uruchamia tylko Projektant (i Administrator); Podgląd i gość widzą wynik
   policzony wcześniej (Z-3, R-07).
 - Login operatora w historii zadań magazynowych zastępowany pseudonimem „OP-…” przy imporcie i podglądzie
-  (US-012, R-06). **Uwaga przy wdrożeniu:** migracja `twin 0008` nieodwracalnie zastępuje loginy już zapisane —
+  (US-012, R-06). Ślad symulacji dla animacji 3D też liczy tylko Projektant (luka Z-3 znaleziona przy US-007). **Uwaga przy wdrożeniu:** migracja `twin 0008` nieodwracalnie zastępuje loginy już zapisane —
   przed wdrożeniem kopia zapasowa bazy. Zmiana `SECRET_KEY` zmienia pseudonimy nowych importów.
 - Kontener działa jako użytkownik `app` od startu (`USER` w Dockerfile). **Uwaga przy wdrożeniu:** katalog
   hosta montowany jako wolumen (media, baza SQLite) musi należeć do UID 10001; wolumeny używane dotąd już
