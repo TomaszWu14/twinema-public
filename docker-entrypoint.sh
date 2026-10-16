@@ -24,6 +24,9 @@ if [ "$DEMO_SEED" = "1" ] || [ "$DEMO_SEED" = "true" ]; then
     $RUN python manage.py seed_demo
 fi
 
+# Demo publiczne na instancji z danymi spoza demo = ich ujawnienie (R-02) — ostrzeżenie w logach.
+$RUN python manage.py demo_exposure_check || true
+
 exec $RUN gunicorn twinema.wsgi:application \
     --bind 0.0.0.0:8000 \
     --workers "${WEB_CONCURRENCY:-2}" \

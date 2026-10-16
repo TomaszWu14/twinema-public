@@ -30,6 +30,8 @@ class SeedDemoShowcaseTests(TestCase):
         demo = User.objects.get(username="demo")                      # DEMO_PUBLIC bez hasła: konto bez logowania hasłem
         self.assertFalse(demo.has_usable_password())
         self.assertEqual(self.client.get(reverse("scenario:public", args=[sc.share_token])).status_code, 200)
+        from core.demo import exposure_reasons
+        self.assertEqual(exposure_reasons(), [])                      # US-011: same dane demo — bez ostrzeżenia
 
 
 class DemoPageTests(TestCase):
@@ -100,3 +102,44 @@ class DemoPageTests(TestCase):
         self.client.force_login(other)
         self.client.post(reverse("core:demo_enter"))
         self.assertEqual(int(self.client.session["_auth_user_id"]), other.pk)
+
+
+class DemoExposureTests(TestCase):
+    """US-011 (SEC, R-02): ostrzeżenie, gdy demo publiczne działa na instancji z danymi spoza demo."""
+
+    def setUp(self):
+        self.admin = User.objects.create_user("adm", password="x")
+        self.admin.groups.add(Group.objects.get_or_create(name=GROUP_ADMIN)[0])
+        self.viewer = User.objects.create_user("zarzad", password="x")
+        self.viewer.groups.add(Group.objects.get_or_create(name=GROUP_VIEWER)[0])
+
+    def _real_import(self):
+        from masterdata.models import ImportLog
+        ImportLog.objects.create(kind="materials", name="materialy.xlsx")
+
+    def _check(self):
+        err = StringIO()
+        call_command("demo_exposure_check", stderr=err)
+        return err.getvalue()
+
+    def test_only_demo_data_no_warning(self):
+        from masterdata.models import ImportLog
+        ImportLog.objects.create(kind="stock", name="Demo — stany (hala)")
+        with self.settings(DEMO_PUBLIC=True):
+            self.assertEqual(self._check(), "")
+
+    def test_warning_in_logs_and_admin_banner(self):
+        self._real_import()
+        with self.settings(DEMO_PUBLIC=True):
+            self.assertIn("importy danych spoza demo", self._check())
+            self.client.force_login(self.admin)
+            self.assertContains(self.client.get(reverse("core:home")), "Demo publiczne jest włączone")
+            self.client.force_login(self.viewer)                      # Podgląd (także gość) banera nie widzi
+            self.assertNotContains(self.client.get(reverse("core:home")), "Demo publiczne jest włączone")
+
+    def test_demo_off_no_warning(self):
+        self._real_import()
+        with self.settings(DEMO_PUBLIC=False):
+            self.assertEqual(self._check(), "")
+            self.client.force_login(self.admin)
+            self.assertNotContains(self.client.get(reverse("core:home")), "Demo publiczne jest włączone")

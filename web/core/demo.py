@@ -44,3 +44,22 @@ def demo_showcase():
     """Prezentacja demo z aktywnym linkiem albo None (demo nie zasiane / link wyłączony)."""
     return (Showcase.objects.filter(title=SHOWCASE, share_token__isnull=False, share_expires__gt=timezone.now())
             .only("pk", "title", "share_token").order_by("-pk").first())
+
+
+def exposure_reasons():
+    """US-011 (SEC, R-02): dane spoza demo na instancji — powody (puste = tylko dane demo).
+
+    Demo publiczne wpuszcza każdego jako Podgląd, więc na instancji z prawdziwymi danymi je ujawnia.
+    Znaki rozpoznawcze danych spoza demo: import zadań, master lokalizacji, import danych spoza `seed_demo`."""
+    from masterdata.models import ImportLog
+    from twin.models import WarehouseLocationMasterBatch
+    from twin.models_tasks import WarehouseTaskBatch
+
+    reasons = []
+    if WarehouseTaskBatch.objects.exists():
+        reasons.append("importy zadań magazynowych")
+    if WarehouseLocationMasterBatch.objects.exists():
+        reasons.append("master lokalizacji")
+    if ImportLog.objects.exclude(name__startswith="Demo — ").exists():
+        reasons.append("importy danych spoza demo")
+    return reasons

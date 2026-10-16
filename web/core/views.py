@@ -7,8 +7,8 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 
-from .demo import DEMO_USER, demo_showcase
-from .roles import GROUP_VIEWER
+from .demo import DEMO_USER, demo_showcase, exposure_reasons
+from .roles import GROUP_ADMIN, GROUP_VIEWER, has_role
 
 # Moduły platformy w kolejności przepływu pracy — jedno źródło dla nawigacji w nagłówku i kafli strony
 # głównej (R4: te same nazwy). `apps` / `match` = kiedy pozycja jest aktywna (patrz `active_module`).
@@ -56,7 +56,8 @@ def home(request):
 @login_required
 def _home(request):
     modules = [{**m, "url": reverse(m["url"])} for m in MODULES]
-    return render(request, "core/home.html", {"modules": modules})
+    exposure = exposure_reasons() if settings.DEMO_PUBLIC and has_role(request.user, GROUP_ADMIN) else []
+    return render(request, "core/home.html", {"modules": modules, "demo_exposure": exposure})
 
 
 def demo(request):
