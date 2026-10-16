@@ -71,3 +71,13 @@ a.hub-tile:hover { border-color: var(--primary); }
   .demo-hero { grid-template-columns: 1fr; }
   .demo-hero__img { order: -1; }
 }
+
+/* US-017: weryfikacja dwuetapowa */
+.tf-wrap { max-width: 720px; }
+.tf-steps { margin: var(--sp-4) 0; }
+.tf-grid { display: grid; grid-template-columns: auto 1fr; gap: var(--sp-5); align-items: start; }
+.tf-qr { background: #fff; padding: 8px; border-radius: var(--radius-lg, 8px); }
+.tf-secret { word-break: break-all; font-size: var(--fs-sm); }
+.tf-submit { margin-top: var(--sp-4); }
+.login-card--plain { margin-top: var(--sp-3); background: none; border: 0; box-shadow: none; }
+@media (max-width: 600px) { .tf-grid { grid-template-columns: 1fr; } }

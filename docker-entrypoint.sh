@@ -18,7 +18,11 @@ $RUN python manage.py migrate --noinput
 $RUN python manage.py create_roles
 # Konto administratora z env (DJANGO_SUPERUSER_USERNAME/EMAIL/PASSWORD) — tylko przy pierwszym starcie.
 if [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; then
-    $RUN python manage.py createsuperuser --noinput 2>/dev/null || echo "Superuser już istnieje."
+    if [ "${#DJANGO_SUPERUSER_PASSWORD}" -lt 12 ]; then
+        echo "UWAGA: DJANGO_SUPERUSER_PASSWORD krótsze niż 12 znaków — konto administratora nie zostanie utworzone (US-017)."
+    else
+        $RUN python manage.py createsuperuser --noinput 2>/dev/null || echo "Superuser już istnieje."
+    fi
 fi
 # Publiczne demo: hala, scenariusz, stany i konto `demo` (Podgląd) — idempotentnie.
 if [ "$DEMO_SEED" = "1" ] || [ "$DEMO_SEED" = "true" ]; then

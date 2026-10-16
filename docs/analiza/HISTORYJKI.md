@@ -22,7 +22,7 @@
 | US-019 | Jako Podgląd chcę widzieć w menu tylko moduły, do których mam dostęp, aby nie trafiać na stronę braku uprawnień | Should | T-3 | **zrobione** (PR #68) |
 | US-023 | Jako PO chcę progu pokrycia testami w CI, aby jakość nie spadała | Should | NFR-015 | **zrobione** — próg 80% (PR #68) |
 | US-024 | Jako Projektant chcę, aby import zadań w tle przetrwał restart serwera, aby nie powtarzać importu | Should | T-2 | **zrobione** (PR #68, ADR-0004) |
-| US-017 | Jako Administrator chcę drugiego składnika logowania i haseł ≥ 12 znaków dla kont uprzywilejowanych, aby utrudnić przejęcie konta | Could | R-11, ASVS V2 | czeka na decyzję PO |
+| US-017 | Jako Administrator chcę drugiego składnika logowania i haseł ≥ 12 znaków dla kont uprzywilejowanych, aby utrudnić przejęcie konta | Could | R-11, ASVS V2 | **zrobione** (PR #68) — TOTP obowiązkowy dla Administratorów (Z-37) |
 | US-018 | Jako SEC chcę akcji CI przypiętych skrótem commita, aby podmiana tagu nie wpuściła obcego kodu | Could | R-16 | **zrobione** (PR #68) |
 | US-015 | Jako Administrator chcę limitu prób dla zleceń renderu odrzucanych przez serwer, aby zlecenie nie krążyło bez końca | Could | R-14, T-11 | **zrobione** (PR #68) |
 | US-020 | Jako gość chcę zrozumiałej strony, gdy link jest nieaktywny, aby wiedzieć, co się stało | Could | T-8 | **zrobione** (PR #68) |
@@ -143,3 +143,11 @@
 
 **R-02 (blokada demo)**
 - *Given* `DEMO_PUBLIC=true` i w bazie dane spoza demo, *Then* strona demo nie pokazuje „Wejdź do systemu”, a wejście gościa zwraca 403 z wyjaśnieniem.
+
+**US-017**
+- *Given* Administrator bez skonfigurowanej aplikacji, *When* zaloguje się hasłem, *Then* każda strona prowadzi do konfiguracji (kod QR i klucz); dostęp po wpisaniu poprawnego kodu.
+- *Given* Administrator ze skonfigurowaną aplikacją, *When* zaloguje się, *Then* musi podać kod; przekierowanie po kodzie tylko na adres w tej aplikacji.
+- *Given* inna rola, *Then* kod nie jest wymagany, ale można go włączyć — wtedy jest wymagany przy logowaniu; konto demo nie może go włączyć.
+- *Given* otwarcie strony konfiguracji, *Then* nic nie jest zapisywane do potwierdzenia; po 5 błędnych kodach powstaje nowy klucz.
+- *Given* hasło konta uprzywilejowanego (Administrator, personel, superużytkownik) krótsze niż 12 znaków, *Then* walidacja je odrzuca; `DJANGO_SUPERUSER_PASSWORD` krótsze niż 12 — konto z env nie powstaje.
+- *Given* zgubiony telefon, *When* `manage.py two_factor_reset <login>`, *Then* urządzenia są usunięte, a w dzienniku jest wpis.

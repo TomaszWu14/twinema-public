@@ -45,4 +45,6 @@
 | FR-008, FR-009 (formularze) | US-021 | `twin/tests/test_rack_type_weights.py::RackTypeFormKeepsValuesTests`, `test_model_edit.py::…test_rejected_edit_keeps_typed_values` | ten PR (#68) |
 | NFR-011 | US-005 | `core/tests/test_csp.py`, `core/tests/test_e2e.py` (job `e2e`) | ten PR (#68) |
 | NFR-013 | US-009 | `core/tests/test_backup.py` | ten PR (#68) |
+| NFR-007 (drugi składnik) | US-017 | `core/tests/test_two_factor.py` | ten PR (#68) |
+| NFR-009 (demo, R-02) | — | `core/tests/test_demo.py::…test_guest_entry_blocked_on_instance_with_real_data` | ten PR (#68) |
 | NFR-014 | — | — | planowane |

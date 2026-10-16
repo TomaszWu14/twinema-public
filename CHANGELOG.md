@@ -57,6 +57,9 @@ trafiają do sekcji „Unreleased”.
 - Procedura czyszczenia historii repozytorium (`docs/operacje/CZYSZCZENIE_HISTORII.md`, R-01) — wykonuje PO.
 
 ### Security
+- Weryfikacja dwuetapowa (TOTP, `django-otp`): obowiązkowa dla Administratorów, opcjonalna dla pozostałych; hasła kont
+  uprzywilejowanych ≥ 12 znaków; `manage.py two_factor_reset <login>` (US-017). **Uwaga przy wdrożeniu:** Administratorzy
+  po pierwszym logowaniu konfigurują aplikację uwierzytelniającą; `DJANGO_SUPERUSER_PASSWORD` musi mieć ≥ 12 znaków.
 - CSP wymuszana: skrypty tylko z serwera albo z jednorazowym nonce, bez `'unsafe-inline'`/`'unsafe-eval'` dla
   skryptów, `object-src 'none'`, `form-action 'self'`; obsługa zdarzeń w atrybutach zastąpiona `core/js/ui.js` (US-005).
   **Uwaga przy wdrożeniu:** `CSP_REPORT_ONLY=true` w środowisku zostawia tryb raportu — ustaw `false` albo usuń zmienną.

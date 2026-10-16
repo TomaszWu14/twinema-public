@@ -1,0 +1,23 @@
+{% extends "core/base.html" %}{% load static %}
+{% block title %}Kod weryfikacyjny · {{ app_name }}{% endblock %}
+{% block body %}
+<main class="login">
+  <form class="login-card" method="post">{% csrf_token %}
+    <div class="brand brand--login">
+      <img class="brand__mark" src="{% static 'core/brand/mark.svg' %}" alt="" width="88" height="60">
+      <span class="brand__word">{% include "core/_wordmark.html" %}</span>
+    </div>
+    <p>Wpisz 6-cyfrowy kod z aplikacji uwierzytelniającej.</p>
+    {% if error %}<p class="login-error" role="alert">{{ error }}</p>{% endif %}
+    <label for="id_token">Kod</label>
+    <input class="form-control" type="text" name="token" id="id_token" inputmode="numeric" autocomplete="one-time-code"
+           pattern="[0-9 ]{6,8}" maxlength="8" autofocus required>
+    <input type="hidden" name="next" value="{{ next }}">
+    <button class="btn btn-primary" type="submit">Potwierdź</button>
+    <p class="login-demo">Zgubiony telefon? Poproś innego Administratora o wyzerowanie weryfikacji.</p>
+  </form>
+  <form class="login-card login-card--plain" method="post" action="{% url 'core:logout' %}">{% csrf_token %}
+    <button class="btn btn-ghost" type="submit">Wyloguj</button>
+  </form>
+</main>
+{% endblock %}

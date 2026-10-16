@@ -14,11 +14,13 @@ class AuditEvent(models.Model):
     IMPORT = "import"
     LINK_CREATE = "link_create"
     LINK_REVOKE = "link_revoke"
+    TWO_FACTOR = "two_factor"
     ACTIONS = [
         (DELETE, "Usunięcie"),
         (IMPORT, "Import pliku"),
         (LINK_CREATE, "Utworzenie linku publicznego"),
         (LINK_REVOKE, "Wyłączenie linku publicznego"),
+        (TWO_FACTOR, "Weryfikacja dwuetapowa"),
     ]
 
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)

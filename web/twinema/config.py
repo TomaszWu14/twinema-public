@@ -50,6 +50,9 @@ class AppEnv(BaseSettings):
     DEMO_VIDEO_URL: str = ""           # adres filmu (np. YouTube) na stronie /demo/; puste = bez przycisku
 
     # ── Dziennik operacji wrażliwych (US-008) ──────────────────────────────
+    # ── Drugi składnik logowania (US-017) ──────────────────────────────────────
+    TWO_FACTOR_ADMIN: bool = True      # TOTP obowiązkowy dla Administratorów (Z-37); false tylko awaryjnie
+
     # ── Kopie zapasowe (US-009) ────────────────────────────────────────────────
     BACKUP_DIR: str = ""              # katalog kopii poza wolumenem mediów; puste = `manage.py backup` odmawia
 

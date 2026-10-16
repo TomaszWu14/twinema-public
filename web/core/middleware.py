@@ -81,3 +81,36 @@ def client_ip(request):
         return remote
     last = request.META.get("HTTP_X_FORWARDED_FOR", "").split(",")[-1].strip()
     return last or remote
+
+
+# US-017: ścieżki dostępne przed podaniem kodu TOTP (konfiguracja, weryfikacja, wylogowanie, pliki, zdrowie)
+_TWO_FACTOR_EXEMPT = ("/2fa/", "/logout/", "/login/", "/static/", "/health/", "/favicon")
+
+
+def two_factor_required(user):
+    """TOTP wymagany: konto ma potwierdzone urządzenie albo jest Administratorem (Z-37, TWO_FACTOR_ADMIN)."""
+    from django_otp import user_has_device
+
+    from .validators import privileged
+    if user_has_device(user, confirmed=True):
+        return True
+    return bool(getattr(settings, "TWO_FACTOR_ADMIN", True)) and privileged(user)
+
+
+class TwoFactorMiddleware:
+    """Zalogowany bez zweryfikowanego kodu, gdy kod jest wymagany → konfiguracja albo weryfikacja (US-017)."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        user = getattr(request, "user", None)
+        if (user is not None and user.is_authenticated and not request.path.startswith(_TWO_FACTOR_EXEMPT)
+                and not user.is_verified() and two_factor_required(user)):
+            from django.shortcuts import redirect
+            from django.utils.http import urlencode
+            from django_otp import user_has_device
+            target = "core:two_factor_verify" if user_has_device(user, confirmed=True) else "core:two_factor_setup"
+            from django.urls import reverse
+            return redirect(reverse(target) + "?" + urlencode({"next": request.get_full_path()}))
+        return self.get_response(request)

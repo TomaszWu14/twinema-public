@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
+from . import audit
 from .demo import DEMO_USER, demo_showcase, exposure_reasons
 from .models import AuditEvent, Job
 from .roles import GROUP_ADMIN, GROUP_DESIGNER, GROUP_VIEWER, admin_only, any_role, has_role
@@ -123,3 +124,90 @@ def job_status(request, pk):
     """US-007: stan zadania z kolejki dla ekranu oczekiwania — bez wyniku i parametrów."""
     job = get_object_or_404(Job, pk=pk)
     return JsonResponse({"status": job.status, "status_display": job.get_status_display(), "pending": job.pending})
+
+
+def _next_url(request):
+    from django.utils.http import url_has_allowed_host_and_scheme
+    nxt = request.POST.get("next") or request.GET.get("next") or ""
+    ok = url_has_allowed_host_and_scheme(nxt, allowed_hosts={request.get_host()}, require_https=request.is_secure())
+    return nxt if ok and nxt.startswith("/") else reverse("core:home")
+
+
+@login_required
+def two_factor_setup(request):
+    """US-017: konfiguracja TOTP — kod QR / klucz dla aplikacji uwierzytelniającej i potwierdzenie pierwszym kodem."""
+    import segno
+    from django_otp import login as otp_login, user_has_device
+    from django_otp.plugins.otp_totp.models import TOTPDevice
+
+    from django_otp.util import random_hex
+
+    if request.user.get_username() == DEMO_USER:          # wspólne konto gościa — kod zablokowałby innych gości
+        return render(request, "core/403.html", {"reason": "Konto demo nie używa weryfikacji dwuetapowej."},
+                      status=403)
+    if user_has_device(request.user, confirmed=True) and not request.user.is_verified():
+        return redirect(reverse("core:two_factor_verify") + "?next=" + _next_url(request))
+    # klucz czeka w sesji do potwierdzenia pierwszym kodem — samo otwarcie strony niczego nie zapisuje
+    key = request.session.setdefault("two_factor_key", random_hex(20))
+    device = TOTPDevice(user=request.user, name="Aplikacja uwierzytelniająca", key=key, confirmed=True)
+    error = ""
+    if request.method == "POST" and request.POST.get("token"):
+        if _setup_token_ok(request, device, request.POST.get("token")):
+            TOTPDevice.objects.filter(user=request.user).delete()       # nowa aplikacja zastępuje poprzednią
+            device.save()
+            request.session.pop("two_factor_key", None)
+            otp_login(request, device)
+            audit.record(request, AuditEvent.TWO_FACTOR, object_type="konto", label=request.user.get_username(),
+                         detail="włączono weryfikację dwuetapową")
+            return redirect(_next_url(request))
+        error = "Kod się nie zgadza — sprawdź czas w telefonie i wpisz aktualny kod."
+    secret = device.bin_key
+    import base64
+    return render(request, "core/two_factor_setup.html", {
+        "qr": segno.make(device.config_url, error="m").svg_data_uri(scale=5, dark="#0f172a", light="#ffffff"),
+        "secret": base64.b32encode(secret).decode().rstrip("="), "error": error, "next": _next_url(request),
+        "already": user_has_device(request.user, confirmed=True),
+    })
+
+
+SETUP_ATTEMPTS = 5
+
+
+def _setup_token_ok(request, device, raw):
+    """Pierwszy kod przy konfiguracji: sprawdzenie bez zapisu urządzenia (verify_token zapisałby licznik
+    prób). Po 5 błędach — nowy klucz (nowy kod QR), żeby nie zgadywać w nieskończoność."""
+    import time
+
+    from django_otp.oath import TOTP
+    token = (raw or "").replace(" ", "")
+    attempts = request.session.get("two_factor_attempts", 0) + 1
+    request.session["two_factor_attempts"] = attempts
+    if attempts > SETUP_ATTEMPTS:
+        request.session.pop("two_factor_key", None)
+        request.session["two_factor_attempts"] = 0
+        return False
+    if not token.isdigit():
+        return False
+    otp = TOTP(device.bin_key, device.step, device.t0, device.digits, device.drift)
+    otp.time = time.time()
+    if otp.verify(int(token), device.tolerance):
+        request.session.pop("two_factor_attempts", None)
+        return True
+    return False
+
+
+@login_required
+def two_factor_verify(request):
+    """US-017: kod z aplikacji po zalogowaniu (Administrator albo konto z włączonym TOTP)."""
+    from django_otp import login as otp_login, match_token, user_has_device
+
+    if not user_has_device(request.user, confirmed=True):
+        return redirect(reverse("core:two_factor_setup") + "?next=" + _next_url(request))
+    error = ""
+    if request.method == "POST":
+        device = match_token(request.user, (request.POST.get("token") or "").replace(" ", ""))
+        if device is not None:
+            otp_login(request, device)
+            return redirect(_next_url(request))
+        error = "Kod się nie zgadza albo wygasł. Po kilku błędach trzeba odczekać chwilę."
+    return render(request, "core/two_factor_verify.html", {"error": error, "next": _next_url(request)})

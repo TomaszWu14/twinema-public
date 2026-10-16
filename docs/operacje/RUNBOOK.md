@@ -34,6 +34,8 @@ Kontener przy starcie usuwa też wpisy dziennika operacji starsze niż `AUDIT_RE
 - CSP jest domyślnie wymuszana (US-005). Jeśli w Coolify jest `CSP_REPORT_ONLY=true`, usuń tę zmienną albo ustaw
   `false`. Gdy po wdrożeniu któryś ekran przestanie działać, `CSP_REPORT_ONLY=true` przywraca tryb raportu bez
   zmiany kodu (zgłoś ekran jako błąd).
+- Weryfikacja dwuetapowa (US-017): po wdrożeniu każdy Administrator przy logowaniu konfiguruje aplikację
+  uwierzytelniającą. `TWO_FACTOR_ADMIN=false` wyłącza obowiązek tylko awaryjnie (zgłoś jako incydent).
 - Ochrona gałęzi `main`: wymagane zatwierdzenie PR i zielone CI (R-09, US-013) — ustawia PO w GitHubie.
 - Kontener działa jako `app` (UID 10001). Wolumeny używane dotąd mają już tego właściciela. Nowy katalog
   hosta: `chown -R 10001:10001 <katalog>` przed startem; jednorazowo można też uruchomić kontener z
@@ -78,6 +80,7 @@ Cel: działanie w ciągu 4 h od decyzji o odtworzeniu (RTO, Z-36).
 
 | Sytuacja | Działanie natychmiastowe | Dalej |
 |---|---|---|
+| Administrator zgubił telefon z aplikacją uwierzytelniającą (US-017) | `python manage.py two_factor_reset <login>` w kontenerze | potwierdź tożsamość osoby innym kanałem; przy następnym logowaniu skonfiguruje nową aplikację |
 | Użytkownik zablokowany po nieudanych logowaniach | `python manage.py axes_reset_username <login>` w kontenerze | sprawdź, czy to nie atak (adresy IP w panelu administracyjnym, sekcja prób logowania) |
 | Wyciek tokenu stanowiska renderującego | nowy `RENDER_WORKER_TOKEN` (≥ 32 znaki) w zmiennych platformy, restart; ten sam token na stanowisku | przejrzyj zlecenia z ostatnich dni |
 | Wyciek klucza usługi AI | unieważnij klucz u dostawcy, ustaw nowy `ANTHROPIC_API_KEY` | sprawdź zużycie u dostawcy |

@@ -8,11 +8,11 @@ Status: ✅ spełnione · ⚠️ częściowo · ❌ niespełnione · n/d nie dot
 | Rozdział | Wymaganie (skrót) | Status | Dowód / luka |
 |---|---|---|---|
 | V1 Architektura | dokumentacja przepływów i granic zaufania | ✅ | [THREAT_MODEL](THREAT_MODEL.md), [ARCHITEKTURA](../architektura/ARCHITEKTURA.md) |
-| V2.1 Hasła | min. 12 znaków (L1) | ⚠️ | minimum 10 znaków + walidatory popularnych i numerycznych haseł; podniesienie do 12 — US-017 |
-| V2.2 Ogólne | ochrona przed automatycznym zgadywaniem | ⚠️ | blokada login + IP; zależna od zaufanego proxy (R-05) |
+| V2.1 Hasła | min. 12 znaków (L1) | ⚠️ | minimum 10 znaków dla kont zwykłych, 12 dla uprzywilejowanych (US-017) + walidatory popularnych i numerycznych haseł |
+| V2.2 Ogólne | ochrona przed automatycznym zgadywaniem | ✅ | blokada login + IP (adres z proxy tylko z sieci wewnętrznej, US-006); limit prób kodu TOTP |
 | V2.4 Przechowywanie haseł | skrót z solą, odporny | ✅ | PBKDF2 Django |
 | V2.5 Odzyskiwanie | bezpieczny reset hasła | n/d | brak samodzielnego resetu — reset przez Administratora |
-| V2.8 MFA | drugi składnik (L2) | ❌ | R-11, US-017 |
+| V2.8 MFA | drugi składnik (L2) | ✅ | TOTP obowiązkowy dla Administratorów, opcjonalny dla pozostałych (US-017) |
 | V3 Sesje | ciasteczka Secure, HttpOnly, SameSite; wylogowanie unieważnia sesję | ✅ | ustawienia produkcyjne, `LogoutView` |
 | V3.3 Czas sesji | limit bezczynności | ✅ | 8 h odświeżane przy aktywności |
 | V4.1 Kontrola dostępu | po stronie serwera, domyślnie odmowa | ✅ | dekoratory ról na każdym widoku; testy 403 |
