@@ -40,5 +40,5 @@ Wszystkie wybrane narzędzia są darmowe i open-source albo wbudowane w GitHub.
 - PR z podatną zależnością albo nowym ustaleniem SAST średniej wagi nie przejdzie bez poprawki lub
   uzasadnionego wyjątku.
 - Czas CI rośnie o kilka minut (osobne joby równolegle; budowa obrazu dla trivy).
-- Próg pokrycia i tryb blokujący semgrep/trivy to otwarte decyzje PO (Z-28, US-014).
+- Próg pokrycia: 80% dla logiki domenowej, blokujący (decyzja PO, Z-28). Tryb blokujący semgrep/trivy — po triażu (US-014).
 - Akcje przypięte tagami, nie skrótami commitów (R-16, US-018).

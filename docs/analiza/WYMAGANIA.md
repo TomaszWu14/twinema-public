@@ -32,7 +32,7 @@ Status: **zrealizowane** (jest w kodzie i ma testy) · **częściowo** · **plan
 | FR-020 | Usunięcie obiektu wymaga potwierdzenia, które wymienia obiekty usuwane razem z nim | US-004 | Must | zrealizowane (PR #68) |
 | FR-021 | Rola Podgląd nie widzi pozycji menu i przycisków prowadzących do stron bez dostępu | US-019 | Should | zrealizowane (PR #68) |
 | FR-022 | System zapisuje dziennik operacji wrażliwych (kto, co, kiedy) | US-008 | Should | planowane |
-| FR-023 | Import historii zadań pseudonimizuje albo pomija login operatora | US-012 | Must (po decyzji PO) | planowane |
+| FR-023 | Import historii zadań pseudonimizuje albo pomija login operatora | US-012 | Must | zrealizowane (PR #68) |
 
 ## Wymagania niefunkcjonalne
 
@@ -52,6 +52,6 @@ Status: **zrealizowane** (jest w kodzie i ma testy) · **częściowo** · **plan
 | NFR-012 | Wydajność | żadne żądanie nie przekracza limitu serwera; długie obliczenia w tle | 0 przekroczeń limitu 120 s | planowane (US-007, Z-6) |
 | NFR-013 | Dostępność | kopia zapasowa bazy i plików z próbą odtworzenia | RPO / RTO do ustalenia przez PO | planowane (US-009) |
 | NFR-014 | Ochrona danych | retencja danych osobowych zgodna z [RODO](../bezpieczenstwo/RODO.md) | okresy z rejestru czynności | planowane |
-| NFR-015 | Jakość | próg pokrycia testami | domyślnie 80% dla logiki domenowej — do potwierdzenia | planowane (US-023) |
+| NFR-015 | Jakość | próg pokrycia testami | 80% dla logiki domenowej, blokujące w CI (decyzja PO) | zrealizowane (PR #68) |
 | NFR-016 | Użyteczność | interfejs po polsku, komunikaty mówią, co zrobić dalej | przegląd [BA] przy każdym PR | zrealizowane (zasada) |
 | NFR-017 | Wydajność / skala | obsługa rzeczywistych wolumenów | do ustalenia (Z-5, Z-17) | do potwierdzenia |

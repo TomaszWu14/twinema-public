@@ -31,6 +31,12 @@ trafiają do sekcji „Unreleased”.
 - Rola Podgląd nie widzi w menu, kaflach i na ekranach przycisków prowadzących do stron bez dostępu (US-019).
 - Komunikat po usunięciu sprzętu podaje, ile grup floty mieszanej usunięto razem z nim (US-002).
 - ADR przeniesione do `docs/architektura/adr/`.
+- Własne strony „nie znaleziono” i „błąd serwera” z drogą powrotu (US-020).
+- Formularze scenariusza po błędzie walidacji zachowują wpisane wartości (US-021).
+- Zlecenia renderu i montażu po 3 nieudanych próbach kończą się błędem zamiast wracać do kolejki bez końca (US-015).
+- CI: próg pokrycia 80% dla logiki domenowej jest blokujący (Z-28, US-023); usunięty automatyczny merge
+  gałęzi `claude/**` — scala tylko PO (R-09).
+- Procedura czyszczenia historii repozytorium (`docs/operacje/CZYSZCZENIE_HISTORII.md`, R-01) — wykonuje PO.
 
 ### Security
 - Adres klienta do blokady logowania z nagłówka `X-Forwarded-For` tylko od proxy w sieci wewnętrznej (US-006).
@@ -43,3 +49,8 @@ trafiają do sekcji „Unreleased”.
 - Stanowisko renderujące odmawia połączenia bez HTTPS z serwerem innym niż lokalny, żeby token nie szedł
   otwartym tekstem (US-003).
   Uwaga przy wdrożeniu: stanowisko łączące się dotąd po `http://` z adresem w sieci lokalnej musi przejść na `https://`.
+- Symulację dnia i kalibrację uruchamia tylko Projektant (i Administrator); Podgląd i gość widzą wynik
+  policzony wcześniej (Z-3, R-07).
+- Login operatora w historii zadań magazynowych zastępowany pseudonimem „OP-…” przy imporcie i podglądzie
+  (US-012, R-06). **Uwaga przy wdrożeniu:** migracja `twin 0008` nieodwracalnie zastępuje loginy już zapisane —
+  przed wdrożeniem kopia zapasowa bazy. Zmiana `SECRET_KEY` zmienia pseudonimy nowych importów.

@@ -154,7 +154,7 @@ w trakcie prac. Gdy nie — opisano tylko kontekst i skutki wynikające z kodu.
 | Integracja na żywo z systemem magazynowym | dane trzeba eksportować i importować ręcznie (D1) |
 | Automatyczna optymalizacja układu | system ocenia wariant narysowany przez Projektanta, nie proponuje układu sam |
 | Rejestracja i odzyskiwanie hasła | konta zakłada Administrator w panelu administracyjnym |
-| Własne strony błędów „nie znaleziono” i „błąd serwera” | wygasły link publiczny albo usunięty wynik → standardowa strona bez nawigacji |
+| ~~Własne strony błędów „nie znaleziono” i „błąd serwera”~~ — są (US-020) | — |
 | Anulowanie trwającego importu zadań | jest tylko wstrzymanie odświeżania |
 | Render na serwerze | wymaga osobnego komputera z Blenderem 4.x i stanowiskiem renderującym |
 | Film sprawdzony od początku do końca | pierwszy prawdziwy film wymaga stanowiska z Blenderem i ffmpeg ≥ 6.1 (D6) |
@@ -179,12 +179,12 @@ w trakcie prac. Gdy nie — opisano tylko kontekst i skutki wynikające z kodu.
 
 - Symulacja (do 30 przebiegów × 2 dni + przebiegi podpowiedzi), import danych, ML i szkic z AI liczą się w trakcie żądania przy limicie serwera 120 s; szkic z AI: 90 s i jedno ponowienie.
 - Import zadań w tle działa w wątku procesu — restart serwera zostawia import „wiszący”; po 6 h zmienia się tylko etykieta, bez ponowienia.
-- Zlecenie renderu odrzucone przez serwer (np. za duży plik) wraca do kolejki co 120 min bez limitu prób.
+- ~~Zlecenie renderu odrzucone przez serwer wracało do kolejki bez limitu prób~~ — po 3 próbach kończy się błędem (US-015).
 
 ### Formularze i informacja zwrotna
 
 - Brak potwierdzenia przy usuwaniu: prezentacji 3D, prezentacji filmowej, zlecenia renderu, slajdu (hala, scenariusz i sprzęt mają ekran potwierdzenia ze skutkami — US-004).
-- Po błędzie walidacji wpisane dane przepadają: formularze scenariusza, typ regału, edycja stref.
+- Po błędzie walidacji wpisane dane przepadają w formularzach typu regału i edycji stref (formularze scenariusza zachowują dane — US-021).
 - Komunikat sukcesu mimo pominięcia danych: współrzędne regałów, elementy hali, import sprzętu z samymi odrzuceniami.
 - Po wygaśnięciu sesji zapis w edytorze prezentacji pokazuje „Brak połączenia z serwerem” zamiast prośby o zalogowanie.
 
@@ -205,14 +205,14 @@ Pozycje T-n mają odpowiedniki w [backlogu](analiza/HISTORYJKI.md) (kolumna „�
 | T-5 | ~~Ekrany potwierdzenia usunięcia z listą obiektów usuwanych kaskadowo (model hali, scenariusz, sprzęt)~~ — zrobione (US-004) | — | — |
 | T-6 | Zachowanie przy usuwaniu sprzętu używanego we flocie mieszanej: ostrzec przed usunięciem albo odłączać zamiast usuwać (komunikat poprawiony w US-002) | grupy floty znikają bez potwierdzenia | wysoki |
 | T-7 | Unikalna nazwa własnego modelu sprzętu w bazie | błąd importu przy duplikatach | średni |
-| T-8 | Własne strony „nie znaleziono” i „błąd serwera” | wygasły link publiczny bez wyjaśnienia | średni |
+| T-8 | ~~Własne strony „nie znaleziono” i „błąd serwera”~~ — zrobione (US-020) | — | — |
 | T-9 | Informacja, że wynik przypięty do prezentacji 3D został usunięty (limit 20) | prezentacja traci dane bez ostrzeżenia | średni |
-| T-10 | Zachowanie danych formularza po błędzie walidacji | utrata pracy użytkownika | średni |
-| T-11 | Limit prób dla zleceń renderu odrzucanych przez serwer | zlecenie krąży bez końca | średni |
+| T-10 | Zachowanie danych formularza po błędzie walidacji — zrobione dla scenariusza (US-021); zostają typ regału i edycja stref | utrata pracy użytkownika | niski |
+| T-11 | ~~Limit prób dla zleceń renderu odrzucanych przez serwer~~ — zrobione (US-015) | — | — |
 | T-12 | Ograniczenia spójności w bazie (min ≤ śr ≤ max, unikalność strumieni i grup floty) | dziś pilnuje tylko aplikacja | niski |
 | T-13 | Osobne konta gościa albo ograniczenie sesji demo | współdzielone konto demo | niski |
 | T-14 | Pełna próba filmu ze stanowiskiem renderującym | moduł filmu niesprawdzony z prawdziwym renderem | niski (moduł opcjonalny) |
-| T-15 | Usunięcie pozostałości z sekcji [Do anonimizacji](#do-anonimizacji), także z historii repozytorium | ochrona danych firmowych i osobowych | wysoki przed publikacją repozytorium |
+| T-15 | Usunięcie pozostałości z sekcji [Do anonimizacji](#do-anonimizacji), także z historii repozytorium | ochrona danych firmowych i osobowych | wysoki — procedura gotowa: [CZYSZCZENIE_HISTORII](operacje/CZYSZCZENIE_HISTORII.md), wykonuje PO |
 | T-16 | Polityka kopii zapasowych bazy i katalogu plików (podkłady, rendery, filmy) | w kodzie brak mechanizmu kopii | wysoki |
 
 ## Do anonimizacji

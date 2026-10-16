@@ -19,6 +19,17 @@ działania: ścieżka `/health/`, okres startowy co najmniej 120 s; trwały wolu
 Zmienne środowiskowe: [.env.example](../../.env.example); walidacja przy starcie w `web/twinema/config.py`.
 **Demo publiczne (`DEMO_PUBLIC=true`) tylko na osobnej instancji z danymi demo** (R-02). Gdy w bazie są dane spoza demo, kontener zapisuje przy starcie ostrzeżenie w logach, a Administrator widzi baner na stronie startowej (US-011).
 
+### Wdrożenie zmian z PR #68 — kroki dla PO
+
+- **Kopia zapasowa bazy przed wdrożeniem.** Migracja `twin 0008_pseudonimizacja_operatorow` nieodwracalnie
+  zastępuje loginy operatorów w historii zadań pseudonimami (US-012). Wycofanie wersji nie przywróci loginów.
+- Pseudonim zależy od `SECRET_KEY`: zmiana klucza daje inne pseudonimy dla nowych importów. Klucz zmieniać
+  razem z ponownym importem historii zadań.
+- Ochrona gałęzi `main`: wymagane zatwierdzenie PR i zielone CI (R-09, US-013) — ustawia PO w GitHubie.
+- Usunięcie sekretu `AUTOMERGE_PAT` z repozytorium — automatyczny merge został usunięty z CI.
+- Włączenie Private Vulnerability Reporting (Z-22).
+- Czyszczenie historii repozytorium (R-01): [CZYSZCZENIE_HISTORII.md](CZYSZCZENIE_HISTORII.md).
+
 ### Wycofanie wersji
 
 Na platformie: ponowne wdrożenie poprzedniego obrazu / commita. Jeśli nowa wersja miała migrację niewstecznie

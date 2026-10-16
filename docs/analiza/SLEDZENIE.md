@@ -31,4 +31,10 @@
 | FR-021 | US-019 | `core/tests/test_navigation.py::ViewerSeesOnlyAccessibleLinksTests` | ten PR (#68) |
 | NFR-007 (blokada logowania) | US-006 | `core/tests/test_foundation.py::ClientIpTests` | ten PR (#68) |
 | NFR-009 (ochrona danych, demo) | US-011 | `core/tests/test_demo.py::DemoExposureTests` | ten PR (#68) |
-| FR-022–023, NFR-011–015 | US-008, US-012, US-005, US-007, US-009, US-023 | — | planowane |
+| FR-023 | US-012 | `twin/tests/test_ewm_tasks_parser.py::OperatorPseudonymTests`, `test_ewm_tasks_flow.py::OperatorLoginNotStoredTests` | ten PR (#68) |
+| NFR-012 (obliczenia tylko dla Projektanta, Z-3) | — | `twin/tests/test_design_sim.py::ViewerDoesNotComputeTests`, `test_design_calibration.py::ViewerDoesNotCalibrateTests` | ten PR (#68) |
+| NFR-002 (stanowisko renderujące) | US-015 | `render/tests/test_render.py::…::test_job_gives_up_after_max_attempts`, `studio/tests/test_render_montage.py::…::test_montage_gives_up_after_max_attempts` | ten PR (#68) |
+| FR-017 (strony błędów) | US-020 | `core/tests/test_error_pages.py` | ten PR (#68) |
+| FR-012 (formularze) | US-021 | `scenario/tests/test_views.py::…::test_invalid_form_keeps_typed_values_once` | ten PR (#68) |
+| NFR-015 | US-023 | CI: job `coverage` w `.github/workflows/ci.yml` (próg 80%) | ten PR (#68) |
+| FR-022, NFR-011–014 | US-008, US-005, US-007, US-009 | — | planowane |

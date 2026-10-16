@@ -57,7 +57,7 @@ Oznaczenia statusu: ✅ zabezpieczone · ⚠️ częściowo · ❌ brak. Pozycje
 | I | pliki dostępne publicznie | media poza katalogiem publicznym, wydawane przez widoki z kontrolą roli | ✅ |
 | E | import przez rolę bez uprawnień | importy tylko dla Projektanta | ✅ |
 | T | import nadpisuje cudzy model sprzętu | autor albo Administrator (US-001) | ✅ |
-| I | dane osobowe pracowników w historii zadań | pole „Użytkownik” zapisywane i pokazywane jako etykieta wózka | ⚠️ R-06 |
+| I | dane osobowe pracowników w historii zadań | login zastępowany pseudonimem przy imporcie i podglądzie; migracja danych istniejących (US-012) | ✅ |
 
 ## F3. Pokaz publiczny (link)
 
@@ -74,7 +74,7 @@ Oznaczenia statusu: ✅ zabezpieczone · ⚠️ częściowo · ❌ brak. Pozycje
 | STRIDE | Zagrożenie | Zabezpieczenie | Status |
 |---|---|---|---|
 | I | włączenie demo na instancji z danymi rzeczywistymi | flaga `DEMO_PUBLIC` domyślnie wyłączona; brak kontroli technicznej | ❌ R-02 |
-| D | obliczenia uruchamiane przez gości | symulacja i kalibracja dostępne dla Podglądu przez zapytanie GET; wynik w pamięci podręcznej | ⚠️ R-07 |
+| D | obliczenia uruchamiane przez gości | symulację i kalibrację uruchamia tylko Projektant; Podgląd i gość widzą wynik policzony wcześniej (Z-3) | ✅ |
 | R | brak rozróżnienia gości | wszyscy goście na jednym koncie | ⚠️ R-13 |
 
 ## F5. API stanowiska renderującego
@@ -85,7 +85,7 @@ Oznaczenia statusu: ✅ zabezpieczone · ⚠️ częściowo · ❌ brak. Pozycje
 | I | token otwartym tekstem | stanowisko wymaga HTTPS poza komputerem lokalnym (US-003) | ✅ |
 | T | spóźnione stanowisko nadpisuje wynik | jednorazowy klucz przejęcia zlecenia | ✅ |
 | T | złośliwy plik wyniku | sygnatura PNG/MP4, limit 500 MB | ✅ |
-| D | zlecenie odrzucane w kółko | powrót do kolejki co 120 min bez limitu prób | ⚠️ R-14 |
+| D | zlecenie odrzucane w kółko | po 3 próbach zlecenie kończy się błędem (US-015) | ✅ |
 
 ## F6. Usługa AI
 
@@ -101,8 +101,8 @@ Oznaczenia statusu: ✅ zabezpieczone · ⚠️ częściowo · ❌ brak. Pozycje
 |---|---|---|---|
 | T | podatna zależność | przypięte wersje, pip-audit blokujący, Dependabot | ✅ |
 | T | podmieniona biblioteka JS | pobranie przy budowie z sumą SHA-256 | ✅ |
-| T | zmiana trafia na produkcję bez akceptacji człowieka | auto-merge gałęzi `claude/**` po zielonym CI | ⚠️ R-09 |
+| T | zmiana trafia na produkcję bez akceptacji człowieka | auto-merge usunięty z CI; wymagane zatwierdzenie w ochronie gałęzi — ustawia PO | ⚠️ R-09 |
 | T | akcje CI przypięte tagiem, nie skrótem | tagi wersji | ⚠️ R-16 |
 | I | sekret w repozytorium | gitleaks w CI i pre-commit | ✅ |
-| I | dane rzeczywistego obiektu w historii repozytorium | — | ❌ R-01 |
+| I | dane rzeczywistego obiektu w historii repozytorium | procedura czyszczenia gotowa ([CZYSZCZENIE_HISTORII](../operacje/CZYSZCZENIE_HISTORII.md)), wykonuje PO | ⚠️ R-01 |
 | A | utrata danych | brak mechanizmu kopii zapasowych w projekcie | ❌ R-10 |

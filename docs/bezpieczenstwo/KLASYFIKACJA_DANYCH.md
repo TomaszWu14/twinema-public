@@ -28,7 +28,7 @@ Klasy określają, kto może widzieć dane i jak je chronić. Klasy ustalono na 
 | Kartoteka materiałów (kody, nazwy, wymiary, cechy) | `Material` | **Poufne** | |
 | Stany magazynu (lokalizacja, ilość, jednostka ładunkowa, partia, termin) | `StockItem` | **Poufne** | |
 | Master lokalizacji | `WarehouseLocationMaster` | **Poufne** | |
-| Historia zadań magazynowych | `WarehouseTask` | **Poufne** + **Dane osobowe** | pole „Użytkownik” to login pracownika z systemu magazynowego |
+| Historia zadań magazynowych | `WarehouseTask` | **Poufne** (dane osobowe pseudonimizowane) | pole „Użytkownik” zawiera pseudonim „OP-…” zamiast loginu pracownika (US-012) |
 | Wyniki ML (prognoza, segmenty) | `ModelRun` | Poufne | segmenty zawierają kody materiałów |
 | Stawki i koszty | `CostRate`, koszty sprzętu | Poufne | |
 | Raporty importu z próbkami odrzuconych wierszy | `ImportLog.rejects` | Poufne | |

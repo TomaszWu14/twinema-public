@@ -239,8 +239,8 @@ także na liście E-900. Ekran sam odświeża status zleceń.
 | E-301 Podgląd importu | sprawdzić plik przed zapisem | — | importuj cały plik, wgraj inny | Projektant |
 | E-303 Raport importu zadań | śledzić import i jego wynik | — | dzień projektowy, animacja, usuń | Projektant |
 | E-306 Profil i dzień projektowy | wyznaczyć dzień, na który projektujemy | percentyl P90/P95/P99 | przejścia do symulacji, kalibracji, porównania, prognozy | każda rola |
-| E-307 Symulacja dnia na modelu | sprawdzić układ na dniu projektowym | model, mnożnik, flota, kalibracja | symuluj | każda rola |
-| E-308 Kalibracja | wyznaczyć normy z historii | model obecnej hali | policz, symuluj ze współczynnikami | każda rola |
+| E-307 Symulacja dnia na modelu | sprawdzić układ na dniu projektowym | model, mnożnik, flota, kalibracja | symuluj | ekran: każda rola; obliczenie: Projektant (Podgląd widzi wynik już policzony — Z-3) |
+| E-308 Kalibracja | wyznaczyć normy z historii | model obecnej hali | policz, symuluj ze współczynnikami | ekran: każda rola; obliczenie: Projektant (Z-3) |
 | E-309 Porównanie modeli | porównać do 4 modeli na jednym dniu | modele | porównaj | ekran: każda rola; obliczenie: Projektant |
 | E-310 Prognoza wzrostu | ocenić przyszły wolumen | horyzont | przelicz, symuluj P50/P90, porównaj | każda rola |
 | E-400 Prognozy i ML | uruchomić modele ML | partia, parametry | uruchom prognozę lub segmentację | ekran: każda rola; uruchomienie: Projektant |

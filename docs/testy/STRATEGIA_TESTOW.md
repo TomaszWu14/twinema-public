@@ -26,8 +26,8 @@
 ## Pokrycie
 
 Raport pokrycia generuje job `coverage` w CI (artefakt `coverage`), konfiguracja w `pyproject.toml`.
-Próg nie jest jeszcze egzekwowany — propozycja: **80% dla logiki domenowej** (`scenario/sim`, `ml`,
-`twin/layout.py`, `twin/design_*`), bez progu dla widoków; decyzja PO ([Z-28](../analiza/ZALOZENIA.md), US-023).
+Próg **80% dla logiki domenowej** (decyzja PO, Z-28) jest blokujący w CI (`scenario/sim`, `ml`,
+`twin/layout.py`, `twin/design_*`), bez progu dla widoków ([Z-28](../analiza/ZALOZENIA.md), US-023).
 Wynik pomiaru z audytu: [AUDYT.md](../AUDYT.md#dev-jakość-kodu-testy-architektura).
 
 ## Uruchomienie

@@ -146,7 +146,7 @@ punkty wymagają decyzji albo informacji od właściciela biznesowego.
 |---|---|---|---|
 | Z-1 | Stan obecny i uzasadnienie biznesowe | brak opisu pracy przed wdrożeniem | jak dziś przygotowuje się wariant, ile to trwa, jakie są koszty błędnej decyzji |
 | Z-2 | Odbiorcy i właściciele procesów w organizacji | role techniczne: Administrator, Projektant, Podgląd; odbiorcy (zarząd, osoba z zewnątrz) zakładani, niezweryfikowani | kto konkretnie pełni role i kto jest właścicielem każdego procesu |
-| Z-3 | Uprawnienia roli Podgląd do obliczeń | Podgląd może liczyć symulację dnia i kalibrację, ale nie porównanie modeli | czy Podgląd ma uruchamiać jakiekolwiek obliczenia |
+| Z-3 | Uprawnienia roli Podgląd do obliczeń | Podgląd może liczyć symulację dnia i kalibrację, ale nie porównanie modeli | **decyzja PO (2026-10-16):** obliczenia uruchamia tylko Projektant; Podgląd widzi wyniki już policzone |
 | Z-4 | Skutek usunięcia sprzętu dla floty mieszanej | grupy floty są usuwane bez potwierdzenia; komunikat po fakcie podaje ich liczbę (US-002) | czy grupy usuwać, czy odłączać, i czy wymagać potwierdzenia |
 | Z-5 | Wolumeny danych produkcyjnych | limity: 300 000 wierszy / 25 MB na plik danych, 300 MB na plik zadań | rzeczywista liczba materiałów, lokalizacji i zadań w obiektach docelowych |
 | Z-6 | Czas obliczeń | symulacja, import danych, ML i szkic z AI liczą się w trakcie żądania z limitem 120 s | czy przy rzeczywistych danych mieszczą się w limicie; czy wymagane jest liczenie w tle |

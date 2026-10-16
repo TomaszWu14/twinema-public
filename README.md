@@ -82,7 +82,7 @@ zmiany: [CHANGELOG.md](CHANGELOG.md); stan wyjściowy: [audyt](docs/AUDYT.md).
 | Obszar | Dokumenty |
 |---|---|
 | [BA] Analiza | [wizja](docs/analiza/WIZJA.md) · [interesariusze](docs/analiza/INTERESARIUSZE.md) · [procesy AS-IS/TO-BE](docs/analiza/PROCESY.md) · [wymagania FR/NFR](docs/analiza/WYMAGANIA.md) · [backlog MoSCoW](docs/analiza/HISTORYJKI.md) · [słownik](docs/analiza/SLOWNIK.md) · [założenia](docs/analiza/ZALOZENIA.md) · [macierz śledzenia](docs/analiza/SLEDZENIE.md) |
-| [DEV] Architektura | [C4: kontekst i kontenery](docs/architektura/ARCHITEKTURA.md) · [model danych](docs/architektura/MODEL_DANYCH.md) · [API](docs/architektura/API.md) · [ADR](docs/architektura/adr/) · [strategia testów](docs/testy/STRATEGIA_TESTOW.md) · [runbook](docs/operacje/RUNBOOK.md) |
+| [DEV] Architektura | [C4: kontekst i kontenery](docs/architektura/ARCHITEKTURA.md) · [model danych](docs/architektura/MODEL_DANYCH.md) · [API](docs/architektura/API.md) · [ADR](docs/architektura/adr/) · [strategia testów](docs/testy/STRATEGIA_TESTOW.md) · [runbook](docs/operacje/RUNBOOK.md) · [czyszczenie historii](docs/operacje/CZYSZCZENIE_HISTORII.md) |
 | [SEC] Bezpieczeństwo | [klasyfikacja danych](docs/bezpieczenstwo/KLASYFIKACJA_DANYCH.md) · [threat model STRIDE](docs/bezpieczenstwo/THREAT_MODEL.md) · [rejestr ryzyk](docs/bezpieczenstwo/RYZYKA.md) · [RODO](docs/bezpieczenstwo/RODO.md) · [checklista ASVS](docs/bezpieczenstwo/CHECKLISTA_ASVS.md) |
 
 ## Jak uruchomić
