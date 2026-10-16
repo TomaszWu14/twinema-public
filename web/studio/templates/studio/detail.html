@@ -204,7 +204,7 @@
 </div>
 {% endblock %}
 {% block extra_scripts %}
-<script>
+<script nonce="{{ csp_nonce }}">
 (function () {
   var live = document.getElementById('st-live');
   if (!live || live.dataset.busy !== '1') return;

@@ -33,3 +33,8 @@ def navigation(request):
     active = active_module(getattr(request, "resolver_match", None))
     return {"nav_modules": [{"name": m["name"], "url": reverse(m["url"]), "active": m["key"] == active}
                             for m in visible_modules(user)]}
+
+
+def csp(request):
+    """US-005: nonce CSP dla skryptów w szablonach — `<script nonce="{{ csp_nonce }}">`."""
+    return {"csp_nonce": getattr(request, "csp_nonce", "")}

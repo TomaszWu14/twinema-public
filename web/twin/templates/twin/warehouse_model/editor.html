@@ -219,6 +219,6 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script type="importmap">{"imports":{"three":"{% static 'twin/vendor/three.module.js' %}","three/addons/":"{% static 'twin/vendor/addons/' %}"}}</script>
+<script nonce="{{ csp_nonce }}" type="importmap">{"imports":{"three":"{% static 'twin/vendor/three.module.js' %}","three/addons/":"{% static 'twin/vendor/addons/' %}"}}</script>
 <script type="module" src="{% static 'twin/js/layout-editor.js' %}"></script>
 {% endblock %}

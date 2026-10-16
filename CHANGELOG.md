@@ -48,9 +48,14 @@ trafiają do sekcji „Unreleased”.
 - Wynik symulacji przypięty do prezentacji 3D nie wypada z limitu przebiegów; gdy zniknie razem ze scenariuszem,
   prezentacja ostrzega Projektanta (US-025).
 - Formularz typu regału i edycja stref po błędzie walidacji zachowują wpisane wartości (US-021).
+- Testy E2E w przeglądarce (Playwright, job CI `e2e`): logowanie i główne ekrany, wynik symulacji, ekrany ze
+  skryptami pod wymuszoną CSP, demo gościa i link publiczny.
 - Procedura czyszczenia historii repozytorium (`docs/operacje/CZYSZCZENIE_HISTORII.md`, R-01) — wykonuje PO.
 
 ### Security
+- CSP wymuszana: skrypty tylko z serwera albo z jednorazowym nonce, bez `'unsafe-inline'`/`'unsafe-eval'` dla
+  skryptów, `object-src 'none'`, `form-action 'self'`; obsługa zdarzeń w atrybutach zastąpiona `core/js/ui.js` (US-005).
+  **Uwaga przy wdrożeniu:** `CSP_REPORT_ONLY=true` w środowisku zostawia tryb raportu — ustaw `false` albo usuń zmienną.
 - Adres klienta do blokady logowania z nagłówka `X-Forwarded-For` tylko od proxy w sieci wewnętrznej (US-006).
 - Ostrzeżenie w logach i baner dla Administratora, gdy demo publiczne działa na instancji z danymi spoza demo (US-011).
 - Obraz produkcyjny bez narzędzia `pip` — skan trivy wykazał w nim 4 podatności wysokie w bibliotekach

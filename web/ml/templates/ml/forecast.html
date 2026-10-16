@@ -44,7 +44,7 @@
 {% endif %}
 {% endblock %}
 {% block extra_scripts %}
-<script>
+<script nonce="{{ csp_nonce }}">
 (function () {
   var el = document.getElementById('ml-data');
   if (!el || typeof echarts === 'undefined') return;

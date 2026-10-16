@@ -31,6 +31,9 @@ Kontener przy starcie usuwa też wpisy dziennika operacji starsze niż `AUDIT_RE
   razem z ponownym importem historii zadań.
 - Migracja `equipment 0007` dopisuje przyrostek („ 2”) do powtórzonych nazw własnych modeli sprzętu (US-022) —
   parametry i powiązania bez zmian; najstarszy model zachowuje nazwę.
+- CSP jest domyślnie wymuszana (US-005). Jeśli w Coolify jest `CSP_REPORT_ONLY=true`, usuń tę zmienną albo ustaw
+  `false`. Gdy po wdrożeniu któryś ekran przestanie działać, `CSP_REPORT_ONLY=true` przywraca tryb raportu bez
+  zmiany kodu (zgłoś ekran jako błąd).
 - Ochrona gałęzi `main`: wymagane zatwierdzenie PR i zielone CI (R-09, US-013) — ustawia PO w GitHubie.
 - Kontener działa jako `app` (UID 10001). Wolumeny używane dotąd mają już tego właściciela. Nowy katalog
   hosta: `chown -R 10001:10001 <katalog>` przed startem; jednorazowo można też uruchomić kontener z

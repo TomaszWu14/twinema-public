@@ -9,7 +9,7 @@
 | Jednostkowe — logika | symulacja, ML, geometria i walidacja układu, importery, napisy filmu (czysty Python) | `unittest` / Django test runner | `web/*/tests/` | szeroko pokryte |
 | Jednostkowe — JS | moduły edytora, sceny, odtwarzaczy (czyste funkcje) | `node --test` | `web/twin/tests/js/` | pokryte kluczowe moduły |
 | Integracyjne | widoki z bazą: uprawnienia ról, formularze, importy, API stanowiska | Django `TestCase` + klient testowy | `web/*/tests/test_*views*.py`, `core/tests/test_role_matrix.py` | pokryte |
-| End-to-end | kluczowe ścieżki w przeglądarce | Playwright (Chromium) | — | **brak** — planowane dla: logowanie → symulacja → prezentacja; demo gościa |
+| End-to-end | kluczowe ścieżki w przeglądarce: logowanie i główne ekrany, wynik symulacji, ekrany ze skryptami pod wymuszoną CSP, demo gościa i link publiczny | Playwright (Chromium), tag `e2e` | `core/tests/test_e2e.py`, job CI `e2e` | pokryte kluczowe ścieżki (US-005) |
 | Bezpieczeństwa | „brak dostępu” dla każdej roli, link publiczny, token stanowiska, scena bez danych źródłowych | Django `TestCase` | `core/tests/test_role_matrix.py`, `scenario/tests/test_public_link.py`, `render/tests/` | pokryte; rozszerzane z każdą historyjką |
 | Statyczne | lint, SAST, SCA, sekrety, kontener | ruff, bandit, semgrep, pip-audit, gitleaks, trivy | CI | [ADR-0002](../architektura/adr/0002-narzedzia-jakosci-i-bezpieczenstwa.md) |
 

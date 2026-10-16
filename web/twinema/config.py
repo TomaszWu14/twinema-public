@@ -32,7 +32,7 @@ class AppEnv(BaseSettings):
 
     # ── Sesja / bezpieczeństwo ──────────────────────────────────────────────
     SESSION_COOKIE_AGE: int = 28800
-    CSP_REPORT_ONLY: bool = True
+    CSP_REPORT_ONLY: bool = False      # US-005: CSP wymuszana; true = tylko raport (awaryjny powrót)
 
     # ── Render (worker Blendera poza serwerem, pobiera zlecenia po HTTPS) ────
     RENDER_WORKER_TOKEN: str = ""      # puste = API workera wyłączone (403)

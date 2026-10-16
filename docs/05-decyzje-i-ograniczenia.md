@@ -208,6 +208,7 @@ Pozycje T-n mają odpowiedniki w [backlogu](analiza/HISTORYJKI.md) (kolumna „�
 | T-8 | ~~Własne strony „nie znaleziono” i „błąd serwera”~~ — zrobione (US-020) | — | — |
 | T-9 | ~~Informacja, że wynik przypięty do prezentacji 3D został usunięty~~ — zrobione: przypięty wynik nie wypada z limitu, a po usunięciu scenariusza prezentacja ostrzega (US-025) | — | — |
 | T-10 | ~~Zachowanie danych formularza po błędzie walidacji~~ — zrobione: scenariusz, typ regału, edycja stref (US-021) | — | — |
+| T-17 | Przenieść atrybuty `style=` i bloki `<style>` z szablonów do plików CSS, potem usunąć `'unsafe-inline'` z `style-src` | CSP dopuszcza style wstawione w stronę (mniejsze ryzyko niż skrypty) | niski |
 | T-11 | ~~Limit prób dla zleceń renderu odrzucanych przez serwer~~ — zrobione (US-015) | — | — |
 | T-12 | Ograniczenia spójności w bazie (min ≤ śr ≤ max, unikalność strumieni i grup floty) | dziś pilnuje tylko aplikacja | niski |
 | T-13 | Osobne konta gościa albo ograniczenie sesji demo | współdzielone konto demo | niski |

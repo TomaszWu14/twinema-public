@@ -68,7 +68,7 @@ Oznaczenia statusu: ✅ zabezpieczone · ⚠️ częściowo · ❌ brak. Pozycje
 | I | wyciek danych źródłowych | pokaz bez danych źródłowych; tylko odczyt | ✅ |
 | I | wyciek linku przez nagłówek Referer, wyszukiwarki, pośredników | `no-referrer`, `noindex`, `no-store` | ✅ |
 | I | link w logach dostępu | adres z kluczem trafia do logów serwera | ⚠️ R-12 |
-| T | XSS przez podpisy slajdów | `textContent` i escapowanie; CSP tylko w trybie raportu | ⚠️ R-04 |
+| T | XSS przez podpisy slajdów | `textContent` i escapowanie; CSP wymuszana — skrypty tylko z serwera albo z nonce (US-005) | ✅ |
 
 ## F4. Demo publiczne (gość)
 

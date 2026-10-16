@@ -162,7 +162,7 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
+<script nonce="{{ csp_nonce }}">
   var body = document.getElementById('feat-body');
   var tpl  = document.getElementById('row-tpl');
   var deletedInput = document.getElementById('deleted-ids');

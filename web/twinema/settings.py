@@ -80,6 +80,7 @@ TEMPLATES = [
                 "core.context_processors.branding",
                 "core.context_processors.user_roles",
                 "core.context_processors.navigation",
+                "core.context_processors.csp",
             ],
         },
     },

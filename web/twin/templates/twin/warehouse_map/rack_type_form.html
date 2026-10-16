@@ -157,7 +157,7 @@
   </div>
 </form>
 
-<script>
+<script nonce="{{ csp_nonce }}">
 // Existing level heights + weights from server
 const EXISTING = {{ level_heights_json|safe }};
 const EXISTING_W = {{ level_weights_json|safe }};

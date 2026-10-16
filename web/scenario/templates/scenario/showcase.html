@@ -152,8 +152,8 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script type="importmap">{"imports":{"three":"/static/twin/vendor/three.module.js","three/addons/":"/static/twin/vendor/addons/"}}</script>
-<script type="module">
+<script nonce="{{ csp_nonce }}" type="importmap">{"imports":{"three":"/static/twin/vendor/three.module.js","three/addons/":"/static/twin/vendor/addons/"}}</script>
+<script nonce="{{ csp_nonce }}" type="module">
 import { startShowcase } from '{% static "twin/js/showcase.js" %}';
 const $ = (id) => document.getElementById(id);
 if (window.__tw3dNoWebGL) {

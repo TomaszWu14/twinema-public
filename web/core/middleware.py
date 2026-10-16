@@ -2,6 +2,7 @@
 import contextvars
 import ipaddress
 import logging
+import secrets
 import uuid
 
 from django.conf import settings
@@ -17,12 +18,14 @@ class RequestIDLogFilter(logging.Filter):
         return True
 
 
-# CSP startuje jako report-only (nie psuje UI); CSP_REPORT_ONLY=false wymusza.
+# US-005: skrypty tylko z serwera albo z jednorazowym nonce żądania (`csp_nonce` w szablonach) — bez
+# 'unsafe-inline' dla skryptów; obsługa zdarzeń w atrybutach (onclick=) jest zablokowana (core/js/ui.js).
+# Style zostają z 'unsafe-inline' (atrybuty style= w szablonach) — mniejsze ryzyko, dług T-17.
 # 'unsafe-eval' nie ma — three.js go nie potrzebuje; dodać świadomie, jeśli wejdzie biblioteka, która tak.
 _CSP = (
-    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
+    "default-src 'self'; script-src 'self' 'nonce-{nonce}'; style-src 'self' 'unsafe-inline'; "
     "font-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; "
-    "frame-ancestors 'self'; base-uri 'self'"
+    "frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
 )
 _PERMISSIONS_POLICY = "geolocation=(), microphone=(), payment=()"
 
@@ -52,11 +55,12 @@ class SecurityHeadersMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        request.csp_nonce = secrets.token_urlsafe(16)          # nowy na każde żądanie (US-005)
         response = self.get_response(request)
         response.setdefault("Permissions-Policy", _PERMISSIONS_POLICY)
-        header = ("Content-Security-Policy-Report-Only" if getattr(settings, "CSP_REPORT_ONLY", True)
+        header = ("Content-Security-Policy-Report-Only" if getattr(settings, "CSP_REPORT_ONLY", False)
                   else "Content-Security-Policy")
-        response.setdefault(header, _CSP)
+        response.setdefault(header, _CSP.format(nonce=request.csp_nonce))
         return response
 
 

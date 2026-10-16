@@ -59,7 +59,7 @@
         <form method="post" action="{% url 'twin:warehouse_rack_type_delete' t.pk %}" style="display:inline">
           {% csrf_token %}
           <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--red)"
-                  onclick="return confirm('Usunąć typ {{ t.code }}?')">Usuń</button>
+                  data-confirm="Usunąć typ {{ t.code }}?">Usuń</button>
         </form>{% endif %}
       </td>
     </tr>
@@ -91,7 +91,7 @@
         <form method="post" action="{% url 'twin:warehouse_rack_type_delete' t.pk %}" style="display:inline">
           {% csrf_token %}
           <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--red)"
-                  onclick="return confirm('Usunąć typ {{ t.code }}?')">Usuń</button>
+                  data-confirm="Usunąć typ {{ t.code }}?">Usuń</button>
         </form>{% endif %}
       </td>
     </tr>

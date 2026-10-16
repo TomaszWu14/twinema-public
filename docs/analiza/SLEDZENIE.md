@@ -43,4 +43,5 @@
 | FR-010 (unikalna nazwa sprzętu) | US-022 | `equipment/tests/test_equipment.py::OwnModelUniqueNameTests` | ten PR (#68) |
 | FR-015 (wynik w prezentacji) | US-025 | `scenario/tests/test_showcase.py::…test_pinned_run_survives_run_limit`, `…test_designer_warned_when_pinned_run_was_deleted` | ten PR (#68) |
 | FR-008, FR-009 (formularze) | US-021 | `twin/tests/test_rack_type_weights.py::RackTypeFormKeepsValuesTests`, `test_model_edit.py::…test_rejected_edit_keeps_typed_values` | ten PR (#68) |
-| NFR-011, NFR-013–014 | US-005, US-009 | — | planowane |
+| NFR-011 | US-005 | `core/tests/test_csp.py`, `core/tests/test_e2e.py` (job `e2e`) | ten PR (#68) |
+| NFR-013–014 | US-009 | — | planowane |

@@ -15,7 +15,7 @@
 | US-009 | Jako Administrator chcę kopii zapasowej bazy i plików z procedurą odtworzenia, aby po awarii odzyskać dane | Must | R-10, T-16 | procedura w RUNBOOK; automatyzacja do realizacji |
 | US-013 | Jako PO chcę, aby każdy merge do `main` wymagał mojego zatwierdzenia, aby żadna zmiana nie trafiła na produkcję bez akceptacji | Must | R-09 | częściowo — auto-merge usunięty (PR #68); ochronę gałęzi ustawia PO |
 | US-007 | Jako Administrator chcę, aby długie obliczenia szły w tle i nie mogła ich uruchamiać rola Podgląd, aby nikt nie zablokował serwera | Should | R-07, T-1 | **zrobione** (PR #68, ADR-0004) — symulacja dnia i scenariusza, kalibracja; reszta długich operacji: T-1 |
-| US-005 | Jako Administrator chcę wymuszonej polityki CSP, aby ograniczyć skutki ewentualnego XSS | Should | R-04 | do realizacji (wymaga testu UI) |
+| US-005 | Jako Administrator chcę wymuszonej polityki CSP, aby ograniczyć skutki ewentualnego XSS | Should | R-04 | **zrobione** (PR #68) — skrypty z nonce, testy E2E; style inline — T-17 |
 | US-006 | Jako Administrator chcę, aby nagłówek adresu klienta był brany pod uwagę tylko od proxy w sieci wewnętrznej, aby blokady logowania nie dało się obejść podmianą adresu | Should | R-05 | **zrobione** (PR #68) |
 | US-008 | Jako Administrator chcę dziennika operacji wrażliwych, aby wiedzieć, kto usunął dane albo udostępnił link | Should | R-08 | **zrobione** (PR #68) — retencja do potwierdzenia (Z-33) |
 | US-014 | Jako SEC chcę, aby semgrep i trivy blokowały PR po triażu pierwszych wyników, aby nowe ustalenia nie przechodziły | Should | R-18 | **zrobione** (PR #68) — [triaż](../bezpieczenstwo/TRIAZ_SKANOW.md) |
@@ -127,3 +127,9 @@
 **US-025**
 - *Given* wynik symulacji przypięty do prezentacji 3D, *When* scenariusz przekracza limit 20 przebiegów, *Then* przypięty wynik zostaje.
 - *Given* przypięty wynik usunięty razem ze scenariuszem, *Then* Projektant widzi na prezentacji ostrzeżenie z datą, a lista prezentacji oznacza ją „wynik symulacji usunięty”; Podgląd i link publiczny ostrzeżenia nie widzą.
+
+**US-005**
+- *Given* dowolna strona, *Then* odpowiedź ma wymuszony nagłówek `Content-Security-Policy`; `script-src` nie zawiera `'unsafe-inline'` ani `'unsafe-eval'`, a skrypty w szablonach mają jednorazowy nonce żądania.
+- *Given* ekrany ze skryptami (3D, edytory, wykresy, prezentacja, odtwarzacz, studio), *When* test E2E je otwiera, *Then* przeglądarka nie zgłasza naruszeń CSP ani błędów JavaScript.
+- *Given* szablon z `onclick=`/`onchange=`/`onsubmit=`, *Then* test zgłasza błąd — potwierdzenia i automatyczne wysyłanie działają przez `data-confirm` i `data-autosubmit`.
+- *Given* awaria strony po wdrożeniu, *Then* `CSP_REPORT_ONLY=true` przywraca tryb raportu bez zmiany kodu.

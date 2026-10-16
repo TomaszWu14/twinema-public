@@ -52,7 +52,7 @@ Dług techniczny: T-1…T-16 w [05-decyzje-i-ograniczenia.md](05-decyzje-i-ogran
 | 3 | Login pracownika magazynu w historii zadań — dane osobowe bez minimalizacji | **wysoka** | R-06 | **naprawione** — pseudonimizacja przy imporcie i migracja danych istniejących (US-012) |
 | 4 | Brak kopii zapasowych | **wysoka** | R-10 | procedura dodana; automatyzacja (US-009) |
 | 5 | Projektant zmieniał i usuwał cudze modele sprzętu (kontrola dostępu do obiektu) | średnia | R-03 | **naprawione** w tym PR (US-001) |
-| 6 | CSP tylko w trybie raportu, z `'unsafe-inline'` | średnia | R-04 | wymuszenie po teście UI (US-005) |
+| 6 | CSP tylko w trybie raportu, z `'unsafe-inline'` | średnia | R-04 | **naprawione** — CSP wymuszana, skrypty z nonce, testy E2E (US-005) |
 | 7 | Zaufanie do `X-Forwarded-For` — obejście blokady logowania przy pominięciu proxy | średnia | R-05 | **naprawione** (US-006) |
 | 8 | Długie obliczenia uruchamiane GET-em także przez rolę Podgląd / gościa | średnia | R-07 | **naprawione** — obliczenia tylko dla Projektanta (Z-3); kolejka zadań w bazie (US-007) do realizacji |
 | 9 | Brak dziennika operacji wrażliwych | średnia | R-08 | **naprawione** (US-008) |

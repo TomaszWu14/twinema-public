@@ -134,7 +134,7 @@
   Dzień roboczy = ruch ≥ 10 % mediany. Pojemność (miejsca paletowe) wymiaruj na maksymalny stan, nie na percentyl ruchu —
   dziś jedyne źródło to snapshot zajętości; historia stanów przyjdzie z importem stanów.</p>
 
-<script>
+<script nonce="{{ csp_nonce }}">
 (function () {
   const d = {{ chart_json|safe }};
   if (!d || typeof echarts === 'undefined') return;

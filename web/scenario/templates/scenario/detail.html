@@ -348,7 +348,7 @@
 {% endblock %}
 {% block extra_scripts %}
 <p class="sr-only" id="sc-fs-live" aria-live="polite"></p>
-<script type="module">
+<script nonce="{{ csp_nonce }}" type="module">
 import { bindFullscreenButton } from '{% static "twin/js/fullscreen.js" %}';
 document.querySelectorAll('[data-fs-target]').forEach((b) => {
   const box = document.getElementById(b.dataset.fsTarget);
@@ -357,7 +357,7 @@ document.querySelectorAll('[data-fs-target]').forEach((b) => {
   }, 60) });
 });
 </script>
-<script>
+<script nonce="{{ csp_nonce }}">
 (function () {
   var form = document.getElementById('sc-simform');
   if (form) form.addEventListener('submit', function () {

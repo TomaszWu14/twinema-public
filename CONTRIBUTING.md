@@ -79,7 +79,7 @@ Uzasadnienie wyboru narzędzi: [ADR-0002](docs/architektura/adr/0002-narzedzia-j
 | Kontrola | Narzędzie | Lokalnie | W CI |
 |---|---|---|---|
 | Lint | ruff | `ruff check .` | blokuje |
-| Testy Python | Django test runner | `cd web && DJANGO_DEBUG=true DJANGO_ALLOWED_HOSTS='*' python manage.py test --parallel 4` | blokuje (PostgreSQL) |
+| Testy Python | Django test runner | `cd web && DJANGO_DEBUG=true DJANGO_ALLOWED_HOSTS='*' python manage.py test --parallel 4 --exclude-tag e2e` | blokuje (PostgreSQL) |
 | Testy JS | node --test | `node --test web/twin/tests/js/*.test.mjs` | blokuje |
 | Migracje | makemigrations --check | pre-commit | blokuje |
 | Pokrycie | coverage | `cd web && coverage run --rcfile=../pyproject.toml manage.py test --parallel 4 && coverage combine --rcfile=../pyproject.toml && coverage report --rcfile=../pyproject.toml` | raport + próg 80% logiki domenowej (blokuje) |
@@ -88,6 +88,7 @@ Uzasadnienie wyboru narzędzi: [ADR-0002](docs/architektura/adr/0002-narzedzia-j
 | SCA | pip-audit, Dependabot | `pip-audit -r requirements.txt` | blokuje |
 | Sekrety | gitleaks | pre-commit | blokuje |
 | Kontener | trivy (Dockerfile, obraz) | `trivy config .`, `trivy image twinema:scan` | blokuje (obraz: wysokie i krytyczne z poprawką) |
+| Testy E2E | Playwright + Chromium | `cd web && python -m playwright install chromium && python manage.py test --tag e2e` | blokuje (job `e2e`) |
 | Worker kolejki (lokalnie) | kolejka zadań w bazie ([ADR-0004](docs/architektura/adr/0004-kolejka-zadan-w-bazie.md)) | `cd web && python manage.py run_jobs` (w testach: `core.jobs.run_pending()`) | — |
 | Wdrożenie | Django deploy check | `python manage.py check --deploy` | blokuje |
 
@@ -96,3 +97,9 @@ Uzasadnienie wyboru narzędzi: [ADR-0002](docs/architektura/adr/0002-narzedzia-j
 - Nowa funkcja lub zmiana: issue z szablonu **Historyjka użytkownika**.
 - Błąd: szablon **Błąd** (bez danych produkcyjnych w treści i załącznikach).
 - Podatność: **nie** przez publiczne issue — zob. [SECURITY.md](SECURITY.md).
+
+### Szablony a CSP (US-005)
+
+Skrypt w szablonie musi mieć `nonce="{{ csp_nonce }}"`; atrybuty `onclick=`, `onchange=`, `onsubmit=` są zablokowane
+(test `core/tests/test_csp.py`). Potwierdzenie: `data-confirm="pytanie"` na formularzu albo przycisku; automatyczne
+wysłanie: `data-autosubmit` na `<select>` (`core/js/ui.js`). Nowy ekran ze skryptami — dopisz go do testu E2E.

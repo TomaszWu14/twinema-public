@@ -130,7 +130,7 @@
     </form>
     {% if is_designer %}{% for v in variants %}
     <form id="del{{ v.pk }}" method="post" action="{% url 'twin:warehouse_variant_delete' v.pk %}"
-          onsubmit="return confirm('Usunąć wariant „{{ v.name|escapejs }}”?')">{% csrf_token %}</form>
+          data-confirm="Usunąć wariant „{{ v.name }}”?">{% csrf_token %}</form>
     {% endfor %}{% endif %}
     {% endif %}
 
