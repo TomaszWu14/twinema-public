@@ -65,7 +65,8 @@
         <label for="sim-kp" title="Z ekranu „Kalibracja na obecnej hali”">Kalibracja kompletacji ×</label>
         <input id="sim-kp" type="number" name="kp" value="{{ calib.picking|stringformat:'g' }}" step="0.05" min="0.3" max="10">
       </div>
-      <button type="submit" class="btn btn-primary">Symuluj dzień</button>
+      <button type="submit" class="btn btn-primary">{% if may_compute %}Symuluj dzień{% else %}Pokaż policzony wynik{% endif %}</button>
+      {% if not may_compute %}<p class="text-muted text-sm" style="margin-top:8px">Nowe obliczenia uruchamia Projektant — rola Podgląd widzi wyniki już policzone.</p>{% endif %}
     </form>
   </div>
 </div>
@@ -74,6 +75,8 @@
 <div class="alert alert-warning" style="margin-top:16px">Brak modeli hali — utwórz go w <a href="{% url 'twin:warehouse_model_generator' %}">Generatorze hali</a>.</div>
 {% elif not day %}
 <div class="alert alert-warning" style="margin-top:16px">Brak potwierdzonych zadań w tym imporcie — nie ma dnia projektowego.</div>
+{% elif ran and not result and not may_compute %}
+<div class="alert alert-info" style="margin-top:16px">Dla tych parametrów nie ma jeszcze policzonego wyniku — poproś Projektanta o uruchomienie symulacji.</div>
 {% elif ran and not result %}
 <div class="alert alert-warning" style="margin-top:16px">Model „{{ wm.name }}” nie ma regałów VNA, półek K1 albo doków — symulacja dotyczy hali z <a href="{% url 'twin:warehouse_model_generator' %}">Generatora hali</a>.</div>
 {% elif result %}

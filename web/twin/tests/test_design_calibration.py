@@ -104,3 +104,24 @@ class CalibrationViewTests(TestCase):
         r = self.client.get(f"/magazyn/zadania-ewm/{self.batch.pk}/symulacja/", {"kt": "1,7", "kp": "2"})
         self.assertContains(r, 'name="kt" value="1.7"')
         self.assertContains(r, 'name="kp" value="2"')
+
+
+class ViewerDoesNotCalibrateTests(CalibrationViewTests):
+    """Z-3 (decyzja PO, R-07): kalibrację liczy tylko Projektant."""
+
+    def test_viewer_gets_no_calibration(self):
+        from unittest.mock import patch
+
+        from django.contrib.auth.models import Group
+
+        from core.roles import GROUP_VIEWER
+        from twin.views import warehouse_calibration as v
+        u = get_user_model().objects.create_user("zarzad", password="x")
+        u.groups.add(Group.objects.get_or_create(name=GROUP_VIEWER)[0])
+        self.client.force_login(u)
+        with patch.object(v, "calibrate", wraps=v.calibrate) as spy:
+            r = self.client.get(f"/magazyn/zadania-ewm/{self.batch.pk}/kalibracja/", {"model": self.wm.pk})
+        self.assertEqual(spy.call_count, 0)
+        self.assertIsNone(r.context["result"])
+        self.assertContains(r, "Kalibrację liczy Projektant")
+        self.assertNotContains(r, "Policz kalibrację")

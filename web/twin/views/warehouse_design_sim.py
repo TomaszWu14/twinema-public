@@ -4,6 +4,8 @@ from urllib.parse import urlencode
 
 from django.core.cache import cache
 
+from core.roles import GROUP_ADMIN, GROUP_DESIGNER, has_role
+
 from twin.shared import _planner, cache_digest, get_object_or_404, hall_feature_dict, render, WarehouseModel
 from twin.blender_scene import model_racks
 from twin.design_day import PERCENTILES, build_profile, load_inputs
@@ -62,11 +64,12 @@ def ewm_tasks_simulate(request, pk):
     wm = next((m for m in models if str(m.pk) == g.get("model")), models[0] if models else None)
     day = design_day(batch, prm["p"])
     result, n_tasks = (None, 0)
+    may_compute = has_role(request.user, GROUP_ADMIN, GROUP_DESIGNER)   # Z-3 (decyzja PO): liczy tylko Projektant
     if day and wm and "run" in g:
         # ten sam (partia, wersja modelu, dzień, parametry) = ten sam wynik — odświeżenie strony nie liczy dnia od nowa
         key = "sim:" + cache_digest(batch.pk, wm.pk, wm.updated_at.timestamp(), day, prm)
         result, n_tasks = cache.get(key) or (None, None)
-        if n_tasks is None:
+        if n_tasks is None and may_compute:
             result, n_tasks = run_simulation(batch, wm, day, prm)
             cache.set(key, (result, n_tasks), CACHE_TTL)
     anim_query = urlencode({"sim": batch.pk, "p": prm["p"], "mult": prm["mult"], **prm["fleet"],
@@ -76,5 +79,5 @@ def ewm_tasks_simulate(request, pk):
         "fleet_rows": [(k, label, prm["fleet"][k]) for k, label in FLEET_KINDS],
         "models": models, "wm": wm, "day": day, "ran": "run" in g, "result": result, "n_tasks": n_tasks,
         "wait_rows": [(dict(TASK_KINDS).get(k, k), w) for k, w in (result or {}).get("waits", {}).items()],
-        "anim_query": anim_query, "calib": prm["calib"],
+        "anim_query": anim_query, "calib": prm["calib"], "may_compute": may_compute,
     })

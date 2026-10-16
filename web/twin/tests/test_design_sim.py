@@ -137,3 +137,34 @@ class SimulationViewTests(TestCase):
             f.save()                                              # sygnał podbija wersję modelu
             self.client.get(url, q)
             self.assertEqual(sim.call_count, 2)
+
+
+class ViewerDoesNotComputeTests(SimulationViewTests):
+    """Z-3 (decyzja PO, R-07): rola Podgląd nie uruchamia symulacji — widzi tylko wynik policzony wcześniej."""
+
+    def _viewer(self):
+        from django.contrib.auth.models import Group
+
+        from core.roles import GROUP_VIEWER
+        u = get_user_model().objects.create_user("zarzad", password="x")
+        u.groups.add(Group.objects.get_or_create(name=GROUP_VIEWER)[0])
+        self.client.force_login(u)
+
+    def test_viewer_run_does_not_simulate(self):
+        from unittest.mock import patch
+
+        from twin.views import warehouse_design_sim as v
+        self._viewer()
+        url = f"/magazyn/zadania-ewm/{self.batch.pk}/symulacja/"
+        with patch.object(v, "run_simulation", wraps=v.run_simulation) as spy:
+            r = self.client.get(url, {"run": 1, "model": self.wm.pk, "agv": 2, "kombi": 2, "ept": 2})
+        self.assertEqual(spy.call_count, 0)
+        self.assertContains(r, "poproś Projektanta")
+        self.assertNotContains(r, "Sugerowane szt.")
+
+    def test_viewer_sees_result_computed_by_designer(self):
+        url = f"/magazyn/zadania-ewm/{self.batch.pk}/symulacja/"
+        q = {"run": 1, "model": self.wm.pk, "agv": 2, "kombi": 2, "ept": 2}
+        self.assertContains(self.client.get(url, q), "Sugerowane szt.")         # superuser liczy i zapisuje w cache
+        self._viewer()
+        self.assertContains(self.client.get(url, q), "Sugerowane szt.")

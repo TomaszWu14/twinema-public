@@ -2,6 +2,8 @@
 # i pickerów z zadań EWM dnia projektowego vs fizyka symulacji na modelu obecnej hali.
 from urllib.parse import urlencode
 
+from core.roles import GROUP_ADMIN, GROUP_DESIGNER, has_role
+
 from twin.shared import _planner, get_object_or_404, hall_feature_dict, render, WarehouseModel
 from twin.blender_scene import model_racks
 from twin.blender_stock import SlotLocator, load_master_levels
@@ -27,7 +29,8 @@ def ewm_tasks_calibration(request, pk):
     wm = next((m for m in models if str(m.pk) == request.GET.get("model")), None)
     day = design_day(batch, p)
     result = None
-    if wm and day:
+    may_compute = has_role(request.user, GROUP_ADMIN, GROUP_DESIGNER)   # Z-3 (decyzja PO): liczy tylko Projektant
+    if wm and day and may_compute:
         rows = _day_rows(batch, day)
         codes = {c for r in rows for c in (r[4], r[5]) if c}
         locator = SlotLocator(model_racks(wm), codes, load_master_levels())
@@ -37,6 +40,6 @@ def ewm_tasks_calibration(request, pk):
     kinds = dict(TASK_KINDS)
     return render(request, "twin/ewm_tasks/calibration.html", {
         "batch": batch, "p": p, "percentiles": PERCENTILES, "models": models, "wm": wm, "day": day,
-        "result": result, "sim_query": sim_query, "gap_max_min": GAP_MAX_S // 60, "min_pairs": MIN_PAIRS,
+        "result": result, "may_compute": may_compute, "sim_query": sim_query, "gap_max_min": GAP_MAX_S // 60, "min_pairs": MIN_PAIRS,
         "kind_rows": [dict(r, label=kinds.get(r["kind"], r["kind"])) for r in (result or {}).get("kinds", [])],
     })
