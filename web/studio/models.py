@@ -102,6 +102,7 @@ class MontageJob(models.Model):
     finished_at = models.DateTimeField(null=True, blank=True)
     worker = models.CharField(max_length=80, blank=True, default="")
     claim_token = models.CharField(max_length=64, blank=True, default="", editable=False)
+    attempts = models.PositiveSmallIntegerField(default=0, editable=False)   # US-015
     result = models.FileField(upload_to="films/%Y/%m/", blank=True)
     log = models.TextField(blank=True, default="")
 

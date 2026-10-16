@@ -128,6 +128,21 @@ class RenderMontageTests(TestCase):
         return getattr(self.client, method)(reverse(name, args=args), data, HTTP_X_WORKER_TOKEN=token,
                                             HTTP_X_CLAIM=claim)
 
+    def test_montage_gives_up_after_max_attempts(self):
+        """US-015: montaż bez wyniku wraca do kolejki najwyżej 3 razy, potem kończy się błędem."""
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from render.api import MAX_ATTEMPTS
+        job = self._queued_montage()
+        for _ in range(MAX_ATTEMPTS):
+            self.assertEqual(self._api("studio:api_claim").json()["id"], job.pk)
+            MontageJob.objects.filter(pk=job.pk).update(claimed_at=timezone.now() - timedelta(hours=5))
+        self.assertEqual(self._api("studio:api_claim").status_code, 204)
+        job.refresh_from_db()
+        self.assertEqual((job.status, job.attempts), ("error", MAX_ATTEMPTS))
+
     def test_worker_flow_manifest_files_result(self):
         job = self._queued_montage()
         self.assertEqual(self._api("studio:api_claim", token="zly" * 12).status_code, 403)

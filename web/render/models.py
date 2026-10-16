@@ -36,6 +36,7 @@ class RenderJob(models.Model):
     finished_at = models.DateTimeField(null=True, blank=True)
     worker = models.CharField(max_length=80, blank=True, default="", verbose_name="Worker")
     claim_token = models.CharField(max_length=64, blank=True, default="", editable=False)
+    attempts = models.PositiveSmallIntegerField(default=0, editable=False, verbose_name="Próby")   # US-015
     result = models.FileField(upload_to="renders/%Y/%m/", blank=True, verbose_name="Plik wyniku")
     log = models.TextField(blank=True, default="", verbose_name="Log workera")
 
