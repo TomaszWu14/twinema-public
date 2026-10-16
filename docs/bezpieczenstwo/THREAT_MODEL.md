@@ -106,4 +106,4 @@ Oznaczenia statusu: ✅ zabezpieczone · ⚠️ częściowo · ❌ brak. Pozycje
 | T | podmieniony tag akcji CI albo przejęte wydanie zależności | akcje przypięte skrótem commita; Dependabot z karencją 7 dni (US-018) | ✅ |
 | I | sekret w repozytorium | gitleaks w CI i pre-commit | ✅ |
 | I | dane rzeczywistego obiektu w historii repozytorium | procedura czyszczenia gotowa ([CZYSZCZENIE_HISTORII](../operacje/CZYSZCZENIE_HISTORII.md)), wykonuje PO | ⚠️ R-01 |
-| A | utrata danych | brak mechanizmu kopii zapasowych w projekcie | ❌ R-10 |
+| A | utrata danych | codzienna kopia bazy i mediów z sumami SHA-256, retencja 14, próba odtworzenia co miesiąc (US-009) | ✅ |

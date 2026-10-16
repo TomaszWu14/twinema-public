@@ -52,6 +52,8 @@ trafiają do sekcji „Unreleased”.
   czeka na wynik, ekran pokazuje stan i link do wyniku (T-1).
 - Testy E2E w przeglądarce (Playwright, job CI `e2e`): logowanie i główne ekrany, wynik symulacji, ekrany ze
   skryptami pod wymuszoną CSP, demo gościa i link publiczny.
+- Kopie zapasowe: `manage.py backup` (baza + media, manifest SHA-256, retencja 14, `--verify`); obraz z
+  `postgresql-client` (US-009). **Do ustawienia:** `BACKUP_DIR` i zadanie zaplanowane w Coolify (RUNBOOK).
 - Procedura czyszczenia historii repozytorium (`docs/operacje/CZYSZCZENIE_HISTORII.md`, R-01) — wykonuje PO.
 
 ### Security

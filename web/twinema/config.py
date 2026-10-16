@@ -50,6 +50,9 @@ class AppEnv(BaseSettings):
     DEMO_VIDEO_URL: str = ""           # adres filmu (np. YouTube) na stronie /demo/; puste = bez przycisku
 
     # ── Dziennik operacji wrażliwych (US-008) ──────────────────────────────
+    # ── Kopie zapasowe (US-009) ────────────────────────────────────────────────
+    BACKUP_DIR: str = ""              # katalog kopii poza wolumenem mediów; puste = `manage.py backup` odmawia
+
     # ── Kolejka zadań w bazie (US-007, ADR-0004) ──────────────────────────────
     JOB_STALE_MIN: int = 60            # zadanie „w toku” dłużej = worker padł → wraca do kolejki
     RUN_WORKER: bool = True            # True = docker-entrypoint.sh uruchamia worker obok serwera

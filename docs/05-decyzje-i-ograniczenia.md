@@ -214,7 +214,7 @@ Pozycje T-n mają odpowiedniki w [backlogu](analiza/HISTORYJKI.md) (kolumna „�
 | T-13 | Osobne konta gościa albo ograniczenie sesji demo | współdzielone konto demo | niski |
 | T-14 | Pełna próba filmu ze stanowiskiem renderującym | moduł filmu niesprawdzony z prawdziwym renderem | niski (moduł opcjonalny) |
 | T-15 | Usunięcie pozostałości z sekcji [Do anonimizacji](#do-anonimizacji), także z historii repozytorium | ochrona danych firmowych i osobowych | wysoki — procedura gotowa: [CZYSZCZENIE_HISTORII](operacje/CZYSZCZENIE_HISTORII.md), wykonuje PO |
-| T-16 | Polityka kopii zapasowych bazy i katalogu plików (podkłady, rendery, filmy) | w kodzie brak mechanizmu kopii | wysoki |
+| T-16 | ~~Polityka kopii zapasowych bazy i katalogu plików~~ — zrobione: `manage.py backup` (US-009, Z-36); harmonogram ustawia Administrator platformy | — | — |
 
 ## Do anonimizacji
 

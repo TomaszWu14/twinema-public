@@ -12,7 +12,7 @@
 | US-011 | Jako Administrator chcę ostrzeżenia przy starcie, gdy demo publiczne jest włączone na instancji z danymi spoza demo, aby nie udostępnić ich światu | Must | R-02 | **zrobione** (PR #68) |
 | US-012 | Jako pracownik magazynu chcę, aby mój login z historii zadań był pseudonimizowany przy imporcie, aby nikt nie oceniał mojej wydajności bez podstawy | Must (po decyzji PO) | R-06, RODO CP-4 | **zrobione** (PR #68) |
 | US-004 | Jako Projektant chcę przed usunięciem hali, scenariusza lub sprzętu zobaczyć listę obiektów usuwanych razem z nimi, aby nie stracić wyników i prezentacji | Must | T-5 | **zrobione** (PR #68) |
-| US-009 | Jako Administrator chcę kopii zapasowej bazy i plików z procedurą odtworzenia, aby po awarii odzyskać dane | Must | R-10, T-16 | procedura w RUNBOOK; automatyzacja do realizacji |
+| US-009 | Jako Administrator chcę kopii zapasowej bazy i plików z procedurą odtworzenia, aby po awarii odzyskać dane | Must | R-10, T-16 | **zrobione** (PR #68) — `manage.py backup`, harmonogram i kopia poza serwerem ustawia Administrator platformy |
 | US-013 | Jako PO chcę, aby każdy merge do `main` wymagał mojego zatwierdzenia, aby żadna zmiana nie trafiła na produkcję bez akceptacji | Must | R-09 | częściowo — auto-merge usunięty (PR #68); ochronę gałęzi ustawia PO |
 | US-007 | Jako Administrator chcę, aby długie obliczenia szły w tle i nie mogła ich uruchamiać rola Podgląd, aby nikt nie zablokował serwera | Should | R-07, T-1 | **zrobione** (PR #68, ADR-0004) — symulacja dnia i scenariusza, kalibracja; reszta długich operacji: T-1 |
 | US-005 | Jako Administrator chcę wymuszonej polityki CSP, aby ograniczyć skutki ewentualnego XSS | Should | R-04 | **zrobione** (PR #68) — skrypty z nonce, testy E2E; style inline — T-17 |
@@ -133,3 +133,13 @@
 - *Given* ekrany ze skryptami (3D, edytory, wykresy, prezentacja, odtwarzacz, studio), *When* test E2E je otwiera, *Then* przeglądarka nie zgłasza naruszeń CSP ani błędów JavaScript.
 - *Given* szablon z `onclick=`/`onchange=`/`onsubmit=`, *Then* test zgłasza błąd — potwierdzenia i automatyczne wysyłanie działają przez `data-confirm` i `data-autosubmit`.
 - *Given* awaria strony po wdrożeniu, *Then* `CSP_REPORT_ONLY=true` przywraca tryb raportu bez zmiany kodu.
+
+**US-009**
+- *Given* ustawione `BACKUP_DIR`, *When* działa `manage.py backup`, *Then* powstaje zestaw z kopią bazy, archiwum mediów (bez plików tymczasowych) i manifestem z sumami SHA-256; z kopii SQLite odczytuje się dane.
+- *Given* 15. zestaw, *Then* najstarszy jest usuwany (retencja 14).
+- *Given* błąd w trakcie kopii, *Then* niepełny zestaw nie zostaje; *Given* brak `BACKUP_DIR` albo katalog w mediach, *Then* polecenie odmawia.
+- *Given* PostgreSQL, *Then* hasło bazy nie trafia do argumentów `pg_dump` (tylko do zmiennej środowiskowej).
+- *Given* zmieniony plik zestawu, *When* `backup --verify`, *Then* polecenie zgłasza niezgodną sumę.
+
+**R-02 (blokada demo)**
+- *Given* `DEMO_PUBLIC=true` i w bazie dane spoza demo, *Then* strona demo nie pokazuje „Wejdź do systemu”, a wejście gościa zwraca 403 z wyjaśnieniem.

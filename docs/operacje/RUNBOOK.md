@@ -49,26 +49,30 @@ zgodną — odtworzenie bazy z kopii sprzed wdrożenia (niżej).
 
 ## Kopie zapasowe
 
-Projekt nie ma automatycznego mechanizmu kopii (R-10, US-009). Do czasu automatyzacji — procedura ręczna
-przed każdą migracją na produkcji i co najmniej raz w tygodniu. RPO i RTO ustala PO.
+Decyzja PO (Z-36): **RPO 24 h, RTO 4 h**, retencja 14 kopii, próba odtworzenia co miesiąc (US-009, R-10).
 
-| Co | PostgreSQL | SQLite |
-|---|---|---|
-| Baza | `pg_dump --format=custom --file=twinema-RRRRMMDD.dump "$DATABASE_URL"` | zatrzymanie aplikacji albo `sqlite3 "$DB_PATH" ".backup twinema-RRRRMMDD.sqlite3"` |
-| Media | archiwum katalogu `MEDIA_ROOT` (`tar czf media-RRRRMMDD.tgz -C "$MEDIA_ROOT" .`) | jak obok |
-| Przechowywanie | poza serwerem aplikacji, szyfrowane, z ograniczonym dostępem (dane poufne i osobowe) | jak obok |
-| Retencja | propozycja: 7 dziennych, 4 tygodniowe — do potwierdzenia z [RODO](../bezpieczenstwo/RODO.md) | jak obok |
+| Krok | Działanie |
+|---|---|
+| Katalog | `BACKUP_DIR` — trwały wolumen **poza** wolumenem mediów, najlepiej na osobnym dysku; kopie zawierają dane poufne i osobowe, więc magazyn musi być szyfrowany i dostępny tylko Administratorowi platformy |
+| Harmonogram | Coolify → aplikacja → *Scheduled Tasks*: `python manage.py backup`, codziennie o 02:00 (cron `0 2 * * *`) |
+| Zawartość zestawu | katalog `RRRRMMDD-GGMMSS/`: `baza.dump` (PostgreSQL, `pg_dump --format=custom`) albo `baza.sqlite3`, `media.tar.gz` (bez plików tymczasowych importów), `manifest.json` (wersja, rozmiary, SHA-256) |
+| Retencja | polecenie zostawia 14 najnowszych zestawów (`--keep N`, żeby zmienić) |
+| Kopia poza serwerem | raz na dobę synchronizacja `BACKUP_DIR` do magazynu zewnętrznego (np. S3 z szyfrowaniem po stronie serwera) — konfiguruje Administrator platformy |
+| Kontrola | w logach zadania: „Kopia … (baza…: N KB, media…: M KB)”; brak wpisu albo błąd = alarm. Sumy: `python manage.py backup --verify <katalog zestawu>` |
 
-Kopie można też włączyć po stronie platformy (Coolify ma zaplanowane kopie baz danych) — decyzja PO.
+Ręcznie przed każdą migracją na produkcji: `python manage.py backup` w kontenerze.
 
 ## Odtworzenie
 
-1. Zatrzymaj aplikację (tryb serwisowy na platformie).
-2. Baza: `pg_restore --clean --if-exists --dbname="$DATABASE_URL" twinema-RRRRMMDD.dump` albo podmiana pliku SQLite.
-3. Media: rozpakuj archiwum do `MEDIA_ROOT`.
-4. Uruchom aplikację; kontener wykona migracje do bieżącej wersji.
-5. Sprawdź `/health/`, logowanie i otwarcie jednego modelu hali.
-6. **Próba odtworzenia** na środowisku testowym co kwartał — wynik zapisz w CHANGELOG (sekcja operacyjna) lub w issue.
+Cel: działanie w ciągu 4 h od decyzji o odtworzeniu (RTO, Z-36).
+
+1. Wybierz zestaw i sprawdź go: `python manage.py backup --verify "$BACKUP_DIR/RRRRMMDD-GGMMSS"`.
+2. Zatrzymaj aplikację (tryb serwisowy na platformie).
+3. Baza: `pg_restore --clean --if-exists --no-owner --dbname="$DATABASE_URL" baza.dump` albo podmiana pliku SQLite na `baza.sqlite3`.
+4. Media: `tar xzf media.tar.gz -C "$MEDIA_ROOT"`.
+5. Uruchom aplikację; kontener wykona migracje do bieżącej wersji.
+6. Sprawdź `/health/`, logowanie i otwarcie jednego modelu hali.
+7. **Próba odtworzenia** na środowisku testowym co miesiąc (Z-36) — wynik (data, zestaw, czas trwania) zapisz w issue.
 
 ## Incydenty
 

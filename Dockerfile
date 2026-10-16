@@ -23,7 +23,8 @@ RUN sh scripts/fetch_vendor.sh
 FROM ${PYTHON_IMAGE} AS runtime
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PATH="/opt/venv/bin:$PATH"
 WORKDIR /app
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates gosu \
+# postgresql-client: pg_dump dla `manage.py backup` (US-009)
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates gosu postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 RUN useradd --system --uid 10001 --create-home --shell /usr/sbin/nologin app \
     && python -m pip uninstall --yes --quiet pip
