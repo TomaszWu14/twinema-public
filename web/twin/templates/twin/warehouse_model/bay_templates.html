@@ -63,7 +63,7 @@
   </div>
   {% else %}
   <div class="card-body text-muted">
-    Brak szablonów. Utwórz pierwszy albo otwórz model magazynu i użyj „Wykryj z EWM” — szablony powstaną z kodów lokalizacji.
+    {% if is_designer %}Brak szablonów. Utwórz pierwszy albo otwórz model magazynu i użyj „Wykryj z EWM” — szablony powstaną z kodów lokalizacji.{% else %}Brak szablonów gniazd — zakłada je Projektant.{% endif %}
   </div>
   {% endif %}
 </div>

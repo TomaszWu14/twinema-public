@@ -102,8 +102,8 @@
     </p>
     {% else %}
     <p class="text-muted" style="padding:24px 8px">
-      Brak wariantów. Dodaj wariant bazowy z modelu obecnego magazynu, a potem zaimportuj warianty
-      zaprojektowane w Blenderze zestawem <code>twinema_design_kit.py</code>.
+      {% if is_designer %}Brak wariantów. Dodaj wariant bazowy z modelu obecnego magazynu, a potem zaimportuj warianty
+      zaprojektowane w Blenderze zestawem <code>twinema_design_kit.py</code>.{% else %}Brak wariantów — przygotowuje je Projektant.{% endif %}
     </p>
     {% endif %}
     </div>

@@ -27,12 +27,16 @@
 <h2 class="dh-sec">Kroki po kolei</h2>
 {% if not design_batch %}<p class="text-muted text-sm" style="margin:-4px 0 12px">Kroki 3–7 liczą się z historii zadań magazynowych — najpierw zaimportuj plik w kroku 2 (eksport z WMS albo plik demonstracyjny z <code>tools/ewm_demo_tasks.py</code>).</p>{% endif %}
 <div class="dh-grid">
-  <a class="dh-step" href="{% url 'twin:warehouse_model_generator' %}"><span class="dh-step__n">1</span>
+{% if is_designer %}  <a class="dh-step" href="{% url 'twin:warehouse_model_generator' %}"><span class="dh-step__n">1</span>
     <div class="dh-step__t">{% icon "warehouse" %} Generator hali</div>
-    <div class="dh-step__d">Pojemność, wysokość, doki → układ hali z widokiem 3D i animacją (AGV, kombi, EPT, kontener).</div></a>
-  <a class="dh-step" href="{% url 'twin:ewm_tasks_list' %}"><span class="dh-step__n">2</span>
+    <div class="dh-step__d">Pojemność, wysokość, doki → układ hali z widokiem 3D i animacją (AGV, kombi, EPT, kontener).</div></a>{% else %}  <div class="dh-step" aria-disabled="true" title="Krok dla roli Projektant"><span class="dh-step__n">1</span>
+    <div class="dh-step__t">{% icon "warehouse" %} Generator hali</div>
+    <div class="dh-step__d">Pojemność, wysokość, doki → układ hali z widokiem 3D i animacją (AGV, kombi, EPT, kontener).</div></div>{% endif %}
+{% if is_designer %}  <a class="dh-step" href="{% url 'twin:ewm_tasks_list' %}"><span class="dh-step__n">2</span>
     <div class="dh-step__t">{% icon "file-spreadsheet" %} Import zadań magazynowych</div>
-    <div class="dh-step__d">Historia ruchów — wsad do dnia projektowego, kalibracji, prognozy i symulacji.</div></a>
+    <div class="dh-step__d">Historia ruchów — wsad do dnia projektowego, kalibracji, prognozy i symulacji.</div></a>{% else %}  <div class="dh-step" aria-disabled="true" title="Krok dla roli Projektant"><span class="dh-step__n">2</span>
+    <div class="dh-step__t">{% icon "file-spreadsheet" %} Import zadań magazynowych</div>
+    <div class="dh-step__d">Historia ruchów — wsad do dnia projektowego, kalibracji, prognozy i symulacji.</div></div>{% endif %}
   {% if design_batch %}
   <a class="dh-step" href="{% url 'twin:ewm_tasks_profile' design_batch.pk %}"><span class="dh-step__n">3</span>
     <div class="dh-step__t">{% icon "chart-column" %} Dzień projektowy</div>

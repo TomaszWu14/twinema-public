@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from .demo import DEMO_USER, demo_showcase, exposure_reasons
-from .roles import GROUP_ADMIN, GROUP_VIEWER, has_role
+from .roles import GROUP_ADMIN, GROUP_DESIGNER, GROUP_VIEWER, has_role
 
 # Moduły platformy w kolejności przepływu pracy — jedno źródło dla nawigacji w nagłówku i kafli strony
 # głównej (R4: te same nazwy). `apps` / `match` = kiedy pozycja jest aktywna (patrz `active_module`).
@@ -22,7 +22,7 @@ MODULES = [
     {"key": "projektowanie", "name": "Projektowanie", "desc": "Dzień projektowy z danych, flota, kalibracja, porównanie wariantów.",
      "url": "twin:design_hub", "match": ("design_",)},
     {"key": "zadania", "name": "Zadania EWM", "desc": "Import zadań magazynowych: profil, prognoza i symulacja dnia.",
-     "url": "twin:ewm_tasks_list", "match": ("ewm_tasks",)},
+     "url": "twin:ewm_tasks_list", "match": ("ewm_tasks",), "designer": True},
     {"key": "sprzet", "name": "Sprzęt", "desc": "Wózki, AGV/AMR z osprzętem: prędkości, podnoszenie, udźwig, alejka, koszty.",
      "url": "equipment:list", "apps": {"equipment"}},
     {"key": "prezentacje", "name": "Prezentacje", "desc": "Pokaz 3D dla zarządu: ujęcia hali, wyniki dnia, szczyt, wnioski.",
@@ -47,6 +47,12 @@ def active_module(rm):
     return next((m["key"] for m in MODULES if rm.app_name in m.get("apps", ())), None)
 
 
+def visible_modules(user):
+    """US-019: moduły, do których rola ma dostęp — Podgląd nie widzi modułów tylko dla Projektanta."""
+    designer = has_role(user, GROUP_ADMIN, GROUP_DESIGNER)
+    return [m for m in MODULES if designer or not m.get("designer")]
+
+
 def home(request):
     if not request.user.is_authenticated and settings.DEMO_PUBLIC:
         return redirect("core:demo")              # publiczne demo: gość zaczyna od strony wejściowej, nie od logowania
@@ -55,7 +61,7 @@ def home(request):
 
 @login_required
 def _home(request):
-    modules = [{**m, "url": reverse(m["url"])} for m in MODULES]
+    modules = [{**m, "url": reverse(m["url"])} for m in visible_modules(request.user)]
     exposure = exposure_reasons() if settings.DEMO_PUBLIC and has_role(request.user, GROUP_ADMIN) else []
     return render(request, "core/home.html", {"modules": modules, "demo_exposure": exposure})
 

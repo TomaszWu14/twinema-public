@@ -17,10 +17,10 @@
     <div class="page-header__sub">Szablony wymiarów fizycznych — przypisywane przez kod w polu Typ magazynu (wh_type)</div>
   </div>
   <div class="page-header__actions">
-    <a href="{% url 'twin:warehouse_rack_type_new' %}" class="btn btn-primary">
+    {% if is_designer %}<a href="{% url 'twin:warehouse_rack_type_new' %}" class="btn btn-primary">
       <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 4v16M4 12h16"/></svg>
       Nowy typ
-    </a>
+    </a>{% endif %}
   </div>
 </div>
 
@@ -55,12 +55,12 @@
       <td>{{ t.max_weight_kg|floatformat:0 }} kg</td>
       <td><span style="display:inline-block;width:20px;height:20px;border-radius:4px;background:{{ t.color_hex }}"></span></td>
       <td>
-        <a href="{% url 'twin:warehouse_rack_type_edit' t.pk %}" class="btn btn-ghost btn-sm">Edytuj</a>
+        {% if is_designer %}<a href="{% url 'twin:warehouse_rack_type_edit' t.pk %}" class="btn btn-ghost btn-sm">Edytuj</a>
         <form method="post" action="{% url 'twin:warehouse_rack_type_delete' t.pk %}" style="display:inline">
           {% csrf_token %}
           <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--red)"
                   onclick="return confirm('Usunąć typ {{ t.code }}?')">Usuń</button>
-        </form>
+        </form>{% endif %}
       </td>
     </tr>
     {% empty %}
@@ -87,12 +87,12 @@
         {% if t.description and t.description != t.name %}<div style="font-size:11px;font-weight:400;color:var(--gray-500)">{{ t.description }}</div>{% endif %}</td>
       <td><span style="display:inline-block;width:20px;height:20px;border-radius:4px;background:{{ t.color_hex }}"></span></td>
       <td>
-        <a href="{% url 'twin:warehouse_rack_type_edit' t.pk %}" class="btn btn-ghost btn-sm">Edytuj</a>
+        {% if is_designer %}<a href="{% url 'twin:warehouse_rack_type_edit' t.pk %}" class="btn btn-ghost btn-sm">Edytuj</a>
         <form method="post" action="{% url 'twin:warehouse_rack_type_delete' t.pk %}" style="display:inline">
           {% csrf_token %}
           <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--red)"
                   onclick="return confirm('Usunąć typ {{ t.code }}?')">Usuń</button>
-        </form>
+        </form>{% endif %}
       </td>
     </tr>
     {% empty %}
@@ -105,10 +105,11 @@
 <div class="card" style="padding:40px;text-align:center;color:var(--gray-400)">
   <div style="font-size:32px;margin-bottom:12px">{% icon "package" cls="icon--em" %}</div>
   <div style="font-size:14px;font-weight:600;color:var(--gray-700);margin-bottom:6px">Brak zdefiniowanych typów</div>
-  <div style="font-size:12px;margin-bottom:20px">
+  {% if is_designer %}<div style="font-size:12px;margin-bottom:20px">
     Utwórz typ lokalizacji — jego kod wpisz w pole <b>Typ magazynu</b> przy snapshocie lub generatorze.
   </div>
   <a href="{% url 'twin:warehouse_rack_type_new' %}" class="btn btn-primary">Utwórz pierwszy typ</a>
+  {% else %}<div style="font-size:12px">Typy regałów zakłada Projektant.</div>{% endif %}
 </div>
 {% endif %}
 
