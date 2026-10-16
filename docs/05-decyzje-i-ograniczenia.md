@@ -162,7 +162,7 @@ w trakcie prac. Gdy nie — opisano tylko kontekst i skutki wynikające z kodu.
 
 ### Uprawnienia i nawigacja
 
-- Menu i część przycisków są widoczne dla roli Podgląd, choć prowadzą do strony braku uprawnień (zadania magazynowe w menu, wklejanie adresów, elementy hali, współrzędne, typy regałów, kroki 1–2 w Projektowaniu).
+- ~~Menu i część przycisków były widoczne dla roli Podgląd, choć prowadziły do strony braku uprawnień~~ — poprawione (US-019).
 - Symulacja dnia i kalibracja liczą się także dla roli Podgląd, a porównanie modeli nie — intencja nieustalona ([Z-3](00-przeglad.md#założenia-wymagające-potwierdzenia)).
 - Wszyscy goście demo współdzielą jedno konto.
 
@@ -183,7 +183,7 @@ w trakcie prac. Gdy nie — opisano tylko kontekst i skutki wynikające z kodu.
 
 ### Formularze i informacja zwrotna
 
-- Brak potwierdzenia przy usuwaniu: scenariusza, prezentacji 3D, prezentacji filmowej, zlecenia renderu, sprzętu, slajdu.
+- Brak potwierdzenia przy usuwaniu: prezentacji 3D, prezentacji filmowej, zlecenia renderu, slajdu (hala, scenariusz i sprzęt mają ekran potwierdzenia ze skutkami — US-004).
 - Po błędzie walidacji wpisane dane przepadają: formularze scenariusza, typ regału, edycja stref.
 - Komunikat sukcesu mimo pominięcia danych: współrzędne regałów, elementy hali, import sprzętu z samymi odrzuceniami.
 - Po wygaśnięciu sesji zapis w edytorze prezentacji pokazuje „Brak połączenia z serwerem” zamiast prośby o zalogowanie.
@@ -200,9 +200,9 @@ Pozycje T-n mają odpowiedniki w [backlogu](analiza/HISTORYJKI.md) (kolumna „�
 |---|---|---|---|
 | T-1 | Przenieść symulację, import danych, ML i szkic z AI do kolejki zadań w tle | limit 120 s żądania; ryzyko przerwania obliczeń (D10) | wysoki |
 | T-2 | Zastąpić wątek importu zadań trwałą kolejką z ponawianiem | import „wisi” po restarcie serwera | wysoki |
-| T-3 | Ukryć przed rolą Podgląd moduły i przyciski bez dostępu | mylące ścieżki ślepe | wysoki |
+| T-3 | ~~Ukryć przed rolą Podgląd moduły i przyciski bez dostępu~~ — zrobione (US-019) | — | — |
 | T-4 | ~~Sprawdzanie autora przy edycji i usuwaniu własnego sprzętu~~ — zrobione (US-001) | Projektant mógł zmienić cudzy model | — |
-| T-5 | Ekrany potwierdzenia usunięcia z listą obiektów usuwanych kaskadowo (model hali, scenariusz, sprzęt) | nieodwracalna utrata wyników i prezentacji | wysoki |
+| T-5 | ~~Ekrany potwierdzenia usunięcia z listą obiektów usuwanych kaskadowo (model hali, scenariusz, sprzęt)~~ — zrobione (US-004) | — | — |
 | T-6 | Zachowanie przy usuwaniu sprzętu używanego we flocie mieszanej: ostrzec przed usunięciem albo odłączać zamiast usuwać (komunikat poprawiony w US-002) | grupy floty znikają bez potwierdzenia | wysoki |
 | T-7 | Unikalna nazwa własnego modelu sprzętu w bazie | błąd importu przy duplikatach | średni |
 | T-8 | Własne strony „nie znaleziono” i „błąd serwera” | wygasły link publiczny bez wyjaśnienia | średni |

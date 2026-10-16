@@ -13,11 +13,11 @@ migracje na danych produkcyjnych, odtworzenie) wykonuje się **tylko za zgodą P
 | 4 | Kontrola: `GET /health/` → `{"status": "ok", "db": "ok", "version": "<skrót>"}`. |
 
 Ustawienia platformy (Coolify): typ budowy **Dockerfile**; port aplikacji **8000** tylko w sieci wewnętrznej
-platformy, ruch z internetu wyłącznie przez proxy TLS (warunek poprawnej blokady logowania, R-05); kontrola
+platformy, ruch z internetu wyłącznie przez proxy TLS (adres klienta z nagłówka proxy jest brany pod uwagę tylko z sieci wewnętrznej — US-006); kontrola
 działania: ścieżka `/health/`, okres startowy co najmniej 120 s; trwały wolumen na media i — przy SQLite — na plik bazy.
 
 Zmienne środowiskowe: [.env.example](../../.env.example); walidacja przy starcie w `web/twinema/config.py`.
-**Demo publiczne (`DEMO_PUBLIC=true`) tylko na osobnej instancji z danymi demo** (R-02).
+**Demo publiczne (`DEMO_PUBLIC=true`) tylko na osobnej instancji z danymi demo** (R-02). Gdy w bazie są dane spoza demo, kontener zapisuje przy starcie ostrzeżenie w logach, a Administrator widzi baner na stronie startowej (US-011).
 
 ### Wycofanie wersji
 

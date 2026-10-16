@@ -48,12 +48,12 @@ Dług techniczny: T-1…T-16 w [05-decyzje-i-ograniczenia.md](05-decyzje-i-ogran
 | Nr | Ryzyko | Waga | Rejestr | Działanie |
 |---|---|---|---|---|
 | 1 | Historia repozytorium zawiera dane rzeczywistego obiektu i prywatny e-mail autora | **krytyczna** | R-01 | decyzja PO: przepisanie historii albo nowe repozytorium (US-010) |
-| 2 | Demo publiczne na instancji z danymi rzeczywistymi udostępnia je każdemu | **wysoka** | R-02 | osobna instancja demo, ostrzeżenie przy starcie (US-011) |
+| 2 | Demo publiczne na instancji z danymi rzeczywistymi udostępnia je każdemu | **wysoka** | R-02 | ostrzeżenie przy starcie dodane (US-011); osobna instancja demo — decyzja PO |
 | 3 | Login pracownika magazynu w historii zadań — dane osobowe bez minimalizacji | **wysoka** | R-06 | decyzja PO: pseudonimizacja przy imporcie (US-012) |
 | 4 | Brak kopii zapasowych | **wysoka** | R-10 | procedura dodana; automatyzacja (US-009) |
 | 5 | Projektant zmieniał i usuwał cudze modele sprzętu (kontrola dostępu do obiektu) | średnia | R-03 | **naprawione** w tym PR (US-001) |
 | 6 | CSP tylko w trybie raportu, z `'unsafe-inline'` | średnia | R-04 | wymuszenie po teście UI (US-005) |
-| 7 | Zaufanie do `X-Forwarded-For` — obejście blokady logowania przy pominięciu proxy | średnia | R-05 | konfiguracja zaufanych proxy (US-006) |
+| 7 | Zaufanie do `X-Forwarded-For` — obejście blokady logowania przy pominięciu proxy | średnia | R-05 | **naprawione** (US-006) |
 | 8 | Długie obliczenia uruchamiane GET-em także przez rolę Podgląd / gościa | średnia | R-07 | obliczenia tylko dla Projektanta albo kolejka (US-007) |
 | 9 | Brak dziennika operacji wrażliwych | średnia | R-08 | US-008 |
 | 10 | Auto-merge bez zatwierdzenia człowieka | średnia | R-09 | decyzja PO: wymagane zatwierdzenie (US-013) |

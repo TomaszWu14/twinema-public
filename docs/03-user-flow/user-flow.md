@@ -121,7 +121,7 @@ flowchart LR
 ```
 
 Import danych zawsze kończy się raportem (E-202). Import sprzętu wraca na listę katalogu z komunikatami.
-Usunięcie sprzętu nie ma ekranu potwierdzenia.
+Usunięcie sprzętu, hali i scenariusza prowadzi przez ekran potwierdzenia ze skutkami (US-004).
 
 ## UF-5. Historia ruchów, projektowanie i uczenie maszynowe
 
@@ -210,7 +210,7 @@ także na liście E-900. Ekran sam odświeża status zleceń.
 | E-107 Elementy hali | edytować doki, strefy i drogi tabelą | rodzaj, rola doku, położenie, wymiary | zapisz, wróć | Projektant |
 | E-108 Edycja stref | przesunąć i przebudować strefy | przesunięcie, gniazda, poziomy | zapisz, usuń strefę | Projektant |
 | E-109 Edytor układu | narysować i sprawdzić układ | plan 2D, działka, słupy, podkład | cofnij, ponów, zapisz; problemy i KPI na żywo | Projektant |
-| E-110 Usunięcie modelu | potwierdzić usunięcie | — | potwierdź, anuluj | Projektant |
+| E-110 Potwierdzenie usunięcia (hala, scenariusz, sprzęt) | potwierdzić usunięcie po zobaczeniu skutków | — | potwierdź, anuluj | Projektant; sprzęt: autor albo Administrator |
 | E-111 Wykrycie układu | zaproponować szablony i rzędy z mastera lokalizacji | — | zapisz | Projektant |
 | E-112 Zgodność adresowania | sprawdzić zgodność modelu z masterem | — | eksport xlsx, wykryj ponownie | Projektant |
 | E-113 / E-114 Typy regałów | utrzymać wzorce regałów | kod, wymiary, poziomy | nowy, edytuj, usuń | lista: każda rola; zmiany: Projektant |

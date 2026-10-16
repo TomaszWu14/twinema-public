@@ -29,8 +29,8 @@ Status: **zrealizowane** (jest w kodzie i ma testy) · **częściowo** · **plan
 | FR-017 | System ogranicza dostęp według ról i blokuje zgadywanie haseł | [P8](../01-procesy/P8-dostep-i-demo.md) WF-801–802 | Must | zrealizowane |
 | FR-018 | System udostępnia demo publiczne i wejście gościa tylko do odczytu | P8 WF-803–805 | Should | zrealizowane |
 | FR-019 | Własny model sprzętu zmienia i usuwa tylko jego autor albo Administrator | US-001 | Must | zrealizowane (ten PR) |
-| FR-020 | Usunięcie obiektu wymaga potwierdzenia, które wymienia obiekty usuwane razem z nim | US-004 | Must | planowane |
-| FR-021 | Rola Podgląd nie widzi pozycji menu i przycisków prowadzących do stron bez dostępu | US-019 | Should | planowane |
+| FR-020 | Usunięcie obiektu wymaga potwierdzenia, które wymienia obiekty usuwane razem z nim | US-004 | Must | zrealizowane (PR #68) |
+| FR-021 | Rola Podgląd nie widzi pozycji menu i przycisków prowadzących do stron bez dostępu | US-019 | Should | zrealizowane (PR #68) |
 | FR-022 | System zapisuje dziennik operacji wrażliwych (kto, co, kiedy) | US-008 | Should | planowane |
 | FR-023 | Import historii zadań pseudonimizuje albo pomija login operatora | US-012 | Must (po decyzji PO) | planowane |
 

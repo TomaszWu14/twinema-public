@@ -26,10 +26,15 @@ trafiają do sekcji „Unreleased”.
 - `tblib` w zależnościach deweloperskich — testy równoległe pokazują pełny traceback błędu.
 
 ### Changed
+- Usunięcie hali, scenariusza i własnego sprzętu prowadzi przez ekran potwierdzenia z liczbą obiektów usuwanych
+  razem z nim i tracących powiązanie (US-004).
+- Rola Podgląd nie widzi w menu, kaflach i na ekranach przycisków prowadzących do stron bez dostępu (US-019).
 - Komunikat po usunięciu sprzętu podaje, ile grup floty mieszanej usunięto razem z nim (US-002).
 - ADR przeniesione do `docs/architektura/adr/`.
 
 ### Security
+- Adres klienta do blokady logowania z nagłówka `X-Forwarded-For` tylko od proxy w sieci wewnętrznej (US-006).
+- Ostrzeżenie w logach i baner dla Administratora, gdy demo publiczne działa na instancji z danymi spoza demo (US-011).
 - Obraz produkcyjny bez narzędzia `pip` — skan trivy wykazał w nim 4 podatności wysokie w bibliotekach
   wbudowanych w `pip`; aplikacja ich nie używa, a instalację zależności wykonuje `uv` na etapie budowy.
 - Własny model sprzętu edytuje i usuwa tylko jego autor albo Administrator; import z pliku nie nadpisuje

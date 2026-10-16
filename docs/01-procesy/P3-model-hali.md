@@ -169,7 +169,7 @@ flowchart TD
 | W7. Opuszczenie edytora | niezapisane zmiany przy zamykaniu strony | prośba o potwierdzenie | możliwa utrata zmian |
 | W8. Brak aktywnego mastera | wykrywanie adresowania bez wgranego mastera lokalizacji | komunikat z instrukcją | wykrywanie niedostępne |
 | W9. Kopia hali | kopiowanie modelu | wyjątki adresów nie są kopiowane | adresowanie trzeba odtworzyć (np. ponownym wykrywaniem) |
-| W10. Usunięcie hali | Projektant usuwa model (z potwierdzeniem) | usunięcie kaskadowe | znikają też wyniki symulacji, prezentacje 3D, prezentacje filmowe i zlecenia renderu; ekran potwierdzenia mówi tylko o regałach |
+| W10. Usunięcie hali | Projektant usuwa model (z potwierdzeniem) | usunięcie kaskadowe | znikają też wyniki symulacji, prezentacje 3D, prezentacje filmowe i zlecenia renderu; ekran potwierdzenia podaje nazwę hali i liczbę tych obiektów (US-004) |
 | W11. Edycja stref przesuwa regały poza halę | przesunięcie daje ujemne współrzędne | „nic nie zapisano” | zmiana odrzucona; kolizje po przesunięciu są tylko ostrzeżeniem |
 
 ## Reguły biznesowe

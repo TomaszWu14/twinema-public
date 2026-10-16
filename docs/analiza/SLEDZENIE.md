@@ -27,4 +27,8 @@
 | FR-010 (komunikat) | US-002 | `equipment/tests/test_equipment.py::OwnModelAuthorizationTests::test_delete_message_reports_removed_fleet_groups` | ten PR (#68) |
 | NFR-002 | US-003 | `render/tests/test_worker_url.py` | ten PR (#68) |
 | NFR-010 | — | CI: `.github/workflows/security.yml` | ten PR (#68) |
-| FR-020–023, NFR-011–015 | US-004, US-019, US-008, US-012, US-005, US-007, US-009, US-023 | — | planowane |
+| FR-020 | US-004 | `core/tests/test_deletion.py` | ten PR (#68) |
+| FR-021 | US-019 | `core/tests/test_navigation.py::ViewerSeesOnlyAccessibleLinksTests` | ten PR (#68) |
+| NFR-007 (blokada logowania) | US-006 | `core/tests/test_foundation.py::ClientIpTests` | ten PR (#68) |
+| NFR-009 (ochrona danych, demo) | US-011 | `core/tests/test_demo.py::DemoExposureTests` | ten PR (#68) |
+| FR-022–023, NFR-011–015 | US-008, US-012, US-005, US-007, US-009, US-023 | — | planowane |

@@ -176,7 +176,7 @@ flowchart TD
 | W6. Brak przeglądarki z grafiką 3D | przeglądarka bez WebGL | komunikat i tabela godzinowa jako tekst | animacja niedostępna, wynik dostępny w formie tekstowej |
 | W7. Długie obliczenie | duża liczba przebiegów × dwa dni + przebiegi podpowiedzi | obliczenie w ramach jednego żądania | możliwe przekroczenie limitu czasu serwera ([założenie Z-6](../00-przeglad.md#założenia-wymagające-potwierdzenia)) |
 | W8. Utrata starszych wyników | więcej niż 20 wyników na scenariusz | najstarsze wyniki są usuwane | prezentacja 3D oparta na usuniętym wyniku traci dane bez ostrzeżenia |
-| W9. Usunięcie scenariusza albo układu | Projektant usuwa scenariusz lub model hali | usunięcie bez potwierdzenia (scenariusz) | wszystkie wyniki tej pary są usuwane |
+| W9. Usunięcie scenariusza albo układu | Projektant usuwa scenariusz lub model hali | ekran potwierdzenia z liczbą usuwanych wyników, zmian i grup floty oraz prezentacji tracących wynik (US-004) | wszystkie wyniki tej pary są usuwane |
 
 ## Reguły biznesowe
 

@@ -9,17 +9,17 @@
 | US-002 | Jako Projektant chcę po usunięciu sprzętu wiedzieć, ile grup floty mieszanej zniknęło, aby nie stracić założeń scenariusza bez wiedzy | Must | W8 w P4, T-6 | **zrobione** (ten PR) |
 | US-003 | Jako Administrator chcę, aby stanowisko renderujące łączyło się z serwerem tylko po HTTPS, aby token nie wyciekł | Must | R-17 | **zrobione** (ten PR) |
 | US-010 | Jako PO chcę usunąć z historii repozytorium dane rzeczywistego obiektu i prywatny e-mail, aby publiczne repozytorium nie ujawniało danych firmowych | Must | R-01, A-8, A-9 | czeka na decyzję PO |
-| US-011 | Jako Administrator chcę ostrzeżenia przy starcie, gdy demo publiczne jest włączone na instancji z danymi spoza demo, aby nie udostępnić ich światu | Must | R-02 | do realizacji |
+| US-011 | Jako Administrator chcę ostrzeżenia przy starcie, gdy demo publiczne jest włączone na instancji z danymi spoza demo, aby nie udostępnić ich światu | Must | R-02 | **zrobione** (PR #68) |
 | US-012 | Jako pracownik magazynu chcę, aby mój login z historii zadań był pseudonimizowany przy imporcie, aby nikt nie oceniał mojej wydajności bez podstawy | Must (po decyzji PO) | R-06, RODO CP-4 | czeka na decyzję PO |
-| US-004 | Jako Projektant chcę przed usunięciem hali, scenariusza lub sprzętu zobaczyć listę obiektów usuwanych razem z nimi, aby nie stracić wyników i prezentacji | Must | T-5 | do realizacji |
+| US-004 | Jako Projektant chcę przed usunięciem hali, scenariusza lub sprzętu zobaczyć listę obiektów usuwanych razem z nimi, aby nie stracić wyników i prezentacji | Must | T-5 | **zrobione** (PR #68) |
 | US-009 | Jako Administrator chcę kopii zapasowej bazy i plików z procedurą odtworzenia, aby po awarii odzyskać dane | Must | R-10, T-16 | procedura w RUNBOOK; automatyzacja do realizacji |
 | US-013 | Jako PO chcę, aby każdy merge do `main` wymagał mojego zatwierdzenia, aby żadna zmiana nie trafiła na produkcję bez akceptacji | Must | R-09 | czeka na decyzję PO |
 | US-007 | Jako Administrator chcę, aby długie obliczenia szły w tle i nie mogła ich uruchamiać rola Podgląd, aby nikt nie zablokował serwera | Should | R-07, T-1 | do realizacji |
 | US-005 | Jako Administrator chcę wymuszonej polityki CSP, aby ograniczyć skutki ewentualnego XSS | Should | R-04 | do realizacji (wymaga testu UI) |
-| US-006 | Jako Administrator chcę ustawić liczbę zaufanych proxy, aby blokady logowania nie dało się obejść podmianą adresu | Should | R-05 | do realizacji |
+| US-006 | Jako Administrator chcę, aby nagłówek adresu klienta był brany pod uwagę tylko od proxy w sieci wewnętrznej, aby blokady logowania nie dało się obejść podmianą adresu | Should | R-05 | **zrobione** (PR #68) |
 | US-008 | Jako Administrator chcę dziennika operacji wrażliwych, aby wiedzieć, kto usunął dane albo udostępnił link | Should | R-08 | do realizacji |
 | US-014 | Jako SEC chcę, aby semgrep i trivy blokowały PR po triażu pierwszych wyników, aby nowe ustalenia nie przechodziły | Should | R-18 | do realizacji |
-| US-019 | Jako Podgląd chcę widzieć w menu tylko moduły, do których mam dostęp, aby nie trafiać na stronę braku uprawnień | Should | T-3 | do realizacji |
+| US-019 | Jako Podgląd chcę widzieć w menu tylko moduły, do których mam dostęp, aby nie trafiać na stronę braku uprawnień | Should | T-3 | **zrobione** (PR #68) |
 | US-023 | Jako PO chcę progu pokrycia testami w CI, aby jakość nie spadała | Should | NFR-015 | czeka na decyzję PO (próg) |
 | US-024 | Jako Projektant chcę, aby import zadań w tle przetrwał restart serwera, aby nie powtarzać importu | Should | T-2 | do realizacji |
 | US-017 | Jako Administrator chcę drugiego składnika logowania i haseł ≥ 12 znaków dla kont uprzywilejowanych, aby utrudnić przejęcie konta | Could | R-11, ASVS V2 | czeka na decyzję PO |
@@ -46,3 +46,21 @@
 - *Given* adres serwera `http://` inny niż komputer lokalny, *When* startuje stanowisko renderujące, *Then* kończy pracę z komunikatem o braku HTTPS.
 - *Given* adres pliku podany w zleceniu bez HTTPS, *When* stanowisko ma go pobrać, *Then* odmawia przed wysłaniem tokenu.
 - *Given* schemat inny niż http(s) (np. `file:`), *When* stanowisko dostaje taki adres, *Then* odmawia.
+
+**US-006**
+- *Given* żądanie z adresu w sieci wewnętrznej (proxy platformy), *When* liczony jest adres klienta, *Then* brany jest ostatni wpis `X-Forwarded-For`.
+- *Given* żądanie wprost z internetu z podrobionym `X-Forwarded-For`, *When* liczony jest adres klienta, *Then* brany jest adres połączenia — blokady logowania nie da się obejść.
+
+**US-011**
+- *Given* `DEMO_PUBLIC=true` i w bazie import zadań, master lokalizacji albo import danych spoza demo, *When* startuje kontener, *Then* w logach jest ostrzeżenie z listą powodów, a start nie jest blokowany.
+- *Given* ta sama sytuacja, *When* Administrator otwiera stronę startową, *Then* widzi baner ostrzegawczy; Podgląd i gość go nie widzą.
+- *Given* tylko dane z `seed_demo` albo `DEMO_PUBLIC=false`, *Then* ostrzeżenia nie ma.
+
+**US-019**
+- *Given* rola Podgląd, *When* otwiera stronę startową, *Then* menu i kafle nie zawierają modułu zadań magazynowych (strona nadal zwraca 403).
+- *Given* rola Podgląd, *When* otwiera widok hali, typy regałów i hub projektowania, *Then* nie widzi przycisków wklejania adresów, elementów hali, współrzędnych, nowego typu, generatora i importu zadań; puste stany nie zachęcają do akcji bez dostępu.
+
+**US-004**
+- *Given* hala z regałami i prezentacją 3D, *When* Projektant wybiera „Usuń”, *Then* widzi ekran z nazwą hali i liczbą regałów, wyników, prezentacji i zleceń usuwanych razem z nią; samo otwarcie ekranu niczego nie usuwa.
+- *Given* scenariusz albo własny sprzęt we flocie mieszanej, *When* Projektant wybiera „Usuń”, *Then* ekran wymienia usuwane grupy floty i wyniki oraz obiekty, które tylko stracą powiązanie.
+- *Given* rola Podgląd, *When* otwiera adres usunięcia, *Then* 403.
