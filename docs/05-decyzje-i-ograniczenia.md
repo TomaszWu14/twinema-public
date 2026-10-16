@@ -198,7 +198,7 @@ Pozycje T-n mają odpowiedniki w [backlogu](analiza/HISTORYJKI.md) (kolumna „�
 
 | Nr | Praca | Powód | Priorytet |
 |---|---|---|---|
-| T-1 | Przenieść do kolejki ślad symulacji dla animacji 3D (reszta — symulacje, kalibracja, import danych, ML, szkic z AI — zrobione) | limit 120 s żądania przy animacji długiego dnia | niski |
+| T-1 | Przenieść do kolejki ślad symulacji dla animacji 3D (reszta — symulacje, kalibracja, import danych, ML, szkic z AI — zrobione) | limit 120 s żądania przy animacji długiego dnia (decyzja PO Z-39: zostaje) | niski |
 | T-2 | ~~Zastąpić wątek importu zadań trwałą kolejką z ponawianiem~~ — zrobione (US-024) | — | — |
 | T-3 | ~~Ukryć przed rolą Podgląd moduły i przyciski bez dostępu~~ — zrobione (US-019) | — | — |
 | T-4 | ~~Sprawdzanie autora przy edycji i usuwaniu własnego sprzętu~~ — zrobione (US-001) | Projektant mógł zmienić cudzy model | — |

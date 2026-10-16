@@ -115,3 +115,17 @@ class AuditPruneTests(TestCase):
         AuditEvent.objects.create(action=AuditEvent.DELETE, object_type="hala", object_label="nowa")
         call_command("audit_prune", stdout=StringIO())
         self.assertEqual(list(AuditEvent.objects.values_list("object_label", flat=True)), ["nowa"])
+
+
+class LoginAttemptRetentionTests(TestCase):
+    @override_settings(LOGIN_ATTEMPT_RETENTION_DAYS=30)
+    def test_prune_removes_old_login_attempts(self):
+        """NFR-014 / RODO CP-2 (decyzja PO): próby logowania starsze niż 30 dni są usuwane."""
+        from axes.models import AccessAttempt, AccessLog
+        for model, extra in ((AccessAttempt, {"failures_since_start": 1}), (AccessLog, {})):
+            old = model.objects.create(username="x", ip_address="8.8.8.8", user_agent="t", **extra)
+            model.objects.filter(pk=old.pk).update(attempt_time=timezone.now() - timedelta(days=31))
+            model.objects.create(username="y", ip_address="8.8.8.8", user_agent="t", **extra)
+        call_command("audit_prune", stdout=StringIO())
+        self.assertEqual(list(AccessAttempt.objects.values_list("username", flat=True)), ["y"])
+        self.assertEqual(list(AccessLog.objects.values_list("username", flat=True)), ["y"])

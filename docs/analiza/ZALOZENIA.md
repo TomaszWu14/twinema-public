@@ -25,3 +25,5 @@ wprowadzaniu procesu zespołu i audycie. Materiały z okresu budowy (burza mózg
 | Z-35 | Demo publiczne a dane rzeczywiste (R-02) | demo na osobnej instancji; przy danych spoza demo wejście gościa wyłączone | **decyzja PO (2026-10-16)** |
 | Z-36 | Kopie zapasowe (R-10, US-009) | RPO 24 h, RTO 4 h: codzienna kopia bazy i mediów, retencja 14 dni, próba odtworzenia co miesiąc | **decyzja PO (2026-10-16)** |
 | Z-37 | Drugi składnik logowania (R-11, US-017) | TOTP obowiązkowy dla Administratorów, opcjonalny dla pozostałych; hasła ≥ 12 znaków dla kont uprzywilejowanych | **decyzja PO (2026-10-16)** |
+| Z-38 | Retencja prób logowania (RODO CP-2, NFR-014) | 30 dni, automatyczne czyszczenie | **decyzja PO (2026-10-16)** |
+| Z-39 | Ślad symulacji do animacji 3D (T-1) | zostaje w trakcie żądania (tylko Projektant, sekundy) | **decyzja PO (2026-10-16):** dług niski, bez zmian |

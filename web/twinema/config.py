@@ -60,6 +60,7 @@ class AppEnv(BaseSettings):
     JOB_STALE_MIN: int = 60            # zadanie „w toku” dłużej = worker padł → wraca do kolejki
     RUN_WORKER: bool = True            # True = docker-entrypoint.sh uruchamia worker obok serwera
     AUDIT_RETENTION_DAYS: int = 365    # wpisy starsze usuwa `audit_prune` (przy starcie kontenera)
+    LOGIN_ATTEMPT_RETENTION_DAYS: int = 30  # próby logowania (django-axes) — RODO CP-2, decyzja PO
 
     # ── Obserwowalność ──────────────────────────────────────────────────────
     SENTRY_DSN: str = ""
@@ -77,6 +78,8 @@ class AppEnv(BaseSettings):
             raise ValueError("DEMO_PASSWORD musi mieć co najmniej 8 znaków.")
         if self.DEMO_VIDEO_URL and not self.DEMO_VIDEO_URL.startswith("https://"):
             raise ValueError("DEMO_VIDEO_URL musi zaczynać się od https://.")
+        if self.LOGIN_ATTEMPT_RETENTION_DAYS < 1:
+            raise ValueError("LOGIN_ATTEMPT_RETENTION_DAYS musi wynosić co najmniej 1 dzień.")
         if self.AUDIT_RETENTION_DAYS < 30:
             raise ValueError("AUDIT_RETENTION_DAYS musi wynosić co najmniej 30 dni.")
         return self

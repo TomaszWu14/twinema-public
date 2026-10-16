@@ -51,7 +51,7 @@ Status: **zrealizowane** (jest w kodzie i ma testy) · **częściowo** · **plan
 | NFR-011 | Bezpieczeństwo | CSP wymuszana, bez `'unsafe-inline'` dla skryptów | nagłówek `Content-Security-Policy` w produkcji | zrealizowane (PR #68) — style inline do usunięcia (T-17) |
 | NFR-012 | Wydajność | żadne żądanie nie przekracza limitu serwera; długie obliczenia w tle | 0 przekroczeń limitu 120 s | zrealizowane (PR #68): symulacje, kalibracja, importy, ML i szkic z AI w kolejce zadań (US-007, T-1); zostaje ślad animacji 3D |
 | NFR-013 | Dostępność | kopia zapasowa bazy i plików z próbą odtworzenia | RPO 24 h / RTO 4 h (decyzja PO) | zrealizowane (PR #68) |
-| NFR-014 | Ochrona danych | retencja danych osobowych zgodna z [RODO](../bezpieczenstwo/RODO.md) | okresy z rejestru czynności | planowane |
+| NFR-014 | Ochrona danych | retencja danych osobowych zgodna z [RODO](../bezpieczenstwo/RODO.md) | okresy z rejestru czynności | zrealizowane (PR #68) dla CP-2 (30 dni) i CP-6 (365 dni); CP-1, CP-3, CP-4 — po stronie konta i platformy |
 | NFR-015 | Jakość | próg pokrycia testami | 80% dla logiki domenowej, blokujące w CI (decyzja PO) | zrealizowane (PR #68) |
 | NFR-016 | Użyteczność | interfejs po polsku, komunikaty mówią, co zrobić dalej | przegląd [BA] przy każdym PR | zrealizowane (zasada) |
 | NFR-017 | Wydajność / skala | obsługa rzeczywistych wolumenów | do ustalenia (Z-5, Z-17) | do potwierdzenia |
