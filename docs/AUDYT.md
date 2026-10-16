@@ -48,7 +48,7 @@ Dług techniczny: T-1…T-16 w [05-decyzje-i-ograniczenia.md](05-decyzje-i-ogran
 | Nr | Ryzyko | Waga | Rejestr | Działanie |
 |---|---|---|---|---|
 | 1 | Historia repozytorium zawiera dane rzeczywistego obiektu i prywatny e-mail autora | **krytyczna** | R-01 | decyzja PO: przepisać historię; procedura gotowa ([CZYSZCZENIE_HISTORII](operacje/CZYSZCZENIE_HISTORII.md)), wykonuje PO (US-010) |
-| 2 | Demo publiczne na instancji z danymi rzeczywistymi udostępnia je każdemu | **wysoka** | R-02 | ostrzeżenie przy starcie dodane (US-011); osobna instancja demo — decyzja PO |
+| 2 | Demo publiczne na instancji z danymi rzeczywistymi udostępnia je każdemu | **wysoka** | R-02 | **naprawione** — osobna instancja demo (decyzja PO); przy danych spoza demo wejście gościa zablokowane (US-011) |
 | 3 | Login pracownika magazynu w historii zadań — dane osobowe bez minimalizacji | **wysoka** | R-06 | **naprawione** — pseudonimizacja przy imporcie i migracja danych istniejących (US-012) |
 | 4 | Brak kopii zapasowych | **wysoka** | R-10 | procedura dodana; automatyzacja (US-009) |
 | 5 | Projektant zmieniał i usuwał cudze modele sprzętu (kontrola dostępu do obiektu) | średnia | R-03 | **naprawione** w tym PR (US-001) |

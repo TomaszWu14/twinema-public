@@ -21,7 +21,7 @@ Kontener uruchamia obok serwera worker kolejki zadań (`manage.py run_jobs`, ADR
 wyłącza go, gdy worker działa jako osobna usługa z tym samym obrazem i poleceniem `python manage.py run_jobs`.
 Zadanie „w toku” dłużej niż `JOB_STALE_MIN` wraca do kolejki. Stan zadań: tabela `core_job`.
 Kontener przy starcie usuwa też wpisy dziennika operacji starsze niż `AUDIT_RETENTION_DAYS` (US-008); dziennik ogląda Administrator pod `/dziennik/`.
-**Demo publiczne (`DEMO_PUBLIC=true`) tylko na osobnej instancji z danymi demo** (R-02). Gdy w bazie są dane spoza demo, kontener zapisuje przy starcie ostrzeżenie w logach, a Administrator widzi baner na stronie startowej (US-011).
+**Demo publiczne (`DEMO_PUBLIC=true`) tylko na osobnej instancji z danymi demo** (R-02). Gdy w bazie są dane spoza demo, kontener zapisuje przy starcie ostrzeżenie w logach, Administrator widzi baner, a wejście gościa jest zablokowane (US-011, R-02).
 
 ### Wdrożenie zmian z PR #68 — kroki dla PO
 

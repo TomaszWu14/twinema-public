@@ -59,7 +59,8 @@ trafiają do sekcji „Unreleased”.
   skryptów, `object-src 'none'`, `form-action 'self'`; obsługa zdarzeń w atrybutach zastąpiona `core/js/ui.js` (US-005).
   **Uwaga przy wdrożeniu:** `CSP_REPORT_ONLY=true` w środowisku zostawia tryb raportu — ustaw `false` albo usuń zmienną.
 - Adres klienta do blokady logowania z nagłówka `X-Forwarded-For` tylko od proxy w sieci wewnętrznej (US-006).
-- Ostrzeżenie w logach i baner dla Administratora, gdy demo publiczne działa na instancji z danymi spoza demo (US-011).
+- Ostrzeżenie w logach i baner dla Administratora, gdy demo publiczne działa na instancji z danymi spoza demo (US-011);
+  wejście gościa jest wtedy zablokowane (R-02, decyzja PO).
 - Obraz produkcyjny bez narzędzia `pip` — skan trivy wykazał w nim 4 podatności wysokie w bibliotekach
   wbudowanych w `pip`; aplikacja ich nie używa, a instalację zależności wykonuje `uv` na etapie budowy.
 - Własny model sprzętu edytuje i usuwa tylko jego autor albo Administrator; import z pliku nie nadpisuje

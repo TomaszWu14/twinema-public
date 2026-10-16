@@ -74,7 +74,7 @@ Oznaczenia statusu: ✅ zabezpieczone · ⚠️ częściowo · ❌ brak. Pozycje
 
 | STRIDE | Zagrożenie | Zabezpieczenie | Status |
 |---|---|---|---|
-| I | włączenie demo na instancji z danymi rzeczywistymi | flaga `DEMO_PUBLIC` domyślnie wyłączona; brak kontroli technicznej | ❌ R-02 |
+| I | włączenie demo na instancji z danymi rzeczywistymi | `DEMO_PUBLIC` domyślnie wyłączone; przy danych spoza demo wejście gościa zablokowane, ostrzeżenie w logach i baner (Z-35) | ✅ |
 | D | obliczenia uruchamiane przez gości | symulację i kalibrację uruchamia tylko Projektant; Podgląd i gość widzą wynik policzony wcześniej (Z-3) | ✅ |
 | R | brak rozróżnienia gości | wszyscy goście na jednym koncie | ⚠️ R-13 |
 

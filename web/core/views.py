@@ -76,7 +76,7 @@ def demo(request):
     sc = demo_showcase()
     resp = render(request, "core/demo.html", {
         "showcase_url": reverse("scenario:public", args=[sc.share_token]) if sc else "",
-        "guest": settings.DEMO_PUBLIC, "video_url": settings.DEMO_VIDEO_URL})
+        "guest": settings.DEMO_PUBLIC and not exposure_reasons(), "video_url": settings.DEMO_VIDEO_URL})
     resp["Referrer-Policy"] = "same-origin"       # adres pokazu niesie token — poza domenę go nie wysyłamy;
     # no-referrer odpada: przeglądarka wysłałaby wtedy Origin: null i CSRF odrzuciłby „Wejdź do systemu”
     return resp
@@ -88,6 +88,9 @@ def demo_enter(request):
     Tylko z DEMO_PUBLIC; konto musi być zwykłym Podglądem — nigdy nie loguje kogoś z wyższymi prawami."""
     if not settings.DEMO_PUBLIC:
         raise Http404
+    if exposure_reasons():          # R-02 (decyzja PO): demo tylko na instancji z samymi danymi demo
+        return render(request, "core/403.html", {"reason": "Wejście gościa jest wyłączone: na tej instancji są "
+                                                           "dane spoza demo."}, status=403)
     if not request.user.is_authenticated:
         user = User.objects.filter(username=DEMO_USER, is_active=True, is_staff=False, is_superuser=False,
                                    groups__name=GROUP_VIEWER).first()

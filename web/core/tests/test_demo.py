@@ -143,3 +143,15 @@ class DemoExposureTests(TestCase):
             self.assertEqual(self._check(), "")
             self.client.force_login(self.admin)
             self.assertNotContains(self.client.get(reverse("core:home")), "Demo publiczne jest włączone")
+
+    def test_guest_entry_blocked_on_instance_with_real_data(self):
+        """R-02 (decyzja PO): przy danych spoza demo gość nie wchodzi — strona demo nie pokazuje przycisku."""
+        User.objects.create_user("demo").groups.add(Group.objects.get_or_create(name=GROUP_VIEWER)[0])
+        with self.settings(DEMO_PUBLIC=True):
+            self.assertContains(self.client.get(reverse("core:demo")), "Wejdź do systemu")
+            self._real_import()
+            self.assertNotContains(self.client.get(reverse("core:demo")), "Wejdź do systemu")
+            r = self.client.post(reverse("core:demo_enter"))
+            self.assertContains(r, "Wejście gościa jest wyłączone", status_code=403)
+            self.assertNotIn("_auth_user_id", self.client.session)
+            self.assertIn("Wejście gościa jest wyłączone", self._check())

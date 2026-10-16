@@ -15,7 +15,7 @@ przetwarzania odtworzony z kodu.
 | CP-3 | Logi serwera i monitoring błędów | użytkownicy i goście | adres IP, adres URL, identyfikator żądania, ślad błędu bez danych osobowych | utrzymanie i bezpieczeństwo | 6(1)(f) | 30 dni (logi), według ustawień usługi monitoringu | retencja po stronie platformy hostingowej |
 | CP-4 | Historia zadań magazynowych | pracownicy magazynu (operatorzy) | login operatora z systemu magazynowego, czasy potwierdzeń zadań | projektowanie hali na rzeczywistym ruchu | do ustalenia ([Z-24](../analiza/ZALOZENIA.md)) | do usunięcia partii; propozycja: maks. 12 miesięcy | od 2026-10-16 (decyzja PO, US-012): przy imporcie i podglądzie login zastępowany stałym pseudonimem „OP-…” (HMAC z kluczem pochodnym klucza aplikacji); migracja zastąpiła loginy już zapisane |
 | CP-5 | Demo publiczne | goście | adres IP w logach | prezentacja systemu | 6(1)(f) | jak CP-3 | wspólne konto demo, bez danych identyfikujących gościa |
-| CP-6 | Dziennik operacji wrażliwych | użytkownicy z kontem | login, adres IP, czas, rodzaj operacji i nazwa obiektu | rozliczalność usunięć, importów i udostępnień (bezpieczeństwo) | 6(1)(f) | 365 dni (`AUDIT_RETENTION_DAYS`, do potwierdzenia — Z-33) | od US-008; wpisy usuwa `audit_prune` przy starcie kontenera; widzi tylko Administrator |
+| CP-6 | Dziennik operacji wrażliwych | użytkownicy z kontem | login, adres IP, czas, rodzaj operacji i nazwa obiektu | rozliczalność usunięć, importów i udostępnień (bezpieczeństwo) | 6(1)(f) | 365 dni (`AUDIT_RETENTION_DAYS`, decyzja PO — Z-33) | od US-008; wpisy usuwa `audit_prune` przy starcie kontenera; widzi tylko Administrator |
 
 ## Ocena ryzyka
 

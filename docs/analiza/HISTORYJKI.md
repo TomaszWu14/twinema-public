@@ -17,7 +17,7 @@
 | US-007 | Jako Administrator chcę, aby długie obliczenia szły w tle i nie mogła ich uruchamiać rola Podgląd, aby nikt nie zablokował serwera | Should | R-07, T-1 | **zrobione** (PR #68, ADR-0004) — symulacja dnia i scenariusza, kalibracja; reszta długich operacji: T-1 |
 | US-005 | Jako Administrator chcę wymuszonej polityki CSP, aby ograniczyć skutki ewentualnego XSS | Should | R-04 | **zrobione** (PR #68) — skrypty z nonce, testy E2E; style inline — T-17 |
 | US-006 | Jako Administrator chcę, aby nagłówek adresu klienta był brany pod uwagę tylko od proxy w sieci wewnętrznej, aby blokady logowania nie dało się obejść podmianą adresu | Should | R-05 | **zrobione** (PR #68) |
-| US-008 | Jako Administrator chcę dziennika operacji wrażliwych, aby wiedzieć, kto usunął dane albo udostępnił link | Should | R-08 | **zrobione** (PR #68) — retencja do potwierdzenia (Z-33) |
+| US-008 | Jako Administrator chcę dziennika operacji wrażliwych, aby wiedzieć, kto usunął dane albo udostępnił link | Should | R-08 | **zrobione** (PR #68) — retencja 365 dni (Z-33, decyzja PO) |
 | US-014 | Jako SEC chcę, aby semgrep i trivy blokowały PR po triażu pierwszych wyników, aby nowe ustalenia nie przechodziły | Should | R-18 | **zrobione** (PR #68) — [triaż](../bezpieczenstwo/TRIAZ_SKANOW.md) |
 | US-019 | Jako Podgląd chcę widzieć w menu tylko moduły, do których mam dostęp, aby nie trafiać na stronę braku uprawnień | Should | T-3 | **zrobione** (PR #68) |
 | US-023 | Jako PO chcę progu pokrycia testami w CI, aby jakość nie spadała | Should | NFR-015 | **zrobione** — próg 80% (PR #68) |
