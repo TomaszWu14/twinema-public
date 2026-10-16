@@ -1,19 +1,27 @@
 # Aktualizacje zależności (SCA). PR-y Dependabota przechodzą ten sam proces co inne zmiany (CONTRIBUTING.md).
+# Cooldown 7 dni: nowe wydanie czeka tydzień, zanim powstanie PR — przejęte wydania zwykle
+# wycofuje się w ciągu kilku dni (semgrep: dependabot-missing-cooldown, US-014).
 version: 2
 updates:
   - package-ecosystem: pip
     directory: "/"
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 5
     labels: ["dependencies", "security"]
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     labels: ["dependencies"]
   - package-ecosystem: docker
     directory: "/"
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     labels: ["dependencies"]
