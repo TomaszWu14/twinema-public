@@ -57,3 +57,26 @@ class AccessTests(TestCase):
         user.groups.add(Group.objects.get(name=roles.GROUP_VIEWER))
         self.assertFalse(roles.has_role(user, roles.GROUP_DESIGNER))
         self.assertTrue(roles.has_role(user, roles.GROUP_VIEWER))
+
+
+class ClientIpTests(SimpleTestCase):
+    """US-006 (SEC): blokada logowania liczy adres klienta; X-Forwarded-For tylko od proxy w sieci wewnętrznej."""
+
+    def _ip(self, remote, xff=None):
+        from django.test import RequestFactory
+
+        from core.middleware import client_ip
+        extra = {"REMOTE_ADDR": remote} | ({"HTTP_X_FORWARDED_FOR": xff} if xff is not None else {})
+        return client_ip(RequestFactory().get("/", **extra))
+
+    def test_proxy_in_internal_network_last_xff_entry(self):
+        self.assertEqual(self._ip("10.0.1.5", "198.51.100.7, 203.0.113.9"), "203.0.113.9")
+        self.assertEqual(self._ip("172.18.0.2", "203.0.113.9"), "203.0.113.9")
+        self.assertEqual(self._ip("127.0.0.1", "203.0.113.9"), "203.0.113.9")
+
+    def test_direct_internet_connection_ignores_spoofed_xff(self):
+        self.assertEqual(self._ip("8.8.8.8", "10.9.9.9"), "8.8.8.8")
+
+    def test_without_header_uses_connection_address(self):
+        self.assertEqual(self._ip("10.0.1.5"), "10.0.1.5")
+        self.assertEqual(self._ip("1.1.1.1", ""), "1.1.1.1")

@@ -1,5 +1,6 @@
 """Middleware przekrojowe: identyfikator żądania (korelacja logów) + nagłówki bezpieczeństwa."""
 import contextvars
+import ipaddress
 import logging
 import uuid
 
@@ -59,7 +60,20 @@ class SecurityHeadersMiddleware:
         return response
 
 
+def _is_internal(addr):
+    try:
+        ip = ipaddress.ip_address(addr)
+    except ValueError:
+        return False
+    return ip.is_private or ip.is_loopback
+
+
 def client_ip(request):
-    """IP klienta dla django-axes za jednym zaufanym proxy (Traefik/Coolify): ostatni wpis XFF."""
+    """IP klienta dla django-axes za jednym zaufanym proxy (Traefik/Coolify): ostatni wpis XFF.
+    US-006: nagłówkowi wierzymy tylko, gdy żądanie przyszło z sieci wewnętrznej (proxy w sieci platformy).
+    Połączenie wprost z internetu → adres połączenia, więc podmiana XFF nie omija blokady logowania."""
+    remote = request.META.get("REMOTE_ADDR", "")
+    if not _is_internal(remote):
+        return remote
     last = request.META.get("HTTP_X_FORWARDED_FOR", "").split(",")[-1].strip()
-    return last or request.META.get("REMOTE_ADDR")
+    return last or remote
