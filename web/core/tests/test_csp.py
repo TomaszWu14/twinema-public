@@ -44,3 +44,21 @@ class TemplatesFollowCspTests(SimpleTestCase):
                 if 'nonce="{{ csp_nonce }}"' not in tag:
                     bad.append(f"{p.relative_to(settings.BASE_DIR)}: {tag}")
         self.assertEqual(bad, [])
+
+
+class InlineStylesDoNotGrowTests(SimpleTestCase):
+    """T-17: style w szablonach (`style=`, `<style>`) wymagają 'unsafe-inline' w style-src. Do czasu przeniesienia
+    ich do plików CSS liczba w żadnym szablonie nie może rosnąć — nowy kod używa klas z core/*.css.
+    Po usunięciu stylów z szablonu zaktualizuj `inline_styles_baseline.json` (liczba może tylko maleć)."""
+
+    def test_no_template_adds_inline_styles(self):
+        import json
+        baseline = json.loads((Path(__file__).parent / "inline_styles_baseline.json").read_text())
+        grown = {}
+        for p in Path(settings.BASE_DIR).glob("*/templates/**/*.html"):
+            text = p.read_text()
+            n = len(re.findall(r'\sstyle="', text)) + len(re.findall(r"<style\b", text))
+            key = str(p.relative_to(settings.BASE_DIR))
+            if n > baseline.get(key, 0):
+                grown[key] = f"{baseline.get(key, 0)} → {n}"
+        self.assertEqual(grown, {}, "Nowe style w szablonach — użyj klasy CSS (T-17)")
