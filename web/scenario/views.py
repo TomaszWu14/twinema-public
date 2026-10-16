@@ -262,15 +262,43 @@ def scenario_detail(request, pk):
         else:
             last = sim_runs[0]["run"].model_id if sim_runs else None
             ctx["sim_form"] = SimForm(initial={"model": int(asked) if asked.isdigit() else last or first})
-        ctx["form"] = ScenarioForm(instance=sc)
-        ctx["day_forms"] = [{"day": d, "inbound": StreamFormSet(queryset=d.inbound.all(), prefix=d.kind),
-                             "outbound": OutFormSet(queryset=d.outbound.all(), prefix=f"{d.kind}-out"),
-                             "profile": DayProfileForm(instance=d, prefix=f"{d.kind}-p")} for d in days]
-        ctx["shift_fs"] = ShiftFormSet(queryset=sc.shifts.all(), prefix="shift")
-        ctx["fleet_fs"] = FleetFormSet(queryset=sc.fleet.all(), prefix="fleet")
+        section, data = _retry(request, sc)          # US-021: formularz z błędem wraca z wpisanymi danymi
+
+        def bound(name):
+            return data if section == name else None
+        ctx["form"] = ScenarioForm(bound("params"), instance=sc)
+        ctx["day_forms"] = [{"day": d,
+                             "inbound": StreamFormSet(bound(f"in:{d.kind}"), queryset=d.inbound.all(), prefix=d.kind),
+                             "outbound": OutFormSet(bound(f"out:{d.kind}"), queryset=d.outbound.all(),
+                                                    prefix=f"{d.kind}-out"),
+                             "profile": DayProfileForm(bound(f"out:{d.kind}"), instance=d, prefix=f"{d.kind}-p")}
+                            for d in days]
+        ctx["shift_fs"] = ShiftFormSet(bound("shift"), queryset=sc.shifts.all(), prefix="shift")
+        ctx["fleet_fs"] = FleetFormSet(bound("fleet"), queryset=sc.fleet.all(), prefix="fleet")
         from masterdata.services import cartons_per_pallet_hint     # podpowiedź, nie nadpisuje normy
         ctx["cpp_hint"] = cartons_per_pallet_hint()
     return render(request, "scenario/detail.html", ctx)
+
+
+RETRY_KEY = "scenario_retry"
+
+
+def _remember(request, pk, section):
+    """US-021: wpisane dane formularza z błędem → sesja; ekran scenariusza odtworzy je raz, z błędami przy polach."""
+    data = {k: v for k, v in request.POST.lists() if k != "csrfmiddlewaretoken"}
+    request.session[RETRY_KEY] = {"pk": pk, "section": section, "data": data}
+
+
+def _retry(request, sc):
+    """(sekcja, QueryDict) zapamiętane po błędzie dla tego scenariusza albo (None, None); jednorazowo."""
+    from django.http import QueryDict
+    saved = request.session.pop(RETRY_KEY, None)
+    if not saved or saved.get("pk") != sc.pk:
+        return None, None
+    data = QueryDict(mutable=True)
+    for k, values in saved["data"].items():
+        data.setlist(k, values)
+    return saved["section"], data
 
 
 def _errors(request, title, fs=None, form=None):
@@ -304,6 +332,7 @@ def scenario_save(request, pk):
         messages.success(request, "Zapisano parametry i normy — wyniki przeliczone.")
     else:
         _errors(request, "Parametry", form=form)
+        _remember(request, pk, "params")
     return redirect("scenario:detail", pk=pk)
 
 
@@ -314,6 +343,7 @@ def day_save(request, pk, kind):
     fs = StreamFormSet(request.POST, queryset=day.inbound.all(), prefix=kind)
     if not fs.is_valid():
         _errors(request, day.get_kind_display(), fs=fs)
+        _remember(request, pk, f"in:{kind}")
         return redirect("scenario:detail", pk=pk)
     with transaction.atomic():
         _save_formset(fs, day=day)
@@ -330,6 +360,7 @@ def outbound_save(request, pk, kind):
     form = DayProfileForm(request.POST, instance=day, prefix=f"{kind}-p")
     if not (fs.is_valid() and form.is_valid()):
         _errors(request, f"Wydania — {day.get_kind_display().lower()}", fs=fs, form=form)
+        _remember(request, pk, f"out:{kind}")
         return redirect("scenario:detail", pk=pk)
     with transaction.atomic():
         form.save()
@@ -346,6 +377,7 @@ def shifts_save(request, pk):
     fs = ShiftFormSet(request.POST, queryset=sc.shifts.all(), prefix="shift")
     if not fs.is_valid():
         _errors(request, "Obsada", fs=fs)
+        _remember(request, pk, "shift")
         return redirect("scenario:detail", pk=pk)
     with transaction.atomic():
         _save_formset(fs, scenario=sc)
@@ -361,6 +393,7 @@ def fleet_save(request, pk):
     fs = FleetFormSet(request.POST, queryset=sc.fleet.all(), prefix="fleet")
     if not fs.is_valid():
         _errors(request, "Flota", fs=fs)
+        _remember(request, pk, "fleet")
         return redirect("scenario:detail", pk=pk)
     with transaction.atomic():
         _save_formset(fs, scenario=sc)
