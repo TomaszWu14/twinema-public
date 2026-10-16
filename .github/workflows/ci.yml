@@ -1,7 +1,7 @@
 name: CI
 
-# Bramka PR → main. `test` = wymagany check w ochronie gałęzi; po zielonym `test`
-# job auto-merge uzbraja natywny auto-merge dla gałęzi claude/** (merge PRZEZ PR).
+# Bramka PR → main. `test` = wymagany check w ochronie gałęzi. Merge wyłącznie po akceptacji PO
+# (R-09, decyzja PO) — automatyczny merge gałęzi claude/** usunięty.
 on:
   pull_request:
     branches: [main]
@@ -63,7 +63,7 @@ jobs:
         run: python manage.py check --deploy --fail-level WARNING
 
   coverage:
-    # Raport pokrycia (bez progu — próg ustala PO, docs/testy/STRATEGIA_TESTOW.md). SQLite, testy równolegle.
+    # Pokrycie: raport całości + próg 80% dla logiki domenowej (Z-28, docs/testy/STRATEGIA_TESTOW.md). SQLite, testy równolegle.
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -83,27 +83,13 @@ jobs:
           coverage run --rcfile=../pyproject.toml manage.py test --noinput -v 0 --parallel 4
           coverage combine --rcfile=../pyproject.toml -q
           coverage report --rcfile=../pyproject.toml | tee coverage.txt
+      - name: Próg pokrycia logiki domenowej 80% (Z-28, decyzja PO)
+        working-directory: web
+        run: >-
+          coverage report --rcfile=../pyproject.toml --fail-under=80
+          --include='*/scenario/sim/*,*/ml/*,*/twin/layout.py,*/twin/design_*'
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: coverage
           path: web/coverage.txt
-
-  auto-merge:
-    needs: test
-    if: >-
-      github.event_name == 'pull_request'
-      && startsWith(github.head_ref, 'claude/')
-      && github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: write
-      pull-requests: write
-    steps:
-      # AUTOMERGE_PAT (fine-grained: contents+PR write) — bez niego merge GITHUB_TOKENem
-      # nie wyzwala deploy.yml (GitHub tłumi workflowy z takich pushy).
-      - name: Uzbrój auto-merge
-        env:
-          GH_TOKEN: ${{ secrets.AUTOMERGE_PAT || secrets.GITHUB_TOKEN }}
-        run: gh pr merge --auto --merge "${{ github.event.pull_request.number }}" --repo "${{ github.repository }}"
