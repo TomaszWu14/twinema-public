@@ -25,7 +25,7 @@ Wspierana jest wyłącznie najnowsza wersja z gałęzi `main` (jedno wdrożenie,
 ## Jak dbamy o bezpieczeństwo
 
 - Każdy PR przechodzi przegląd [SEC] według checklisty w [szablonie PR](.github/pull_request_template.md)
-  i kontrole automatyczne: gitleaks, pip-audit, bandit (blokujące), semgrep i trivy (raport) —
+  i kontrole automatyczne: gitleaks, pip-audit, bandit, semgrep i trivy (wszystkie blokujące) —
   [CONTRIBUTING.md](CONTRIBUTING.md#narzędzia-i-uruchomienie-lokalne).
 - Dokumenty: [klasyfikacja danych](docs/bezpieczenstwo/KLASYFIKACJA_DANYCH.md),
   [threat model](docs/bezpieczenstwo/THREAT_MODEL.md), [rejestr ryzyk](docs/bezpieczenstwo/RYZYKA.md),

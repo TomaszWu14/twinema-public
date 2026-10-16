@@ -84,10 +84,10 @@ Uzasadnienie wyboru narzędzi: [ADR-0002](docs/architektura/adr/0002-narzedzia-j
 | Migracje | makemigrations --check | pre-commit | blokuje |
 | Pokrycie | coverage | `cd web && coverage run --rcfile=../pyproject.toml manage.py test --parallel 4 && coverage combine --rcfile=../pyproject.toml && coverage report --rcfile=../pyproject.toml` | raport + próg 80% logiki domenowej (blokuje) |
 | SAST | bandit | `bandit -r web tools -x '*/tests/*,*/migrations/*' --severity-level medium --confidence-level medium` | blokuje od wagi średniej |
-| SAST | semgrep (OWASP, Django) | `semgrep scan --config p/owasp-top-ten --config p/django` | raport |
+| SAST | semgrep (OWASP, Django) | `semgrep scan --config p/owasp-top-ten --config p/django` | blokuje ([triaż](docs/bezpieczenstwo/TRIAZ_SKANOW.md)) |
 | SCA | pip-audit, Dependabot | `pip-audit -r requirements.txt` | blokuje |
 | Sekrety | gitleaks | pre-commit | blokuje |
-| Kontener | trivy (Dockerfile, obraz) | `trivy config .`, `trivy image twinema:scan` | raport |
+| Kontener | trivy (Dockerfile, obraz) | `trivy config .`, `trivy image twinema:scan` | blokuje (obraz: wysokie i krytyczne z poprawką) |
 | Wdrożenie | Django deploy check | `python manage.py check --deploy` | blokuje |
 
 ## Zgłaszanie

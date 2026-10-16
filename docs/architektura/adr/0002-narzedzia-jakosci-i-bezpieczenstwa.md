@@ -12,7 +12,7 @@ i pomiaru pokrycia. Proces zespołu wymaga, by ustalenia o wysokiej wadze blokow
 
 | Obszar | Opcje | Wybór |
 |---|---|---|
-| SAST | bandit; semgrep; CodeQL | bandit (blokujący) + semgrep z regułami OWASP i Django (raport) |
+| SAST | bandit; semgrep; CodeQL | bandit + semgrep z regułami OWASP i Django (oba blokujące) |
 | SCA | pip-audit; Safety; Dependabot alerts | pip-audit (blokujący) + Dependabot (PR z aktualizacjami) |
 | Kontener | trivy; grype; Docker Scout | trivy (Dockerfile i obraz) |
 | Pokrycie | coverage.py; pytest-cov | coverage.py — testy działają na runnerze Django, bez pytest |
@@ -40,5 +40,5 @@ Wszystkie wybrane narzędzia są darmowe i open-source albo wbudowane w GitHub.
 - PR z podatną zależnością albo nowym ustaleniem SAST średniej wagi nie przejdzie bez poprawki lub
   uzasadnionego wyjątku.
 - Czas CI rośnie o kilka minut (osobne joby równolegle; budowa obrazu dla trivy).
-- Próg pokrycia: 80% dla logiki domenowej, blokujący (decyzja PO, Z-28). Tryb blokujący semgrep/trivy — po triażu (US-014).
-- Akcje przypięte tagami, nie skrótami commitów (R-16, US-018).
+- Próg pokrycia: 80% dla logiki domenowej, blokujący (decyzja PO, Z-28). Semgrep i trivy blokujące od 2026-10-16 po triażu ([TRIAZ_SKANOW](../../bezpieczenstwo/TRIAZ_SKANOW.md), US-014).
+- Akcje przypięte skrótami commitów z wersją w komentarzu; Dependabot aktualizuje je z karencją 7 dni (US-018).

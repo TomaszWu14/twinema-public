@@ -33,7 +33,11 @@ COPY web/ ./web/
 COPY --from=vendor /vendor/web/twin/static/twin/vendor/ ./web/twin/static/twin/vendor/
 WORKDIR /app/web
 RUN DJANGO_SECRET_KEY=build-only DJANGO_DEBUG=false DJANGO_ALLOWED_HOSTS=* \
-    python manage.py collectstatic --noinput
+    python manage.py collectstatic --noinput \
+    && mkdir -p /app/web/media && chown app:app /app/web/media
+# Kontener działa jako app od startu (US-014, trivy DS-0002). Nowy wolumen Docker przejmuje
+# właściciela katalogu z obrazu; montowanie katalogu hosta wymaga chown 10001 (RUNBOOK).
+USER app
 
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \

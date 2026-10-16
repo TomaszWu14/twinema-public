@@ -36,6 +36,8 @@ trafiają do sekcji „Unreleased”.
 - Zlecenia renderu i montażu po 3 nieudanych próbach kończą się błędem zamiast wracać do kolejki bez końca (US-015).
 - CI: próg pokrycia 80% dla logiki domenowej jest blokujący (Z-28, US-023); usunięty automatyczny merge
   gałęzi `claude/**` — scala tylko PO (R-09).
+- CI: akcje GitHub przypięte skrótem commita, Dependabot z karencją 7 dni (US-018); semgrep i trivy
+  blokują PR po triażu pierwszych wyników (US-014, `docs/bezpieczenstwo/TRIAZ_SKANOW.md`).
 - Procedura czyszczenia historii repozytorium (`docs/operacje/CZYSZCZENIE_HISTORII.md`, R-01) — wykonuje PO.
 
 ### Security
@@ -54,3 +56,6 @@ trafiają do sekcji „Unreleased”.
 - Login operatora w historii zadań magazynowych zastępowany pseudonimem „OP-…” przy imporcie i podglądzie
   (US-012, R-06). **Uwaga przy wdrożeniu:** migracja `twin 0008` nieodwracalnie zastępuje loginy już zapisane —
   przed wdrożeniem kopia zapasowa bazy. Zmiana `SECRET_KEY` zmienia pseudonimy nowych importów.
+- Kontener działa jako użytkownik `app` od startu (`USER` w Dockerfile). **Uwaga przy wdrożeniu:** katalog
+  hosta montowany jako wolumen (media, baza SQLite) musi należeć do UID 10001; wolumeny używane dotąd już
+  są jego własnością (dotychczasowy start zmieniał właściciela).

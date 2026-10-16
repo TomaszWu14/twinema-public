@@ -2,7 +2,8 @@
 set -e
 cd /app/web
 
-# Wolumen media (rendery, audio) Docker tworzy jako root — oddaj go użytkownikowi app.
+# Obraz startuje jako app (USER w Dockerfile). Gałąź root zostaje dla uruchomienia z `--user root`
+# (np. jednorazowa naprawa uprawnień starego wolumenu): oddaje wolumeny app i schodzi do app przez gosu.
 mkdir -p /app/web/media
 if [ "$(id -u)" = "0" ]; then
     chown -R app:app /app/web/media 2>/dev/null || true

@@ -45,6 +45,7 @@ Oznaczenia statusu: ✅ zabezpieczone · ⚠️ częściowo · ❌ brak. Pozycje
 | S | przejęcie sesji | ciasteczka `Secure`, `HttpOnly`, `SameSite=Lax`; HTTPS i HSTS w produkcji | ✅ |
 | S | przejęcie konta Administratora | brak drugiego składnika | ⚠️ R-11 |
 | R | brak śladu kto się logował | django-axes zapisuje próby; brak dziennika operacji wrażliwych | ⚠️ R-08 |
+| E | ucieczka z kontenera przez proces root | obraz działa jako użytkownik `app` (`USER` w Dockerfile, US-014) | ✅ |
 | E | podniesienie uprawnień przez wejście gościa | wejście gościa tylko na konto zwykłego Podglądu, bez praw personelu | ✅ |
 
 ## F2. Import plików (dane podstawowe, zadania, sprzęt, układ, podkład)
@@ -102,7 +103,7 @@ Oznaczenia statusu: ✅ zabezpieczone · ⚠️ częściowo · ❌ brak. Pozycje
 | T | podatna zależność | przypięte wersje, pip-audit blokujący, Dependabot | ✅ |
 | T | podmieniona biblioteka JS | pobranie przy budowie z sumą SHA-256 | ✅ |
 | T | zmiana trafia na produkcję bez akceptacji człowieka | auto-merge usunięty z CI; wymagane zatwierdzenie w ochronie gałęzi — ustawia PO | ⚠️ R-09 |
-| T | akcje CI przypięte tagiem, nie skrótem | tagi wersji | ⚠️ R-16 |
+| T | podmieniony tag akcji CI albo przejęte wydanie zależności | akcje przypięte skrótem commita; Dependabot z karencją 7 dni (US-018) | ✅ |
 | I | sekret w repozytorium | gitleaks w CI i pre-commit | ✅ |
 | I | dane rzeczywistego obiektu w historii repozytorium | procedura czyszczenia gotowa ([CZYSZCZENIE_HISTORII](../operacje/CZYSZCZENIE_HISTORII.md)), wykonuje PO | ⚠️ R-01 |
 | A | utrata danych | brak mechanizmu kopii zapasowych w projekcie | ❌ R-10 |

@@ -18,12 +18,12 @@
 | US-005 | Jako Administrator chcę wymuszonej polityki CSP, aby ograniczyć skutki ewentualnego XSS | Should | R-04 | do realizacji (wymaga testu UI) |
 | US-006 | Jako Administrator chcę, aby nagłówek adresu klienta był brany pod uwagę tylko od proxy w sieci wewnętrznej, aby blokady logowania nie dało się obejść podmianą adresu | Should | R-05 | **zrobione** (PR #68) |
 | US-008 | Jako Administrator chcę dziennika operacji wrażliwych, aby wiedzieć, kto usunął dane albo udostępnił link | Should | R-08 | do realizacji |
-| US-014 | Jako SEC chcę, aby semgrep i trivy blokowały PR po triażu pierwszych wyników, aby nowe ustalenia nie przechodziły | Should | R-18 | do realizacji |
+| US-014 | Jako SEC chcę, aby semgrep i trivy blokowały PR po triażu pierwszych wyników, aby nowe ustalenia nie przechodziły | Should | R-18 | **zrobione** (PR #68) — [triaż](../bezpieczenstwo/TRIAZ_SKANOW.md) |
 | US-019 | Jako Podgląd chcę widzieć w menu tylko moduły, do których mam dostęp, aby nie trafiać na stronę braku uprawnień | Should | T-3 | **zrobione** (PR #68) |
 | US-023 | Jako PO chcę progu pokrycia testami w CI, aby jakość nie spadała | Should | NFR-015 | **zrobione** — próg 80% (PR #68) |
 | US-024 | Jako Projektant chcę, aby import zadań w tle przetrwał restart serwera, aby nie powtarzać importu | Should | T-2 | do realizacji |
 | US-017 | Jako Administrator chcę drugiego składnika logowania i haseł ≥ 12 znaków dla kont uprzywilejowanych, aby utrudnić przejęcie konta | Could | R-11, ASVS V2 | czeka na decyzję PO |
-| US-018 | Jako SEC chcę akcji CI przypiętych skrótem commita, aby podmiana tagu nie wpuściła obcego kodu | Could | R-16 | do realizacji |
+| US-018 | Jako SEC chcę akcji CI przypiętych skrótem commita, aby podmiana tagu nie wpuściła obcego kodu | Could | R-16 | **zrobione** (PR #68) |
 | US-015 | Jako Administrator chcę limitu prób dla zleceń renderu odrzucanych przez serwer, aby zlecenie nie krążyło bez końca | Could | R-14, T-11 | **zrobione** (PR #68) |
 | US-020 | Jako gość chcę zrozumiałej strony, gdy link jest nieaktywny, aby wiedzieć, co się stało | Could | T-8 | **zrobione** (PR #68) |
 | US-021 | Jako Projektant chcę, aby po błędzie walidacji formularz zachował wpisane dane, aby nie wpisywać ich od nowa | Could | T-10 | częściowo — formularze scenariusza (PR #68); typ regału i edycja stref do realizacji |
@@ -88,3 +88,11 @@
 
 **US-023**
 - *Given* pokrycie logiki domenowej (`scenario/sim`, `ml`, `twin/layout.py`, `twin/design_*`) poniżej 80%, *When* działa CI, *Then* job `coverage` kończy się błędem.
+
+**US-014**
+- *Given* nowe ustalenie semgrep (reguły OWASP Top 10 i Django) albo trivy (Dockerfile; obraz: wysokie i krytyczne z poprawką), *When* działa CI, *Then* PR jest zablokowany.
+- *Given* formularz POST w szablonie bez `{% csrf_token %}`, *When* działają testy, *Then* test `test_csrf_forms` wskazuje plik i linię.
+- *Given* obraz produkcyjny, *Then* kontener działa jako użytkownik `app`, nie root.
+
+**US-018**
+- *Given* workflow CI, *Then* każda akcja jest przypięta pełnym skrótem commita z wersją w komentarzu; Dependabot proponuje nowe wersje po 7 dniach karencji.

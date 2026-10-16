@@ -1,9 +1,9 @@
 name: Security
 
 # Bramka bezpieczeństwa PR → main (ADR-0002, docs/architektura/adr/0002-narzedzia-jakosci-i-bezpieczenstwa.md).
-#   blokują:   gitleaks (sekrety), pip-audit (podatne zależności), bandit (SAST, waga ≥ średnia)
-#   raportują: semgrep (OWASP, Django), trivy (Dockerfile + obraz) — wyniki jako artefakty;
-#              po triażu pierwszych wyników przechodzą na blokujące (decyzja PO, docs/bezpieczenstwo/RYZYKA.md)
+#   blokują: gitleaks (sekrety), pip-audit (podatne zależności), bandit (SAST, waga ≥ średnia),
+#            semgrep (OWASP, Django), trivy (Dockerfile; obraz: wysokie i krytyczne z poprawką).
+#   Triaż i wyjątki (decyzje PO): docs/bezpieczenstwo/TRIAZ_SKANOW.md (US-014).
 on:
   pull_request:
     branches: [main]
@@ -66,9 +66,15 @@ jobs:
       image: semgrep/semgrep:1.95.0
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-      - name: SAST — reguły OWASP Top 10 i Django (raport)
-        run: semgrep scan --config p/owasp-top-ten --config p/django --sarif --output semgrep.sarif --metrics off || true
+      # django-no-csrf-token wyłączona decyzją PO: fałszywe alarmy dla długich formularzy;
+      # zastępuje ją test core/tests/test_csrf_forms.py (token w każdym formularzu POST).
+      - name: SAST — reguły OWASP Top 10 i Django (blokuje)
+        run: >-
+          semgrep scan --config p/owasp-top-ten --config p/django --metrics off --error
+          --exclude-rule python.django.security.django-no-csrf-token.django-no-csrf-token
+          --sarif --output semgrep.sarif
       - name: Lista ustaleń w logu
+        if: always()
         run: >-
           python3 -c "import json; d=json.load(open('semgrep.sarif'));
           [print(r['ruleId'].split('.')[-1], r.get('level'), l['artifactLocation']['uri'], l['region']['startLine'])
@@ -87,14 +93,19 @@ jobs:
       TRIVY: aquasec/trivy:0.74.0
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-      - name: Konfiguracja (Dockerfile) — raport
-        run: docker run --rm -v "$PWD:/src" "$TRIVY" config --format table /src | tee trivy-config.txt
+      - name: Konfiguracja (Dockerfile) — blokuje
+        run: >-
+          set -o pipefail;
+          docker run --rm -v "$PWD:/src" "$TRIVY" config --exit-code 1 --format table /src
+          | tee trivy-config.txt
       - name: Budowa obrazu
         run: DOCKER_BUILDKIT=1 docker build -t twinema:scan .
-      - name: Obraz — podatności wysokie i krytyczne z dostępną poprawką (raport)
+      - name: Obraz — podatności wysokie i krytyczne z dostępną poprawką (blokuje)
         run: >-
+          set -o pipefail;
           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock "$TRIVY" image
-          --severity HIGH,CRITICAL --ignore-unfixed --exit-code 0 --format table twinema:scan | tee trivy-image.txt
+          --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --format table twinema:scan
+          | tee trivy-image.txt
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:

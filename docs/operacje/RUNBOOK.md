@@ -26,6 +26,9 @@ Zmienne środowiskowe: [.env.example](../../.env.example); walidacja przy starci
 - Pseudonim zależy od `SECRET_KEY`: zmiana klucza daje inne pseudonimy dla nowych importów. Klucz zmieniać
   razem z ponownym importem historii zadań.
 - Ochrona gałęzi `main`: wymagane zatwierdzenie PR i zielone CI (R-09, US-013) — ustawia PO w GitHubie.
+- Kontener działa jako `app` (UID 10001). Wolumeny używane dotąd mają już tego właściciela. Nowy katalog
+  hosta: `chown -R 10001:10001 <katalog>` przed startem; jednorazowo można też uruchomić kontener z
+  `--user root` — entrypoint naprawi uprawnienia i zejdzie do `app`.
 - Usunięcie sekretu `AUTOMERGE_PAT` z repozytorium — automatyczny merge został usunięty z CI.
 - Włączenie Private Vulnerability Reporting (Z-22).
 - Czyszczenie historii repozytorium (R-01): [CZYSZCZENIE_HISTORII.md](CZYSZCZENIE_HISTORII.md).
