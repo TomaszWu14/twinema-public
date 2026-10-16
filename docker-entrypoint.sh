@@ -27,6 +27,8 @@ fi
 
 # Demo publiczne na instancji z danymi spoza demo = ich ujawnienie (R-02) — ostrzeżenie w logach.
 $RUN python manage.py demo_exposure_check || true
+# Dziennik operacji: usuń wpisy starsze niż AUDIT_RETENTION_DAYS (US-008).
+$RUN python manage.py audit_prune || true
 
 exec $RUN gunicorn twinema.wsgi:application \
     --bind 0.0.0.0:8000 \

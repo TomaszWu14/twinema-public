@@ -22,7 +22,7 @@ Status: ✅ spełnione · ⚠️ częściowo · ❌ niespełnione · n/d nie dot
 | V5.2 Sanityzacja | brak niebezpiecznego HTML | ✅ | autoescape, `safe_json`, `textContent`, `escapeHtml` |
 | V5.3 Kodowanie wyjścia / wstrzyknięcia | brak SQL injection | ✅ | ORM; bandit bez ustaleń |
 | V5.5 Deserializacja | bezpieczne parsowanie XML/JSON | ✅ | defusedxml, `json` |
-| V7 Logowanie | brak sekretów w logach; dziennik zdarzeń bezpieczeństwa | ⚠️ | logi z identyfikatorem żądania; brak dziennika operacji wrażliwych (R-08) |
+| V7 Logowanie | brak sekretów w logach; dziennik zdarzeń bezpieczeństwa | ✅ | logi z identyfikatorem żądania; dziennik operacji wrażliwych dla Administratora (US-008) |
 | V8 Ochrona danych | dane poufne niedostępne dla ról bez uprawnień | ✅ | scena dla Podglądu czyszczona; [klasyfikacja](KLASYFIKACJA_DANYCH.md) |
 | V8.3 Dane osobowe | minimalizacja i retencja | ⚠️ | [RODO](RODO.md), R-06 |
 | V9 Komunikacja | TLS, HSTS | ✅ | HSTS 1 rok, przekierowanie na HTTPS; stanowisko renderujące tylko HTTPS (US-003) |

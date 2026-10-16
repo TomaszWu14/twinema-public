@@ -1,0 +1,41 @@
+{% extends "core/base.html" %}
+{% block title %}Dziennik operacji · {{ app_name }}{% endblock %}
+{% block main %}
+<div class="wrap">
+  <div class="eyebrow">Administrator</div>
+  <h1 class="hero-title">Dziennik operacji</h1>
+  <p class="lead">Usunięcia, importy plików i linki publiczne: kto, co i kiedy. Pokazujemy {{ limit }} ostatnich
+    wpisów; wpisy starsze niż {{ retention_days }} dni są usuwane automatycznie.</p>
+  <form method="get" style="display:flex;gap:8px;align-items:center;margin:16px 0">
+    <label for="action">Rodzaj</label>
+    <select id="action" name="action">
+      <option value="">wszystkie</option>
+      {% for value, label in actions %}<option value="{{ value }}"{% if value == action %} selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <button type="submit" class="btn btn-secondary">Pokaż</button>
+  </form>
+  {% if events %}
+  <div class="table-wrap">
+    <table class="table">
+      <caption class="sr-only">Dziennik operacji wrażliwych</caption>
+      <thead><tr><th scope="col">Kiedy</th><th scope="col">Kto</th><th scope="col">Operacja</th>
+        <th scope="col">Obiekt</th><th scope="col">Szczegóły</th><th scope="col">Adres IP</th></tr></thead>
+      <tbody>
+      {% for e in events %}
+        <tr>
+          <td>{{ e.created_at|date:"Y-m-d H:i" }}</td>
+          <td>{{ e.actor_name|default:"—" }}</td>
+          <td>{{ e.get_action_display }}</td>
+          <td>{{ e.object_type }}{% if e.object_label %}: {{ e.object_label }}{% endif %}{% if e.object_id %} (nr {{ e.object_id }}){% endif %}</td>
+          <td>{{ e.detail|default:"—" }}</td>
+          <td>{{ e.ip|default:"—" }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p>Brak wpisów{% if action %} tego rodzaju{% endif %}.</p>
+  {% endif %}
+</div>
+{% endblock %}

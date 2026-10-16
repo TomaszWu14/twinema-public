@@ -17,7 +17,7 @@
 | US-007 | Jako Administrator chcę, aby długie obliczenia szły w tle i nie mogła ich uruchamiać rola Podgląd, aby nikt nie zablokował serwera | Should | R-07, T-1 | częściowo — Podgląd nie uruchamia obliczeń (PR #68); kolejka w tle — do realizacji |
 | US-005 | Jako Administrator chcę wymuszonej polityki CSP, aby ograniczyć skutki ewentualnego XSS | Should | R-04 | do realizacji (wymaga testu UI) |
 | US-006 | Jako Administrator chcę, aby nagłówek adresu klienta był brany pod uwagę tylko od proxy w sieci wewnętrznej, aby blokady logowania nie dało się obejść podmianą adresu | Should | R-05 | **zrobione** (PR #68) |
-| US-008 | Jako Administrator chcę dziennika operacji wrażliwych, aby wiedzieć, kto usunął dane albo udostępnił link | Should | R-08 | do realizacji |
+| US-008 | Jako Administrator chcę dziennika operacji wrażliwych, aby wiedzieć, kto usunął dane albo udostępnił link | Should | R-08 | **zrobione** (PR #68) — retencja do potwierdzenia (Z-33) |
 | US-014 | Jako SEC chcę, aby semgrep i trivy blokowały PR po triażu pierwszych wyników, aby nowe ustalenia nie przechodziły | Should | R-18 | **zrobione** (PR #68) — [triaż](../bezpieczenstwo/TRIAZ_SKANOW.md) |
 | US-019 | Jako Podgląd chcę widzieć w menu tylko moduły, do których mam dostęp, aby nie trafiać na stronę braku uprawnień | Should | T-3 | **zrobione** (PR #68) |
 | US-023 | Jako PO chcę progu pokrycia testami w CI, aby jakość nie spadała | Should | NFR-015 | **zrobione** — próg 80% (PR #68) |
@@ -96,3 +96,11 @@
 
 **US-018**
 - *Given* workflow CI, *Then* każda akcja jest przypięta pełnym skrótem commita z wersją w komentarzu; Dependabot proponuje nowe wersje po 7 dniach karencji.
+
+**US-008**
+- *Given* Projektant usuwa halę, scenariusz, prezentację 3D lub filmową, własny sprzęt albo import zadań, *When* potwierdzi usunięcie, *Then* w dzienniku jest wpis: kiedy, kto, adres IP, rodzaj i nazwa obiektu; samo otwarcie ekranu potwierdzenia nie tworzy wpisu.
+- *Given* import danych podstawowych, zadań albo sprzętu, *Then* wpis zawiera nazwę pliku i liczbę wierszy, bez treści pliku.
+- *Given* utworzenie albo wyłączenie linku publicznego, *Then* wpis zawiera prezentację i ważność linku, bez tokenu.
+- *Given* rola Projektant, Podgląd albo gość, *When* otwiera dziennik, *Then* 403; Administrator widzi ostatnie 200 wpisów z filtrem rodzaju.
+- *Given* usunięte konto autora, *Then* wpis zachowuje login.
+- *Given* wpis starszy niż okres przechowywania (domyślnie 365 dni), *When* startuje kontener, *Then* wpis jest usuwany.

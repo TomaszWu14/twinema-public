@@ -49,6 +49,9 @@ class AppEnv(BaseSettings):
     DEMO_PUBLIC: bool = False          # True = /demo/ wpuszcza bez hasła jako `demo` (Podgląd, tylko odczyt)
     DEMO_VIDEO_URL: str = ""           # adres filmu (np. YouTube) na stronie /demo/; puste = bez przycisku
 
+    # ── Dziennik operacji wrażliwych (US-008) ──────────────────────────────
+    AUDIT_RETENTION_DAYS: int = 365    # wpisy starsze usuwa `audit_prune` (przy starcie kontenera)
+
     # ── Obserwowalność ──────────────────────────────────────────────────────
     SENTRY_DSN: str = ""
     SENTRY_ENVIRONMENT: str = "production"
@@ -65,6 +68,8 @@ class AppEnv(BaseSettings):
             raise ValueError("DEMO_PASSWORD musi mieć co najmniej 8 znaków.")
         if self.DEMO_VIDEO_URL and not self.DEMO_VIDEO_URL.startswith("https://"):
             raise ValueError("DEMO_VIDEO_URL musi zaczynać się od https://.")
+        if self.AUDIT_RETENTION_DAYS < 30:
+            raise ValueError("AUDIT_RETENTION_DAYS musi wynosić co najmniej 30 dni.")
         return self
 
 

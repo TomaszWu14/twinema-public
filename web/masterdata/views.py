@@ -11,6 +11,8 @@ from core.roles import any_role, designer
 from . import importers, services
 from . import packaging
 from .models import SPECIAL_FLAGS, Carrier, ImportLog, Material, PalletClass
+from core import audit
+from core.models import AuditEvent
 
 MAX_UPLOAD_MB = 25
 KINDS = dict(ImportLog.KIND_CHOICES)
@@ -65,6 +67,8 @@ def upload(request, kind):
     except importers.ImportFileError as exc:
         messages.error(request, f"{KINDS[kind]}: {exc}")
         return redirect("masterdata:home")
+    audit.record(request, AuditEvent.IMPORT, log, object_type=f"import: {KINDS[kind]}", label=log.name,
+                 detail=f"wiersze: {log.rows_ok} z {log.rows_total}")
     level = messages.WARNING if log.rows_rejected else messages.SUCCESS
     messages.add_message(request, level, f"{KINDS[kind]}: zapisano {log.rows_ok} z {log.rows_total} wierszy"
                          + (f", odrzucono {log.rows_rejected}." if log.rows_rejected else "."))

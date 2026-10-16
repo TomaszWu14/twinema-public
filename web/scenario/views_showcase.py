@@ -26,6 +26,8 @@ from .models import ScenarioRun, Showcase
 from .showcase import CARDS, SlideError, clean_slides, kpi_cards, template_slides
 from .views_play import bottleneck_focus, layout_places, peak_index
 from .views_sim import _sim_view
+from core import audit
+from core.models import AuditEvent
 
 MAX_BODY = 512 * 1024
 SHARE_DAYS = (1, 7, 14, 30, 90)
@@ -209,6 +211,8 @@ def showcase_share(request, pk):
         return redirect("scenario:showcase", pk=pk)
     sc.share_token, sc.share_expires = secrets.token_urlsafe(24), timezone.now() + timedelta(days=days)
     sc.save(update_fields=["share_token", "share_expires", "updated_at"])
+    audit.record(request, AuditEvent.LINK_CREATE, sc, object_type="prezentacja 3D", label=sc.title,
+                 detail=f"ważny {days} dni")
     messages.success(request, f"Utworzono publiczny link ważny {days} dni — poprzedni link (jeśli był) przestał działać.")
     return redirect("scenario:showcase", pk=pk)
 
@@ -216,6 +220,9 @@ def showcase_share(request, pk):
 @designer
 @require_POST
 def showcase_unshare(request, pk):
+    sc = get_object_or_404(Showcase, pk=pk)
+    if sc.share_token:
+        audit.record(request, AuditEvent.LINK_REVOKE, sc, object_type="prezentacja 3D", label=sc.title)
     Showcase.objects.filter(pk=pk).update(share_token=None, share_expires=None)
     messages.success(request, "Publiczny link wyłączony.")
     return redirect("scenario:showcase", pk=pk)
@@ -254,6 +261,7 @@ def showcase_reset(request, pk):
 def showcase_delete(request, pk):
     sc = get_object_or_404(Showcase, pk=pk)
     title = sc.title
+    audit.record(request, AuditEvent.DELETE, sc, object_type="prezentacja 3D", label=title)
     sc.delete()
     messages.success(request, f"Usunięto prezentację „{title}”.")
     return redirect("scenario:showcase_list")

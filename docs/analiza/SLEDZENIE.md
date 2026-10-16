@@ -38,4 +38,5 @@
 | FR-012 (formularze) | US-021 | `scenario/tests/test_views.py::…::test_invalid_form_keeps_typed_values_once` | ten PR (#68) |
 | NFR-015 | US-023 | CI: job `coverage` w `.github/workflows/ci.yml` (próg 80%) | ten PR (#68) |
 | NFR-010 (skany blokujące) | US-014, US-018 | `core/tests/test_csrf_forms.py`; CI: `.github/workflows/security.yml` | ten PR (#68) |
-| FR-022, NFR-011–014 | US-008, US-005, US-007, US-009 | — | planowane |
+| FR-022 | US-008 | `core/tests/test_audit.py` | ten PR (#68) |
+| NFR-011–014 | US-005, US-007, US-009 | — | planowane |

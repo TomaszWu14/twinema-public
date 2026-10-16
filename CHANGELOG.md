@@ -38,6 +38,8 @@ trafiają do sekcji „Unreleased”.
   gałęzi `claude/**` — scala tylko PO (R-09).
 - CI: akcje GitHub przypięte skrótem commita, Dependabot z karencją 7 dni (US-018); semgrep i trivy
   blokują PR po triażu pierwszych wyników (US-014, `docs/bezpieczenstwo/TRIAZ_SKANOW.md`).
+- Dziennik operacji wrażliwych dla Administratora: usunięcia, importy plików, linki publiczne — kto, co,
+  kiedy, adres IP; retencja `AUDIT_RETENTION_DAYS` (domyślnie 365 dni) (US-008).
 - Procedura czyszczenia historii repozytorium (`docs/operacje/CZYSZCZENIE_HISTORII.md`, R-01) — wykonuje PO.
 
 ### Security

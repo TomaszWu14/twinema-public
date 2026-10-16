@@ -26,6 +26,8 @@ from .captions import build_srt, offsets, shot_cues
 from .deck import build_deck
 from .models import RENDER_RESOLUTION, MontageJob, Presentation, Shot
 from .script import TARGET_WORDS, kpi_facts, template_script
+from core import audit
+from core.models import AuditEvent
 
 
 def model_kpi(wm):
@@ -203,6 +205,7 @@ def reopen(request, pk):
 def presentation_delete(request, pk):
     p = get_object_or_404(Presentation, pk=pk)
     title = p.title
+    audit.record(request, AuditEvent.DELETE, p, object_type="prezentacja filmowa", label=title)
     p.delete()
     messages.success(request, f"Usunięto prezentację „{title}”.")
     return redirect("studio:list")

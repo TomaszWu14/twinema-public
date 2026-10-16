@@ -11,6 +11,8 @@ from masterdata.importers import ImportFileError
 from . import importers
 from .catalog import ATTACHMENTS, KINDS, capacity_at
 from .models import PARAM_FIELDS, CostRate, Equipment
+from core import audit
+from core.models import AuditEvent
 
 IMPORT_MAX = 5 * 1024 * 1024
 
@@ -125,6 +127,8 @@ def import_file(request):
         messages.error(request, str(exc))
         return redirect("equipment:list")
     created, updated, skipped = importers.import_rows(rows, request.user)
+    audit.record(request, AuditEvent.IMPORT, object_type="import sprzętu", label=f.name[:200],
+                 detail=f"nowe: {created}, zaktualizowane: {updated}, pominięte: {len(skipped)}")
     messages.success(request, f"Import: {created} nowych, {updated} zaktualizowanych modeli.")
     for n, why in bad[:20]:
         messages.warning(request, f"Wiersz {n}: {why}")
@@ -191,6 +195,7 @@ def catalog_delete(request, pk):
         return confirm(request, title="Usuń model sprzętu", name=eq.name, removed=removed, detached=detached,
                        cancel_url=reverse("equipment:detail", args=[eq.pk]), confirm_label="Tak, usuń model")
     name, groups = eq.name, eq.scenario_fleets.count()
+    audit.record(request, AuditEvent.DELETE, eq, object_type="model sprzętu", detail=f"grupy floty mieszanej: {groups}")
     eq.delete()
     msg = f"Usunięto „{name}” — regały i flota jednorodna scenariuszy z tym sprzętem wracają do ustawień ogólnych."
     if groups:

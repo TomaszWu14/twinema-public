@@ -17,6 +17,7 @@ platformy, ruch z internetu wyłącznie przez proxy TLS (adres klienta z nagłó
 działania: ścieżka `/health/`, okres startowy co najmniej 120 s; trwały wolumen na media i — przy SQLite — na plik bazy.
 
 Zmienne środowiskowe: [.env.example](../../.env.example); walidacja przy starcie w `web/twinema/config.py`.
+Kontener przy starcie usuwa też wpisy dziennika operacji starsze niż `AUDIT_RETENTION_DAYS` (US-008); dziennik ogląda Administrator pod `/dziennik/`.
 **Demo publiczne (`DEMO_PUBLIC=true`) tylko na osobnej instancji z danymi demo** (R-02). Gdy w bazie są dane spoza demo, kontener zapisuje przy starcie ostrzeżenie w logach, a Administrator widzi baner na stronie startowej (US-011).
 
 ### Wdrożenie zmian z PR #68 — kroki dla PO

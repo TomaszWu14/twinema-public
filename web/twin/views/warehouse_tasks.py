@@ -16,6 +16,8 @@ from twin.shared import (
 from twin.ewm_tasks import KIND_LABELS, Scan, parse_overrides
 from twin.ewm_tasks_import import EXTENSIONS, location_report, run_import, save_upload, upload_path
 from twin.models_tasks import WarehouseTaskBatch
+from core import audit
+from core.models import AuditEvent
 
 __all__ = ["ewm_tasks_list", "ewm_tasks_preview", "ewm_tasks_import", "ewm_tasks_detail",
            "ewm_tasks_status", "ewm_tasks_delete"]
@@ -115,6 +117,8 @@ def ewm_tasks_import(request):
     batch = WarehouseTaskBatch.objects.create(
         name=form["name"] or "Import zadań EWM", file_name=request.POST.get("file_name", "")[:255],
         uploaded_by=request.user, tz=form["tz"], kind_map=form["overrides"])
+    audit.record(request, AuditEvent.IMPORT, batch, object_type="import zadań magazynowych", label=batch.name,
+                 detail=batch.file_name)
     if path.stat().st_size <= SYNC_MAX_BYTES:
         run_import(batch.pk, token)
     else:
@@ -160,6 +164,7 @@ def ewm_tasks_status(request, pk):
 def ewm_tasks_delete(request, pk):
     batch = get_object_or_404(WarehouseTaskBatch, pk=pk)
     name = batch.name
+    audit.record(request, AuditEvent.DELETE, batch, object_type="import zadań magazynowych", label=name)
     batch.delete()
     messages.success(request, f"Usunięto import „{name}”.")
     return redirect("twin:ewm_tasks_list")

@@ -8,7 +8,8 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from .demo import DEMO_USER, demo_showcase, exposure_reasons
-from .roles import GROUP_ADMIN, GROUP_DESIGNER, GROUP_VIEWER, has_role
+from .models import AuditEvent
+from .roles import GROUP_ADMIN, GROUP_DESIGNER, GROUP_VIEWER, admin_only, has_role
 
 # Moduły platformy w kolejności przepływu pracy — jedno źródło dla nawigacji w nagłówku i kafli strony
 # głównej (R4: te same nazwy). `apps` / `match` = kiedy pozycja jest aktywna (patrz `active_module`).
@@ -33,6 +34,8 @@ MODULES = [
      "url": "render:jobs", "apps": {"render"}},
     {"key": "studio", "name": "Studio", "desc": "Scenariusz, napisy, montaż — film i deck.",
      "url": "studio:list", "apps": {"studio"}},
+    {"key": "dziennik", "name": "Dziennik", "desc": "Kto usunął dane, zaimportował plik albo udostępnił link publiczny.",
+     "url": "core:audit_log", "match": ("audit_log",), "admin": True},
 ]
 
 
@@ -50,7 +53,8 @@ def active_module(rm):
 def visible_modules(user):
     """US-019: moduły, do których rola ma dostęp — Podgląd nie widzi modułów tylko dla Projektanta."""
     designer = has_role(user, GROUP_ADMIN, GROUP_DESIGNER)
-    return [m for m in MODULES if designer or not m.get("designer")]
+    admin = has_role(user, GROUP_ADMIN)
+    return [m for m in MODULES if (designer or not m.get("designer")) and (admin or not m.get("admin"))]
 
 
 def home(request):
@@ -90,3 +94,20 @@ def demo_enter(request):
             raise Http404
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
     return redirect("core:home")
+
+
+AUDIT_PAGE = 200
+
+
+@admin_only
+def audit_log(request):
+    """US-008: dziennik operacji wrażliwych — tylko Administrator; ostatnie wpisy, filtr po rodzaju."""
+    action = request.GET.get("action", "")
+    events = AuditEvent.objects.all()
+    if action in dict(AuditEvent.ACTIONS):
+        events = events.filter(action=action)
+    else:
+        action = ""
+    return render(request, "core/audit_log.html", {
+        "events": events[:AUDIT_PAGE], "actions": AuditEvent.ACTIONS, "action": action, "limit": AUDIT_PAGE,
+        "retention_days": settings.AUDIT_RETENTION_DAYS})

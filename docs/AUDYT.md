@@ -55,7 +55,7 @@ Dług techniczny: T-1…T-16 w [05-decyzje-i-ograniczenia.md](05-decyzje-i-ogran
 | 6 | CSP tylko w trybie raportu, z `'unsafe-inline'` | średnia | R-04 | wymuszenie po teście UI (US-005) |
 | 7 | Zaufanie do `X-Forwarded-For` — obejście blokady logowania przy pominięciu proxy | średnia | R-05 | **naprawione** (US-006) |
 | 8 | Długie obliczenia uruchamiane GET-em także przez rolę Podgląd / gościa | średnia | R-07 | **częściowo** — obliczenia tylko dla Projektanta (Z-3); kolejka w tle (US-007) do realizacji |
-| 9 | Brak dziennika operacji wrażliwych | średnia | R-08 | US-008 |
+| 9 | Brak dziennika operacji wrażliwych | średnia | R-08 | **naprawione** (US-008) |
 | 10 | Auto-merge bez zatwierdzenia człowieka | średnia | R-09 | **częściowo** — auto-merge usunięty z CI; wymagane zatwierdzenie w ochronie gałęzi ustawia PO (US-013) |
 
 Naprawione również: stanowisko renderujące mogło wysłać token po HTTP (R-17, US-003).

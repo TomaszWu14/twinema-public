@@ -44,7 +44,7 @@ Oznaczenia statusu: ✅ zabezpieczone · ⚠️ częściowo · ❌ brak. Pozycje
 | S | obejście blokady przez podmianę `X-Forwarded-For`, gdy aplikacja jest osiągalna z pominięciem proxy | IP z ostatniego wpisu nagłówka — poprawne tylko za jednym zaufanym proxy | ⚠️ R-05 |
 | S | przejęcie sesji | ciasteczka `Secure`, `HttpOnly`, `SameSite=Lax`; HTTPS i HSTS w produkcji | ✅ |
 | S | przejęcie konta Administratora | brak drugiego składnika | ⚠️ R-11 |
-| R | brak śladu kto się logował | django-axes zapisuje próby; brak dziennika operacji wrażliwych | ⚠️ R-08 |
+| R | brak śladu, kto się logował albo usunął dane | django-axes zapisuje próby logowania; dziennik operacji wrażliwych: usunięcia, importy, linki publiczne (US-008) | ✅ |
 | E | ucieczka z kontenera przez proces root | obraz działa jako użytkownik `app` (`USER` w Dockerfile, US-014) | ✅ |
 | E | podniesienie uprawnień przez wejście gościa | wejście gościa tylko na konto zwykłego Podglądu, bez praw personelu | ✅ |
 

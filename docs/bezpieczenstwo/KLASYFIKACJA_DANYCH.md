@@ -35,6 +35,7 @@ Klasy określają, kto może widzieć dane i jak je chronić. Klasy ustalono na 
 | Konta użytkowników (login, e-mail, imię, nazwisko, hasło — skrót) | `auth_user` | **Dane osobowe** | hasło jako skrót PBKDF2 |
 | Autor obiektów (`created_by`, `uploaded_by`) | wiele encji | Dane osobowe (pośrednio) | identyfikator konta |
 | Próby logowania (login, adres IP, user agent) | django-axes | **Dane osobowe** | |
+| Dziennik operacji wrażliwych (login, adres IP, operacja, nazwa obiektu) | `AuditEvent` | **Dane osobowe** | tylko Administrator; bez treści plików i tokenów linków; retencja CP-6 |
 | Logi dostępu serwera (IP, adres URL, identyfikator żądania) | stdout kontenera | **Dane osobowe** | adres pokazu publicznego zawiera klucz linku |
 | Klucz aplikacji, hasło bazy, token stanowiska, klucz AI, hasło demo, adres monitoringu | zmienne środowiskowe | **Sekrety** | [config.py](../../web/twinema/config.py) waliduje przy starcie |
 

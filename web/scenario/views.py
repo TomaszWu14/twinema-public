@@ -17,6 +17,8 @@ from .inbound import _hhmm
 from .models import InboundStream, OutboundStream, Scenario, ScenarioDay, ScenarioFleet, Shift
 from .staffing import cutoff_risk, process_hours, staffing
 from .views_sim import SimForm, _sim_view
+from core import audit
+from core.models import AuditEvent
 
 KIND_LABEL = dict(InboundStream._meta.get_field("kind").choices)
 OUT_LABEL = dict(OutboundStream._meta.get_field("kind").choices)
@@ -436,6 +438,7 @@ def scenario_delete(request, pk):
         return confirm(request, title="Usuń scenariusz", name=sc.name, removed=removed, detached=detached,
                        cancel_url=reverse("scenario:detail", args=[sc.pk]), confirm_label="Tak, usuń scenariusz")
     name = sc.name
+    audit.record(request, AuditEvent.DELETE, sc, object_type="scenariusz")
     sc.delete()
     messages.success(request, f"Usunięto scenariusz „{name}”.")
     return redirect("scenario:list")
