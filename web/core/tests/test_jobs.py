@@ -99,7 +99,9 @@ class JobQueueTests(TestCase):
 
     def test_worker_loop_survives_errors_and_stops(self):
         calls = []
+        # close_old_connections zamknąłby połączenie transakcji testu (PostgreSQL w CI) — w teście pętli wyłączone
         with mock.patch.object(jobs, "run_next", side_effect=[True, RuntimeError("baza"), False]), \
+                mock.patch.object(jobs, "close_old_connections"), mock.patch.object(jobs, "prune"), \
                 self.assertLogs("core.jobs", "ERROR"):
             jobs.worker_loop(stop=lambda: len(calls) >= 2, sleep=calls.append)
         self.assertEqual(calls, [2.0, 2.0])
