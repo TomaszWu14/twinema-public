@@ -177,7 +177,7 @@ w trakcie prac. Gdy nie — opisano tylko kontekst i skutki wynikające z kodu.
 
 ### Długie operacje
 
-- ~~Symulacja liczyła się w trakcie żądania~~ — symulacja dnia i scenariusza oraz kalibracja idą przez kolejkę zadań w bazie (US-007, ADR-0004). W trakcie żądania zostają: import danych podstawowych, ML, szkic z AI (90 s i jedno ponowienie) i ślad symulacji dla animacji 3D.
+- ~~Symulacja liczyła się w trakcie żądania~~ — symulacja dnia i scenariusza oraz kalibracja idą przez kolejkę zadań w bazie (US-007, ADR-0004). Do kolejki trafiają też import danych podstawowych, przebiegi ML i szkic z AI (T-1). W trakcie żądania zostaje tylko ślad symulacji dla animacji 3D (liczy go wyłącznie Projektant).
 - ~~Import zadań w tle działał w wątku procesu~~ — duży import idzie przez kolejkę i po restarcie workera jest ponawiany bez dublowania wierszy (US-024).
 - ~~Zlecenie renderu odrzucone przez serwer wracało do kolejki bez limitu prób~~ — po 3 próbach kończy się błędem (US-015).
 
@@ -198,7 +198,7 @@ Pozycje T-n mają odpowiedniki w [backlogu](analiza/HISTORYJKI.md) (kolumna „�
 
 | Nr | Praca | Powód | Priorytet |
 |---|---|---|---|
-| T-1 | Przenieść do kolejki zadań import danych podstawowych, ML, szkic z AI i ślad symulacji 3D (symulacja i kalibracja — zrobione, US-007) | limit 120 s żądania; ryzyko przerwania obliczeń (D10) | średni |
+| T-1 | Przenieść do kolejki ślad symulacji dla animacji 3D (reszta — symulacje, kalibracja, import danych, ML, szkic z AI — zrobione) | limit 120 s żądania przy animacji długiego dnia | niski |
 | T-2 | ~~Zastąpić wątek importu zadań trwałą kolejką z ponawianiem~~ — zrobione (US-024) | — | — |
 | T-3 | ~~Ukryć przed rolą Podgląd moduły i przyciski bez dostępu~~ — zrobione (US-019) | — | — |
 | T-4 | ~~Sprawdzanie autora przy edycji i usuwaniu własnego sprzętu~~ — zrobione (US-001) | Projektant mógł zmienić cudzy model | — |

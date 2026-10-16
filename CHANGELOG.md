@@ -48,6 +48,8 @@ trafiają do sekcji „Unreleased”.
 - Wynik symulacji przypięty do prezentacji 3D nie wypada z limitu przebiegów; gdy zniknie razem ze scenariuszem,
   prezentacja ostrzega Projektanta (US-025).
 - Formularz typu regału i edycja stref po błędzie walidacji zachowują wpisane wartości (US-021).
+- Import danych podstawowych, przebiegi ML i szkic scenariusza z Claude idą przez kolejkę zadań — żądanie nie
+  czeka na wynik, ekran pokazuje stan i link do wyniku (T-1).
 - Testy E2E w przeglądarce (Playwright, job CI `e2e`): logowanie i główne ekrany, wynik symulacji, ekrany ze
   skryptami pod wymuszoną CSP, demo gościa i link publiczny.
 - Procedura czyszczenia historii repozytorium (`docs/operacje/CZYSZCZENIE_HISTORII.md`, R-01) — wykonuje PO.

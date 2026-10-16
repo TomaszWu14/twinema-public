@@ -58,11 +58,13 @@ class AuditRecordTests(TestCase):
         self.assertNotIn(Showcase.objects.get().share_token or "-", str(events))   # token nie trafia do dziennika
 
     def test_masterdata_import_is_recorded_without_file_content(self):
-        self.client.post(reverse("masterdata:upload", args=["materials"]),
-                         {"file": SimpleUploadedFile("m.csv", "Kod;Nazwa\nA1;Śruba\n".encode())})
+        import tempfile
+        with override_settings(MEDIA_ROOT=tempfile.mkdtemp(prefix="twinema-audit-")):
+            self.client.post(reverse("masterdata:upload", args=["materials"]),
+                             {"file": SimpleUploadedFile("m.csv", "Kod;Nazwa\nA1;Śruba\n".encode())})
         e = AuditEvent.objects.get()
-        self.assertEqual(e.action, AuditEvent.IMPORT)
-        self.assertIn("wiersze: 1 z 1", e.detail)
+        self.assertEqual((e.action, e.object_label), (AuditEvent.IMPORT, "m.csv"))
+        self.assertIn("zlecony do kolejki", e.detail)
         self.assertNotIn("Śruba", f"{e.object_label} {e.detail}")
 
     def test_entry_survives_actor_account_deletion(self):

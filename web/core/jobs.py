@@ -28,6 +28,9 @@ HANDLERS = {
     "twin.calibration": "twin.jobs.calibrate_day",
     "twin.ewm_import": "twin.jobs.import_tasks",
     "scenario.sim": "scenario.jobs.simulate_scenario",
+    "ml.run": "ml.jobs.run_model",
+    "studio.ai_draft": "studio.jobs.draft_with_ai",
+    "masterdata.import": "masterdata.jobs.import_upload",
 }
 
 
@@ -44,6 +47,12 @@ def enqueue(kind, params, *, key=None, user=None):
             status=Job.QUEUED, attempts=0, message="", result=None, started_at=None, finished_at=None)
         job.refresh_from_db()
     return job
+
+
+def latest(kind, **params):
+    """Ostatnie zadanie danego rodzaju o podanych parametrach (np. user=…, presentation=…) — do ekranu stanu."""
+    filters = {f"params__{k}": v for k, v in params.items()}
+    return Job.objects.filter(kind=kind, **filters).order_by("-created_at", "-id").first()
 
 
 def requeue_stale(now=None):

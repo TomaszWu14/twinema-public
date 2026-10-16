@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
+from core import jobs
 from core.roles import any_role, designer
 from twin.models_tasks import WarehouseTaskBatch
 
@@ -26,6 +27,7 @@ def home(request):
         "batches": WarehouseTaskBatch.objects.filter(status="done"),
         "streams": services.STREAM_LABELS.items(),
         "runs": ModelRun.objects.select_related("batch", "created_by")[:30],
+        "job": jobs.latest("ml.run", user=request.user.pk),
     })
 
 
@@ -33,17 +35,18 @@ def home(request):
 @require_POST
 def run(request, kind):
     batch = get_object_or_404(WarehouseTaskBatch, pk=request.POST.get("batch") or 0, status="done")
+    params = {"kind": kind, "batch": batch.pk, "user": request.user.pk}
     if kind == "forecast":
         stream = request.POST.get("stream", "total")
-        stream = stream if stream in services.STREAM_LABELS else "total"
-        mr = services.run_forecast(batch, stream, _int(request.POST.get("years"), 5, 1, 20), request.user)
+        params.update(stream=stream if stream in services.STREAM_LABELS else "total",
+                      years=_int(request.POST.get("years"), 5, 1, 20))
     elif kind == "segmentation":
-        mr = services.run_segmentation(batch, _int(request.POST.get("k"), 4, 2, 8), request.user)
+        params.update(k=_int(request.POST.get("k"), 4, 2, 8))
     else:
         return redirect("ml:home")
-    if not mr.result.get("ok"):
-        messages.warning(request, mr.result.get("reason", "Model nie dał wyniku."))
-    return redirect("ml:detail", pk=mr.pk)
+    jobs.enqueue("ml.run", params, user=request.user)             # T-1: model liczy worker kolejki
+    messages.success(request, "Model liczy się w tle — wynik pojawi się na tej stronie.")
+    return redirect("ml:home")
 
 
 @any_role

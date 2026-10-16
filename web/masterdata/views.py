@@ -1,3 +1,6 @@
+import uuid
+from pathlib import Path
+
 from django import forms
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -8,13 +11,15 @@ from django.views.decorators.http import require_POST
 
 from core.roles import any_role, designer
 
+from .jobs import upload_dir
 from . import importers, services
 from . import packaging
 from .models import SPECIAL_FLAGS, Carrier, ImportLog, Material, PalletClass
-from core import audit
+from core import audit, jobs
 from core.models import AuditEvent
 
 MAX_UPLOAD_MB = 25
+UPLOAD_SUFFIXES = (".csv", ".txt", ".xlsx", ".xlsm")
 KINDS = dict(ImportLog.KIND_CHOICES)
 KIND_HELP = {
     "materials": "Kod, nazwa, grupa, sztuka → karton → paleta (wymiary, wagi, przeliczniki, warstwy), nośnik, klasy, "
@@ -47,6 +52,7 @@ def home(request):
         "logs": ImportLog.objects.select_related("uploaded_by")[:20],
         "models": WarehouseModel.objects.order_by("-created_at")[:20],
         "max_mb": MAX_UPLOAD_MB,
+        "job": jobs.latest("masterdata.import", user=request.user.pk),
     })
 
 
@@ -62,17 +68,21 @@ def upload(request, kind):
     if f.size > MAX_UPLOAD_MB * 1024 * 1024:
         messages.error(request, f"Plik jest większy niż {MAX_UPLOAD_MB} MB — podziel go.")
         return redirect("masterdata:home")
-    try:
-        log = services.import_file(kind, f.name, f.read(), request.user)
-    except importers.ImportFileError as exc:
-        messages.error(request, f"{KINDS[kind]}: {exc}")
+    suffix = Path(f.name).suffix.lower()
+    if suffix not in UPLOAD_SUFFIXES:
+        messages.error(request, f"{KINDS[kind]}: obsługiwane pliki to CSV i XLSX.")
         return redirect("masterdata:home")
-    audit.record(request, AuditEvent.IMPORT, log, object_type=f"import: {KINDS[kind]}", label=log.name,
-                 detail=f"wiersze: {log.rows_ok} z {log.rows_total}")
-    level = messages.WARNING if log.rows_rejected else messages.SUCCESS
-    messages.add_message(request, level, f"{KINDS[kind]}: zapisano {log.rows_ok} z {log.rows_total} wierszy"
-                         + (f", odrzucono {log.rows_rejected}." if log.rows_rejected else "."))
-    return redirect("masterdata:log_detail", pk=log.pk)
+    # T-1: import liczy worker kolejki — duży plik nie przekracza limitu żądania
+    stored = upload_dir() / f"{uuid.uuid4().hex}{suffix}"
+    with open(stored, "wb") as out:
+        for chunk in f.chunks():
+            out.write(chunk)
+    jobs.enqueue("masterdata.import", {"kind": kind, "name": f.name[:200], "file": stored.name,
+                                       "user": request.user.pk}, user=request.user)
+    audit.record(request, AuditEvent.IMPORT, object_type=f"import: {KINDS[kind]}", label=f.name[:200],
+                 detail=f"plik {f.size // 1024} KB, zlecony do kolejki")
+    messages.success(request, f"{KINDS[kind]}: import trwa w tle — raport pojawi się na tej stronie.")
+    return redirect("masterdata:home")
 
 
 @designer                      # raport pokazuje wiersze danych źródłowych — nie dla roli Podgląd

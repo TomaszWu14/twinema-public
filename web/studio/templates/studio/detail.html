@@ -120,6 +120,9 @@
           <p class="text-sm" id="st-ai-off" style="margin:6px 0 0">Szkic z Claude wyłączony — ustaw <code>ANTHROPIC_API_KEY</code> w zmiennych serwera.</p>
         {% endif %}
         <p class="text-sm" id="st-ai-live" role="status" aria-live="polite" style="margin:6px 0 0"></p>
+        {% if ai_job %}{% include "core/_job_status.html" with job=ai_job may_compute=is_designer %}
+        {% if ai_job.status == "done" and ai_job.result.error %}<div class="alert alert-error" role="alert" style="margin-top:12px">{{ ai_job.result.error }}</div>
+        {% elif ai_job.status == "done" %}<p class="text-sm" style="margin:6px 0 0">Ostatni szkic z Claude: {{ ai_job.result.count }} ujęć ({{ ai_job.finished_at|date:"d.m.Y H:i" }}).{% for w in ai_job.result.warnings %} {{ w }}{% endfor %}</p>{% endif %}{% endif %}
         {% else %}
         <p class="text-sm" style="margin:0 0 10px">Tekst zatwierdzony — render i montaż korzystają z tych tekstów.</p>
         <form method="post" action="{% url 'studio:reopen' p.pk %}">{% csrf_token %}<button class="btn btn-ghost" type="submit">Wróć do edycji</button></form>

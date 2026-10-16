@@ -58,7 +58,7 @@ przekazuje przez bazę ([ADR-0004](adr/0004-kolejka-zadan-w-bazie.md)).
 | Kontener | Technologia | Odpowiedzialność |
 |---|---|---|
 | Serwer aplikacji | Python 3.13, Django 5.2 LTS, gunicorn (2 procesy × 4 wątki, limit 120 s), whitenoise | widoki, logika, API stanowiska, pliki statyczne |
-| Worker kolejki zadań | `manage.py run_jobs` (proces obok gunicorna; `RUN_WORKER`) | symulacja dnia i scenariusza, kalibracja, import zadań > 5 MB; ponowienie po restarcie ([ADR-0004](adr/0004-kolejka-zadan-w-bazie.md)) |
+| Worker kolejki zadań | `manage.py run_jobs` (proces obok gunicorna; `RUN_WORKER`) | symulacja dnia i scenariusza, kalibracja, importy (zadania > 5 MB, dane podstawowe), ML, szkic z AI; ponowienie po restarcie ([ADR-0004](adr/0004-kolejka-zadan-w-bazie.md)) |
 | Baza danych | PostgreSQL 17 (lokalnie i w testach SQLite) | wszystkie encje ([model danych](MODEL_DANYCH.md)) |
 | Wolumen mediów | system plików kontenera | pliki od użytkowników i wyniki renderu, wydawane przez widoki z kontrolą roli |
 | Przeglądarka | szablony Django, three.js, ECharts (dołączone do obrazu) | edytor 2D/3D, animacje, pokazy |

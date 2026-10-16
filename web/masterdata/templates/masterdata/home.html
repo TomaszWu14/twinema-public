@@ -23,6 +23,11 @@
   {% if is_designer %}<div class="page-header__actions"><a class="btn btn-secondary" href="{% url 'masterdata:materials' %}">Materiały</a>
     <a class="btn btn-ghost" href="{% url 'masterdata:catalog' %}">Nośniki i klasy</a></div>{% endif %}
 </div>
+{% if job %}{% include "core/_job_status.html" with may_compute=is_designer %}
+{% if job.status == "done" and job.result.error %}<div class="alert alert-error" role="alert" style="margin-top:16px">Ostatni import: {{ job.result.error }}</div>
+{% elif job.status == "done" %}<div class="alert {% if job.result.rows_rejected %}alert-warning{% else %}alert-success{% endif %}" role="status" style="margin-top:16px">
+  Ostatni import „{{ job.params.name }}”: zapisano {{ job.result.rows_ok }} z {{ job.result.rows_total }} wierszy{% if job.result.rows_rejected %}, odrzucono {{ job.result.rows_rejected }}{% endif %} —
+  <a href="{% url 'masterdata:log_detail' job.result.log %}">raport importu</a>.</div>{% endif %}{% endif %}
 
 <div class="stats-grid" style="margin-bottom:24px">
   <div class="stat-card"><div><div class="stat-value">{{ n_materials }}</div><div class="stat-label">materiałów · {{ n_groups }} grup towarowych</div></div></div>

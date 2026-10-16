@@ -21,6 +21,10 @@
   </div>
 </div>
 
+{% if job %}{% include "core/_job_status.html" with may_compute=is_designer %}
+{% if job.status == "done" %}<div class="alert {% if job.result.ok %}alert-success{% else %}alert-warning{% endif %}" role="status" style="margin-bottom:16px">
+  {% if job.result.ok %}Ostatni przebieg gotowy{% else %}{{ job.result.reason|default:"Model nie dał wyniku." }}{% endif %} —
+  <a href="{% url 'ml:detail' job.result.run %}">zobacz wynik</a>.</div>{% endif %}{% endif %}
 {% if not batches %}
 <div class="card" style="margin-bottom:24px"><div class="empty-state">Najpierw zaimportuj zadania magazynowe w <a href="{% url 'twin:ewm_tasks_list' %}">Zadaniach i symulacji</a> — modele uczą się na historii ruchów.</div></div>
 {% endif %}

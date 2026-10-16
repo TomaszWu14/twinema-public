@@ -32,9 +32,9 @@ Opcji 2 nie wybrano: przy kilku użytkownikach nie uzasadnia kosztu i utrzymania
 
 ## Konsekwencje
 
-- Do kolejki trafiają: symulacja dnia projektowego, kalibracja, symulacja scenariusza i import zadań większy niż
-  5 MB. W trakcie żądania zostają: import danych podstawowych, ML, szkic z AI i ślad symulacji dla animacji 3D
-  (T-1, częściowo).
+- Do kolejki trafiają: symulacja dnia projektowego, kalibracja, symulacja scenariusza, import zadań większy niż
+  5 MB, import danych podstawowych, przebiegi ML i szkic z AI. W trakcie żądania zostaje ślad symulacji dla
+  animacji 3D (T-1).
 - Komunikaty o wyniku symulacji scenariusza pokazuje karta scenariusza, a nie komunikat po żądaniu.
 - Zakończone zadania są usuwane po 7 dniach; wynik liczy się wtedy od nowa.
 - Uruchomienie lokalne bez workera: zadania czekają w kolejce. Trzeba uruchomić `python manage.py run_jobs`
