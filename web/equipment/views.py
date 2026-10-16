@@ -2,6 +2,7 @@ from django import forms
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from core.roles import GROUP_ADMIN, any_role, designer, has_role
@@ -180,11 +181,15 @@ def catalog_copy(request, pk):
 
 
 @designer
-@require_POST
 def catalog_delete(request, pk):
     eq = get_object_or_404(Equipment, pk=pk)
     if eq.is_system or not _can_edit(request.user, eq):
         return render(request, "core/403.html", status=403)
+    if request.method != "POST":                         # US-004: najpierw ekran potwierdzenia ze skutkami
+        from core.deletion import confirm, equipment_effects
+        removed, detached = equipment_effects(eq)
+        return confirm(request, title="Usuń model sprzętu", name=eq.name, removed=removed, detached=detached,
+                       cancel_url=reverse("equipment:detail", args=[eq.pk]), confirm_label="Tak, usuń model")
     name, groups = eq.name, eq.scenario_fleets.count()
     eq.delete()
     msg = f"Usunięto „{name}” — regały i flota jednorodna scenariuszy z tym sprzętem wracają do ustawień ogólnych."

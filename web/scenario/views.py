@@ -395,9 +395,13 @@ def scenario_copy(request, pk):
 
 
 @designer
-@require_POST
 def scenario_delete(request, pk):
     sc = get_object_or_404(Scenario, pk=pk)
+    if request.method != "POST":                         # US-004: najpierw ekran potwierdzenia ze skutkami
+        from core.deletion import confirm, scenario_effects
+        removed, detached = scenario_effects(sc)
+        return confirm(request, title="Usuń scenariusz", name=sc.name, removed=removed, detached=detached,
+                       cancel_url=reverse("scenario:detail", args=[sc.pk]), confirm_label="Tak, usuń scenariusz")
     name = sc.name
     sc.delete()
     messages.success(request, f"Usunięto scenariusz „{name}”.")

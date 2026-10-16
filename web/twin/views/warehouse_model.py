@@ -354,7 +354,10 @@ def warehouse_model_delete(request, pk):
         wm.delete()
         messages.success(request, "Model magazynu usunięty.")
         return redirect("twin:warehouse_model_list")
-    return render(request, "twin/warehouse_model/confirm_delete.html", {"object": wm})
+    from core.deletion import confirm, hall_effects
+    removed, detached = hall_effects(wm)
+    return confirm(request, title="Usuń model magazynu", name=wm.name, removed=removed, detached=detached,
+                   cancel_url=reverse("twin:warehouse_model_view", args=[wm.pk]), confirm_label="Tak, usuń model")
 
 __all__ = [
     'warehouse_model_list',

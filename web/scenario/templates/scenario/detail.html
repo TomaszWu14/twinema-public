@@ -330,7 +330,7 @@
 
 <div class="sc-actions" style="margin-top:16px">
   <form method="post" action="{% url 'scenario:copy' sc.pk %}">{% csrf_token %}<button class="btn btn-ghost" type="submit">Kopiuj scenariusz</button></form>
-  <form method="post" action="{% url 'scenario:delete' sc.pk %}">{% csrf_token %}<button class="btn btn-ghost btn-sm" type="submit">Usuń scenariusz</button></form>
+  <a class="btn btn-ghost btn-sm" href="{% url 'scenario:delete' sc.pk %}">Usuń scenariusz</a>
 </div>
 {% else %}
 <section class="card" style="margin-top:16px" aria-labelledby="sc-plan-h"><div class="card-body">

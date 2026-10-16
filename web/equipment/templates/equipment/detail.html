@@ -33,7 +33,7 @@
     <div class="eq-actions">
       {% if can_edit %}<a class="btn btn-primary btn-sm" href="{% url 'equipment:edit' eq.pk %}">Edytuj</a>{% endif %}
       <form method="post" action="{% url 'equipment:copy' eq.pk %}">{% csrf_token %}<button class="btn btn-ghost btn-sm" type="submit">Kopiuj jako własny model</button></form>
-      {% if can_edit and not eq.is_system %}<form method="post" action="{% url 'equipment:delete' eq.pk %}">{% csrf_token %}<button class="btn btn-ghost btn-sm" type="submit">Usuń</button></form>{% endif %}
+      {% if can_edit and not eq.is_system %}<a class="btn btn-ghost btn-sm" href="{% url 'equipment:delete' eq.pk %}">Usuń</a>{% endif %}
     </div>
     {% endif %}
   </div></div>

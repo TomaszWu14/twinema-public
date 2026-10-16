@@ -1,0 +1,23 @@
+{% extends "core/base.html" %}
+{% block title %}{{ title }} · {{ app_name }}{% endblock %}
+{% block main %}
+<div class="wrap" style="max-width:640px">
+  <div class="eyebrow">Usunięcie</div>
+  <h1 class="hero-title">{{ title }}</h1>
+  <p class="lead">Czy na pewno usunąć <strong>{{ name }}</strong>? Tej operacji nie można cofnąć.</p>
+  {% if removed %}
+  <h2 style="font-size:15px;margin:20px 0 8px">Razem z nim zostaną usunięte</h2>
+  <ul>{% for label, n in removed %}<li>{{ label }}: <strong>{{ n }}</strong></li>{% endfor %}</ul>
+  {% endif %}
+  {% if detached %}
+  <h2 style="font-size:15px;margin:20px 0 8px">Stracą powiązanie, ale zostaną</h2>
+  <ul>{% for label, n in detached %}<li>{{ label }}: <strong>{{ n }}</strong></li>{% endfor %}</ul>
+  {% endif %}
+  <div style="display:flex;gap:12px;margin-top:24px">
+    <form method="post">{% csrf_token %}
+      <button type="submit" class="btn btn-danger">{{ confirm_label }}</button>
+    </form>
+    <a href="{{ cancel_url }}" class="btn btn-secondary">Anuluj</a>
+  </div>
+</div>
+{% endblock %}
