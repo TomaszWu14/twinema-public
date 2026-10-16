@@ -95,6 +95,17 @@ class VariantEditViewTests(TestCase):
         self.client.post(f"/magazyn/model/{self.wm.pk}/strefy/", {"dx_V": "-400", "dx_K1": "0"})
         self.assertEqual(list(self.wm.racks.values_list("x_m", flat=True)), before)
 
+    def test_rejected_edit_keeps_typed_values(self):
+        """US-021: odrzucona edycja stref wraca z wpisanymi wartościami, nie z pustym formularzem."""
+        r = self.client.post(f"/magazyn/model/{self.wm.pk}/strefy/",
+                             {"dx_V": "-400", "dy_V": "1,5", "levels_K1": "7", "del_K1": "1", "floor_w": "123"})
+        self.assertEqual(r.status_code, 400)
+        self.assertContains(r, "poza halę", status_code=400)
+        for value in ('name="dx_V" value="-400"', 'name="dy_V" value="1,5"', 'name="levels_K1" value="7"',
+                      'value="123"'):
+            self.assertContains(r, value, status_code=400)
+        self.assertRegex(r.content.decode(), r'name="del_K1" value="1" checked')
+
     def test_view_has_variant_buttons(self):
         r = self.client.get(f"/magazyn/model/{self.wm.pk}/view/")
         self.assertContains(r, "Utwórz przyszły layout (kopia)")

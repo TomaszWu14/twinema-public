@@ -55,6 +55,9 @@ class Equipment(models.Model):
         ordering = ["kind", "-is_system", "name"]
         verbose_name = "Sprzęt"
         verbose_name_plural = "Katalog sprzętu"
+        # US-022: import aktualizuje własny model po nazwie — nazwa musi wskazywać jeden model
+        constraints = [models.UniqueConstraint(fields=["name"], condition=models.Q(is_system=False),
+                                               name="equipment_own_name_unique")]
 
     def __str__(self):
         return self.name

@@ -1,6 +1,6 @@
 {% extends "twin/base.html" %}
 {% load static %}
-{% block title %}{% if obj %}Edytuj typ{% else %}Nowy typ{% endif %} — {{ app_name }}{% endblock %}
+{% block title %}{% if obj.pk %}Edytuj typ{% else %}Nowy typ{% endif %} — {{ app_name }}{% endblock %}
 {% block nav_warehouse_map %}topnav__link--active{% endblock %}
 
 {% block extra_head %}
@@ -24,17 +24,17 @@
   <span class="breadcrumb__sep">›</span>
   <a href="{% url 'twin:warehouse_rack_type_list' %}">Typy regałów</a>
   <span class="breadcrumb__sep">›</span>
-  <span>{% if obj %}{{ obj.code }}{% else %}Nowy typ{% endif %}</span>
+  <span>{% if obj.pk %}{{ obj.code }}{% else %}Nowy typ{% endif %}</span>
 </nav>
 
 <div class="page-header" style="margin-bottom:20px">
   <div>
-    <div class="page-header__title">{% if obj %}Edytuj typ {{ obj.code }}{% else %}Nowy typ lokalizacji{% endif %}</div>
+    <div class="page-header__title">{% if obj.pk %}Edytuj typ {{ obj.code }}{% else %}Nowy typ lokalizacji{% endif %}</div>
     <div class="page-header__sub">Szablon wymiarów fizycznych — przypisywany automatycznie przez kod wh_type</div>
   </div>
 </div>
 
-<form method="post" action="{% if obj %}{% url 'twin:warehouse_rack_type_edit' obj.pk %}{% else %}{% url 'twin:warehouse_rack_type_new' %}{% endif %}">
+<form method="post" action="{% if obj.pk %}{% url 'twin:warehouse_rack_type_edit' obj.pk %}{% else %}{% url 'twin:warehouse_rack_type_new' %}{% endif %}">
   {% csrf_token %}
   <div class="rt-grid">
 
@@ -140,7 +140,7 @@
       <div class="field-block">
         <label>JSON kolumn per poziom</label>
         <textarea aria-label="JSON kolumn per poziom" name="level_cols_json" id="level-cols-json"
-                  rows="3" style="font-family:monospace;font-size:12px;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;resize:vertical">{{ level_cols_json }}</textarea>
+                  rows="3" style="font-family:monospace;font-size:12px;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;resize:vertical">{{ level_cols_raw|default:level_cols_json }}</textarea>
         <span style="font-size:11px;color:var(--gray-400)">Przykład: {"1":1,"2":2,"3":1,"4":1}</span>
       </div>
     </div>
@@ -151,7 +151,7 @@
 
   <div style="margin-top:24px;max-width:860px;display:flex;gap:12px">
     <button type="submit" class="btn btn-primary">
-      {% if obj %}Zapisz zmiany{% else %}Utwórz typ{% endif %}
+      {% if obj.pk %}Zapisz zmiany{% else %}Utwórz typ{% endif %}
     </button>
     <a href="{% url 'twin:warehouse_rack_type_list' %}" class="btn btn-ghost">Anuluj</a>
   </div>

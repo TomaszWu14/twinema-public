@@ -29,6 +29,8 @@ Kontener przy starcie usuwa też wpisy dziennika operacji starsze niż `AUDIT_RE
   zastępuje loginy operatorów w historii zadań pseudonimami (US-012). Wycofanie wersji nie przywróci loginów.
 - Pseudonim zależy od `SECRET_KEY`: zmiana klucza daje inne pseudonimy dla nowych importów. Klucz zmieniać
   razem z ponownym importem historii zadań.
+- Migracja `equipment 0007` dopisuje przyrostek („ 2”) do powtórzonych nazw własnych modeli sprzętu (US-022) —
+  parametry i powiązania bez zmian; najstarszy model zachowuje nazwę.
 - Ochrona gałęzi `main`: wymagane zatwierdzenie PR i zielone CI (R-09, US-013) — ustawia PO w GitHubie.
 - Kontener działa jako `app` (UID 10001). Wolumeny używane dotąd mają już tego właściciela. Nowy katalog
   hosta: `chown -R 10001:10001 <katalog>` przed startem; jednorazowo można też uruchomić kontener z

@@ -60,6 +60,11 @@
     <div class="page-header__sub">„{{ sc.model.name }}”{% if sc.run %} · wyniki: {{ sc.run.scenario.name }}, {{ sc.run.get_day_kind_display|lower }}{% endif %} · {{ sc.slides|length }} slajdów</div>
   </div>
 </div>
+{% if is_designer and not public and not sc.run and sc.run_removed_at %}
+<div class="alert alert-warning" role="alert">Wynik symulacji przypięty do tej prezentacji został usunięty
+  {{ sc.run_removed_at|date:"d.m.Y H:i" }} (razem ze scenariuszem albo przebiegiem). Pokaz nie ma już wyników
+  symulacji — utwórz prezentację z nowym wynikiem, zanim pokażesz ją zarządowi.</div>
+{% endif %}
 
 <div class="sh-grid{% if not is_designer %} is-view{% endif %}">
   <section id="sh-stage" aria-label="Prezentacja">

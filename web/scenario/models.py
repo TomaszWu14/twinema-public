@@ -11,6 +11,9 @@ from django.db import models
 from .inbound import day_demand
 from .outbound import day_outbound
 from .staffing import PROCESSES
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
+from django.utils import timezone
 
 INBOUND_KINDS = [("container40", "Kontener 40' luzem"), ("truck33", "Auto 33-paletowe"), ("solo", "Solówka / bus"),
                  ("crossdock", "Cross-dock (auto)")]
@@ -366,6 +369,8 @@ class Showcase(models.Model):
                               verbose_name="Model hali")
     run = models.ForeignKey(ScenarioRun, on_delete=models.SET_NULL, null=True, blank=True, related_name="showcases",
                             verbose_name="Wynik symulacji")
+    # US-025: kiedy przypięty wynik zniknął (usunięty scenariusz albo przebieg) — pokaz traci wyniki bez ostrzeżenia
+    run_removed_at = models.DateTimeField(null=True, blank=True, editable=False)
     slides = models.JSONField(default=list)
     # P3: publiczny link tylko do odczytu (bez logowania) — losowy token w adresie, wygasa; brak tokenu = wyłączony
     share_token = models.CharField(max_length=64, unique=True, null=True, blank=True, editable=False)
@@ -381,3 +386,9 @@ class Showcase(models.Model):
 
     def __str__(self):
         return self.title
+
+
+@receiver(pre_delete, sender=ScenarioRun)
+def _mark_showcases_without_run(sender, instance, **kwargs):
+    """US-025: prezentacja z tym wynikiem dostaje znacznik — pokaz ostrzeże Projektanta."""
+    Showcase.objects.filter(run=instance).update(run_removed_at=timezone.now())

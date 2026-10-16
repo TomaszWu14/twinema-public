@@ -172,7 +172,7 @@ w trakcie prac. Gdy nie — opisano tylko kontekst i skutki wynikające z kodu.
 - Usunięcie modelu hali kaskadowo usuwa wyniki symulacji, prezentacje 3D, prezentacje filmowe i zlecenia renderu; ekran potwierdzenia wspomina tylko regały i nie wyświetla nazwy modelu.
 - Zachowywanych jest 20 ostatnich wyników na scenariusz — starsze znikają także z prezentacji 3D, bez informacji.
 - Dane demo nadpisują stan bieżący magazynu (najnowszy import stanów wygrywa).
-- Nazwa własnego modelu sprzętu nie jest unikalna w bazie, a import aktualizuje model po nazwie — dwa modele o tej samej nazwie powodują błąd importu.
+- ~~Nazwa własnego modelu sprzętu nie była unikalna~~ — baza i formularz pilnują unikalności (US-022).
 - Ograniczenia min ≤ śr ≤ max, okien godzin i procentów są pilnowane tylko przez aplikację, nie przez bazę; brak kontroli nakładania się zmian i duplikatów strumieni tego samego rodzaju.
 
 ### Długie operacje
@@ -204,10 +204,10 @@ Pozycje T-n mają odpowiedniki w [backlogu](analiza/HISTORYJKI.md) (kolumna „�
 | T-4 | ~~Sprawdzanie autora przy edycji i usuwaniu własnego sprzętu~~ — zrobione (US-001) | Projektant mógł zmienić cudzy model | — |
 | T-5 | ~~Ekrany potwierdzenia usunięcia z listą obiektów usuwanych kaskadowo (model hali, scenariusz, sprzęt)~~ — zrobione (US-004) | — | — |
 | T-6 | Zachowanie przy usuwaniu sprzętu używanego we flocie mieszanej: ostrzec przed usunięciem albo odłączać zamiast usuwać (komunikat poprawiony w US-002) | grupy floty znikają bez potwierdzenia | wysoki |
-| T-7 | Unikalna nazwa własnego modelu sprzętu w bazie | błąd importu przy duplikatach | średni |
+| T-7 | ~~Unikalna nazwa własnego modelu sprzętu w bazie~~ — zrobione (US-022) | — | — |
 | T-8 | ~~Własne strony „nie znaleziono” i „błąd serwera”~~ — zrobione (US-020) | — | — |
-| T-9 | Informacja, że wynik przypięty do prezentacji 3D został usunięty (limit 20) | prezentacja traci dane bez ostrzeżenia | średni |
-| T-10 | Zachowanie danych formularza po błędzie walidacji — zrobione dla scenariusza (US-021); zostają typ regału i edycja stref | utrata pracy użytkownika | niski |
+| T-9 | ~~Informacja, że wynik przypięty do prezentacji 3D został usunięty~~ — zrobione: przypięty wynik nie wypada z limitu, a po usunięciu scenariusza prezentacja ostrzega (US-025) | — | — |
+| T-10 | ~~Zachowanie danych formularza po błędzie walidacji~~ — zrobione: scenariusz, typ regału, edycja stref (US-021) | — | — |
 | T-11 | ~~Limit prób dla zleceń renderu odrzucanych przez serwer~~ — zrobione (US-015) | — | — |
 | T-12 | Ograniczenia spójności w bazie (min ≤ śr ≤ max, unikalność strumieni i grup floty) | dziś pilnuje tylko aplikacja | niski |
 | T-13 | Osobne konta gościa albo ograniczenie sesji demo | współdzielone konto demo | niski |

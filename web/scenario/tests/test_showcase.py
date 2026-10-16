@@ -181,3 +181,30 @@ class ShowcaseViewTests(TestCase):
         self.assertNotIn("anim", [s["type"] for s in sc.slides])
         data = self.client.get(reverse("scenario:showcase_data", args=[sc.pk])).json()
         self.assertFalse(data["has_events"])
+
+    def test_pinned_run_survives_run_limit(self):
+        """US-025: limit przebiegów scenariusza nie usuwa wyniku przypiętego do prezentacji."""
+        from scenario import services
+        _, show = self._create()
+        for _ in range(services.KEEP_RUNS + 2):
+            ScenarioRun.objects.create(scenario=self.sc, day_kind="typical", model=self.wm, runs=1, seed=1,
+                                       duration_s=0, events=[], result=self.run.result)
+        services.prune_runs(self.sc)
+        self.assertTrue(ScenarioRun.objects.filter(pk=self.run.pk).exists())
+        self.assertEqual(ScenarioRun.objects.filter(scenario=self.sc).count(), services.KEEP_RUNS + 1)
+        show.refresh_from_db()
+        self.assertEqual(show.run_id, self.run.pk)
+
+    def test_designer_warned_when_pinned_run_was_deleted(self):
+        """US-025: usunięcie scenariusza zabiera wynik — prezentacja ostrzega Projektanta, nie Podgląd."""
+        _, show = self._create()
+        self.client.post(reverse("scenario:delete", args=[self.sc.pk]))
+        show.refresh_from_db()
+        self.assertIsNone(show.run_id)
+        self.assertIsNotNone(show.run_removed_at)
+        self.assertContains(self.client.get(reverse("scenario:showcase", args=[show.pk])),
+                            "Wynik symulacji przypięty do tej prezentacji został usunięty")
+        self.assertContains(self.client.get(reverse("scenario:showcase_list")), "wynik symulacji usunięty")
+        self.client.force_login(self.viewer)
+        self.assertNotContains(self.client.get(reverse("scenario:showcase", args=[show.pk])),
+                               "Wynik symulacji przypięty")

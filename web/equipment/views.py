@@ -41,6 +41,12 @@ class EquipmentForm(forms.ModelForm):
             raise forms.ValidationError("Lista punktów [wysokość m, udźwig kg], np. [[6, 1600], [10, 1000]].")
         return sorted(pts)
 
+    def clean_name(self):
+        name = self.cleaned_data["name"].strip()
+        if Equipment.objects.filter(name__iexact=name).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Model o tej nazwie już jest w katalogu — wybierz inną nazwę.")   # US-022
+        return name
+
     def clean(self):
         data = super().clean()
         for f in ("speed_loaded_kmh", "speed_empty_kmh"):
@@ -49,6 +55,18 @@ class EquipmentForm(forms.ModelForm):
         for lo, hi in (("cost_purchase", "cost_purchase_max"), ("cost_per_hour", "cost_per_hour_max")):
             _check_range(self, data, lo, hi)
         return data
+
+
+def free_name(base):
+    """US-022: pierwsza wolna nazwa — „X (kopia)”, „X (kopia) 2”, … (do 120 znaków)."""
+    base = base[:110]
+    taken = set(Equipment.objects.filter(name__istartswith=base).values_list("name", flat=True))
+    taken_lower = {t.lower() for t in taken}
+    name, n = base, 1
+    while name.lower() in taken_lower:
+        n += 1
+        name = f"{base} {n}"
+    return name
 
 
 def _check_range(form, data, lo, hi):
@@ -178,7 +196,7 @@ def catalog_form(request, pk=None):
 def catalog_copy(request, pk):
     src = get_object_or_404(Equipment, pk=pk)
     src.pk, src.is_system, src.created_by = None, False, request.user
-    src.name = f"{src.name} (kopia)"[:120]
+    src.name = free_name(f"{src.name} (kopia)")
     src.save()
     messages.success(request, "Skopiowano jako własny model — wpisz parametry z karty katalogowej.")
     return redirect("equipment:edit", pk=src.pk)

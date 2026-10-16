@@ -43,6 +43,11 @@ trafiają do sekcji „Unreleased”.
 - Kolejka zadań w bazie z workerem `run_jobs` (ADR-0004): symulacja dnia i scenariusza oraz kalibracja liczą się
   w tle, a ekran pokazuje stan bez przeładowania (US-007); duży import zadań przetrwa restart i jest ponawiany
   bez duplikatów (US-024). Wynik zapisany w bazie widzą wszystkie procesy serwera.
+- Nazwa własnego modelu sprzętu jest unikalna (formularz, kopie „(kopia) 2”, ograniczenie w bazie) (US-022).
+  **Uwaga przy wdrożeniu:** migracja `equipment 0007` dopisuje przyrostek do powtórzonych nazw własnych modeli.
+- Wynik symulacji przypięty do prezentacji 3D nie wypada z limitu przebiegów; gdy zniknie razem ze scenariuszem,
+  prezentacja ostrzega Projektanta (US-025).
+- Formularz typu regału i edycja stref po błędzie walidacji zachowują wpisane wartości (US-021).
 - Procedura czyszczenia historii repozytorium (`docs/operacje/CZYSZCZENIE_HISTORII.md`, R-01) — wykonuje PO.
 
 ### Security

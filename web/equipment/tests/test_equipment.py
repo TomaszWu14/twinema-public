@@ -153,3 +153,41 @@ class OwnModelAuthorizationTests(TestCase):
         r = self.client.post(reverse("equipment:delete", args=[self.own.pk]), follow=True)
         self.assertContains(r, "Usunięto też grupy floty mieszanej z tym sprzętem: 1.")
         self.assertFalse(ScenarioFleet.objects.filter(scenario=sc).exists())
+
+
+class OwnModelUniqueNameTests(TestCase):
+    """US-022: nazwa własnego modelu jest unikalna — import po nazwie zawsze trafia w jeden model."""
+
+    def setUp(self):
+        self.proj = User.objects.create_user("proj", password="x")
+        self.proj.groups.add(Group.objects.get_or_create(name=GROUP_DESIGNER)[0])
+        self.client.force_login(self.proj)
+        self.reach = Equipment.objects.get(name="Reach truck 1,6 t / 10 m")
+
+    def _data(self, eq, **over):
+        data = {f: getattr(eq, f) for f in ("kind", "speed_loaded_kmh", "speed_empty_kmh", "capacity_kg")}
+        return {**data, "lift_curve": "[]", **over}
+
+    def test_copying_twice_gives_distinct_names(self):
+        for _ in range(3):
+            self.client.post(reverse("equipment:copy", args=[self.reach.pk]))
+        names = sorted(Equipment.objects.filter(is_system=False).values_list("name", flat=True))
+        self.assertEqual(names, ["Reach truck 1,6 t / 10 m (kopia)", "Reach truck 1,6 t / 10 m (kopia) 2",
+                                 "Reach truck 1,6 t / 10 m (kopia) 3"])
+
+    def test_form_rejects_taken_name_ignoring_case(self):
+        self.client.post(reverse("equipment:copy", args=[self.reach.pk]))
+        self.client.post(reverse("equipment:copy", args=[self.reach.pk]))
+        first, second = Equipment.objects.filter(is_system=False).order_by("pk")
+        r = self.client.post(reverse("equipment:edit", args=[second.pk]), self._data(second, name=first.name.upper()))
+        self.assertContains(r, "Model o tej nazwie już jest w katalogu")
+        r = self.client.post(reverse("equipment:edit", args=[second.pk]), self._data(second, name=self.reach.name))
+        self.assertContains(r, "Model o tej nazwie już jest w katalogu")             # nazwa klasy systemowej
+        r = self.client.post(reverse("equipment:edit", args=[second.pk]), self._data(second, name=second.name))
+        self.assertEqual(r.status_code, 302)                                         # własna nazwa bez zmian
+
+    def test_database_rejects_duplicate_own_name(self):
+        from django.db import IntegrityError, transaction
+        Equipment.objects.create(kind="reach", name="Mój", capacity_kg=1, speed_loaded_kmh=1, speed_empty_kmh=1)
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Equipment.objects.create(kind="reach", name="Mój", capacity_kg=1, speed_loaded_kmh=1, speed_empty_kmh=1)

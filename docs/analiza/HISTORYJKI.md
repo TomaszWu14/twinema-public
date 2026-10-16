@@ -26,9 +26,9 @@
 | US-018 | Jako SEC chcę akcji CI przypiętych skrótem commita, aby podmiana tagu nie wpuściła obcego kodu | Could | R-16 | **zrobione** (PR #68) |
 | US-015 | Jako Administrator chcę limitu prób dla zleceń renderu odrzucanych przez serwer, aby zlecenie nie krążyło bez końca | Could | R-14, T-11 | **zrobione** (PR #68) |
 | US-020 | Jako gość chcę zrozumiałej strony, gdy link jest nieaktywny, aby wiedzieć, co się stało | Could | T-8 | **zrobione** (PR #68) |
-| US-021 | Jako Projektant chcę, aby po błędzie walidacji formularz zachował wpisane dane, aby nie wpisywać ich od nowa | Could | T-10 | częściowo — formularze scenariusza (PR #68); typ regału i edycja stref do realizacji |
-| US-022 | Jako Projektant chcę unikalnych nazw własnych modeli sprzętu, aby import nie kończył się błędem | Could | T-7 | do realizacji |
-| US-025 | Jako Projektant chcę wiedzieć, że wynik przypięty do prezentacji został usunięty, aby nie pokazać zarządowi niepełnego pokazu | Could | T-9 | do realizacji |
+| US-021 | Jako Projektant chcę, aby po błędzie walidacji formularz zachował wpisane dane, aby nie wpisywać ich od nowa | Could | T-10 | **zrobione** (PR #68) — scenariusz, typ regału, edycja stref |
+| US-022 | Jako Projektant chcę unikalnych nazw własnych modeli sprzętu, aby import nie kończył się błędem | Could | T-7 | **zrobione** (PR #68) |
+| US-025 | Jako Projektant chcę wiedzieć, że wynik przypięty do prezentacji został usunięty, aby nie pokazać zarządowi niepełnego pokazu | Could | T-9 | **zrobione** (PR #68) |
 | US-016 | Jako PO chcę osobnych sesji gości demo z ograniczeniem czasu, aby rozróżniać wizyty | Won't (na teraz) | R-13 | — |
 
 ## Kryteria akceptacji historyjek zrealizowanych w tym PR
@@ -114,3 +114,16 @@
 **US-024**
 - *Given* plik zadań większy niż 5 MB, *When* Projektant potwierdzi import, *Then* import trafia do kolejki i kończy się bez udziału żądania.
 - *Given* worker padł w trakcie importu (restart), *When* minie `JOB_STALE_MIN`, *Then* import wraca do kolejki i kończy się bez zdublowanych wierszy; po 3 nieudanych próbach — błąd z komunikatem.
+
+**US-021 (typ regału, edycja stref)**
+- *Given* typ regału z zajętym kodem, błędną liczbą albo błędnym JSON kolumn, *When* Projektant zapisuje, *Then* wraca ten sam formularz (tworzenie albo edycja) z wpisanymi wartościami i komunikatem; nic nie jest zapisane.
+- *Given* edycja stref wypychająca regały poza halę, *Then* formularz wraca z wpisanymi przesunięciami, liczbą gniazd i poziomów, zaznaczonymi strefami do usunięcia i wymiarami hali.
+
+**US-022**
+- *Given* własny model sprzętu o danej nazwie, *When* Projektant zapisuje inny model o tej samej nazwie (bez względu na wielkość liter) albo o nazwie klasy systemowej, *Then* formularz pokazuje błąd przy nazwie.
+- *Given* kolejne kopie tej samej klasy, *Then* dostają nazwy „X (kopia)”, „X (kopia) 2”, „X (kopia) 3”.
+- *Given* baza z powtórzonymi nazwami przed wdrożeniem, *When* działa migracja, *Then* późniejsze modele dostają przyrostek, najstarszy zachowuje nazwę; baza pilnuje unikalności.
+
+**US-025**
+- *Given* wynik symulacji przypięty do prezentacji 3D, *When* scenariusz przekracza limit 20 przebiegów, *Then* przypięty wynik zostaje.
+- *Given* przypięty wynik usunięty razem ze scenariuszem, *Then* Projektant widzi na prezentacji ostrzeżenie z datą, a lista prezentacji oznacza ją „wynik symulacji usunięty”; Podgląd i link publiczny ostrzeżenia nie widzą.
