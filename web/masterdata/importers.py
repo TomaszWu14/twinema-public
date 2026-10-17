@@ -11,6 +11,7 @@ import unicodedata
 from datetime import date, datetime
 
 MAX_ROWS = 300_000
+MAX_XLSX_BYTES = 400 * 1024 * 1024     # xlsx po rozpakowaniu (plik do 25 MB; przegląd SEC)
 REJECT_SAMPLE = 200
 
 # pole → aliasy nagłówków (porównywane po normalizacji: małe litery, bez ogonków i znaków).
@@ -97,11 +98,21 @@ def norm(text):
     return " ".join(re.sub(r"[^a-z0-9/]+", " ", s).split())
 
 
+class _SemicolonExcel(csv.excel):
+    delimiter = ";"
+
+
 def read_table(name, data):
     """(nazwa pliku, bajty) → (nagłówki, wiersze jako listy). xlsx/xlsm albo csv/txt (; , TAB)."""
     ext = name.lower().rsplit(".", 1)[-1] if "." in name else ""
     if ext in ("xlsx", "xlsm"):
         import openpyxl
+
+        from twin.xlsx import check_xlsx_size
+        try:
+            check_xlsx_size(io.BytesIO(data), MAX_XLSX_BYTES)
+        except ValueError as exc:
+            raise ImportFileError(str(exc)) from exc
         try:
             wb = openpyxl.load_workbook(io.BytesIO(data), read_only=True, data_only=True)
         except Exception as exc:
@@ -119,8 +130,7 @@ def read_table(name, data):
         try:
             dialect = csv.Sniffer().sniff(text[:4096], delimiters=";,\t")
         except csv.Error:
-            dialect = csv.excel
-            dialect.delimiter = ";"
+            dialect = _SemicolonExcel          # nie zmieniamy csv.excel — to wspólny obiekt całego procesu
         rows = [r for r in csv.reader(io.StringIO(text), dialect) if any(c.strip() for c in r)]
         if len(rows) > MAX_ROWS + 1:
             raise ImportFileError(f"Plik ma więcej niż {MAX_ROWS} wierszy — podziel go.")

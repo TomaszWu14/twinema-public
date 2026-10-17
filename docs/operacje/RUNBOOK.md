@@ -22,7 +22,7 @@ wyłącza go, gdy worker działa jako osobna usługa z tym samym obrazem i polec
 Worker co minutę odświeża sygnał zadania, które liczy; zadanie „w toku” bez sygnału od `JOB_STALE_MIN` wraca do kolejki. Zadanie z błędem Projektant ponawia przyciskiem „Policz ponownie”. Stan zadań: tabela `core_job`.
 Kontener przy starcie usuwa też wpisy dziennika operacji starsze niż `AUDIT_RETENTION_DAYS` (US-008) i próby logowania
 starsze niż `LOGIN_ATTEMPT_RETENTION_DAYS` (30 dni, RODO CP-2); dziennik ogląda Administrator pod `/dziennik/`.
-**Demo publiczne (`DEMO_PUBLIC=true`) tylko na osobnej instancji z danymi demo** (R-02). Gdy w bazie są dane spoza demo, kontener zapisuje przy starcie ostrzeżenie w logach, Administrator widzi baner, a wejście gościa jest zablokowane (US-011, R-02).
+**Demo publiczne (`DEMO_PUBLIC=true`) tylko na osobnej instancji z danymi demo** (R-02). Gdy w bazie są dane spoza demo, kontener zapisuje przy starcie ostrzeżenie w logach, Administrator widzi baner, a wejście gościa jest zablokowane (US-011, R-02). Dane demo rozpoznaje rejestr zapisywany przez `seed_demo` (hala, scenariusz, prezentacja, import stanów demo) — **po wdrożeniu na instancji demo uruchom `python manage.py seed_demo`** (przy `DEMO_SEED=true` robi to kontener), inaczej gość nie wejdzie. Zalogowany gość traci sesję, gdy pojawią się dane spoza demo.
 
 ### Wdrożenie zmian z PR #68 — kroki dla PO
 

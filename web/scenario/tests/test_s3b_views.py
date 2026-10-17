@@ -131,6 +131,16 @@ class SimS3bTests(TestCase):
         text = " ".join(str(c.value) for ws in wb for row in ws.iter_rows() for c in row if c.value)
         self.assertNotIn("M-ADR", text)                                      # #25: bez danych źródłowych
 
+    def test_xlsx_neutralizes_formulas_in_names(self):
+        """Przegląd SEC (4): nazwa scenariusza zaczynająca się od „=” nie staje się formułą w pliku."""
+        self.sc.name = '=HYPERLINK("https://zly.example","Kliknij")'
+        self.sc.save(update_fields=["name"])
+        run = self._run()
+        wb = load_workbook(BytesIO(self.client.get(reverse("scenario:run_xlsx", args=[run.pk])).content))
+        cells = [c for ws in wb for row in ws.iter_rows() for c in row if isinstance(c.value, str)]
+        self.assertFalse([c.coordinate for c in cells if c.data_type == "f"])
+        self.assertTrue(any(c.value.startswith("'=HYPERLINK") for c in cells))
+
     def test_compare_view_and_xlsx(self):
         a = self._run()
         self.wm.racks.create(zone="V", rack_id="003", n_bays=10, n_levels=4, bay_width_cm=270, depth_cm=110,

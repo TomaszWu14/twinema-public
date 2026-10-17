@@ -8,7 +8,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from core.demo import SHOWCASE, SHOWCASE_DAY, demo_showcase
+from core.demo import SHOWCASE, SHOWCASE_DAY, demo_showcase, mark_demo
 from core.roles import GROUP_ADMIN, GROUP_VIEWER
 from scenario.models import ScenarioRun, Showcase
 from twin.models import WarehouseModel
@@ -39,6 +39,7 @@ class DemoPageTests(TestCase):
         wm = WarehouseModel.objects.create(name="Hala", floor_width_m=30, floor_depth_m=20)
         self.sc = Showcase.objects.create(title=SHOWCASE, model=wm, share_token="tok-demo",
                                           share_expires=timezone.now() + timedelta(days=30))
+        mark_demo(wm, self.sc)
         self.viewer_group = Group.objects.create(name=GROUP_VIEWER)
 
     def _demo_user(self, **kw):
@@ -52,6 +53,14 @@ class DemoPageTests(TestCase):
         self.assertContains(r, reverse("scenario:public", args=["tok-demo"]))
         self.assertEqual(r["Referrer-Policy"], "same-origin")
         self.assertNotContains(r, reverse("core:demo_enter"))         # bez DEMO_PUBLIC nie ma wejścia gościa
+
+    def test_showcase_with_demo_title_but_not_from_seed_is_not_advertised(self):
+        """Przegląd SEC (6): /demo/ wybiera pokaz z rejestru seed_demo, nie po tytule."""
+        real = WarehouseModel.objects.create(name="Hala firmy", floor_width_m=30, floor_depth_m=20)
+        Showcase.objects.create(title=SHOWCASE, model=real, share_token="tok-firmy",
+                                share_expires=timezone.now() + timedelta(days=30))
+        self.assertEqual(demo_showcase(), self.sc)
+        self.assertNotContains(self.client.get(reverse("core:demo")), "tok-firmy")
 
     def test_expired_link_hidden(self):
         Showcase.objects.update(share_expires=timezone.now() - timedelta(minutes=1))
@@ -124,9 +133,36 @@ class DemoExposureTests(TestCase):
 
     def test_only_demo_data_no_warning(self):
         from masterdata.models import ImportLog
-        ImportLog.objects.create(kind="stock", name="Demo — stany (hala)")
+        mark_demo(ImportLog.objects.create(kind="stock", name="Demo — stany (hala)"))
         with self.settings(DEMO_PUBLIC=True):
             self.assertEqual(self._check(), "")
+
+    def test_registry_decides_not_names(self):
+        """Przegląd SEC (1): plik nazwany „Demo — …” i hala z prawdziwego pliku lokalizacji to dane spoza demo."""
+        from core.demo import exposure_reasons
+        from equipment.models import Equipment
+        from masterdata.models import ImportLog
+        from scenario.models import Scenario
+        ImportLog.objects.create(kind="stock", name="Demo — stany.xlsx")
+        WarehouseModel.objects.create(name="Hala z pliku lokalizacji")
+        Scenario.objects.create(name="Plan 2027")
+        Equipment.objects.create(kind="reach", name="Mój reach", capacity_kg=1500, speed_loaded_kmh=10,
+                                 speed_empty_kmh=11, created_by=self.admin)
+        self.assertEqual(exposure_reasons(), ["importy danych spoza demo", "hale spoza demo",
+                                              "scenariusze spoza demo", "własne modele sprzętu"])
+
+    @override_settings(DEMO_PUBLIC=True)
+    def test_guest_already_inside_is_logged_out_when_real_data_appears(self):
+        """Przegląd SEC (1): sesja gościa trwa do 8 h — sprawdzenie przy każdym żądaniu, nie tylko przy wejściu."""
+        User.objects.create_user("demo").groups.add(Group.objects.get_or_create(name=GROUP_VIEWER)[0])
+        self.client.post(reverse("core:demo_enter"))
+        self.assertEqual(self.client.get(reverse("core:home")).status_code, 200)
+        self._real_import()
+        r = self.client.get(reverse("core:home"))
+        self.assertContains(r, "Wejście gościa jest wyłączone", status_code=403)
+        self.assertNotIn("_auth_user_id", self.client.session)
+        self.client.force_login(self.viewer)                          # zwykły Podgląd pracuje dalej
+        self.assertEqual(self.client.get(reverse("core:home")).status_code, 200)
 
     def test_warning_in_logs_and_admin_banner(self):
         self._real_import()

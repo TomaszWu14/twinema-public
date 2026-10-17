@@ -26,7 +26,7 @@ class FlowSceneEndpointTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = get_user_model().objects.create_user("fl", password="x")
-        cls.user.groups.add(Group.objects.get_or_create(name="Podgląd")[0])  # _planner wymaga roli
+        cls.user.groups.add(Group.objects.get_or_create(name="Projektant")[0])  # parametry sceny ustawia Projektant
         cls.wm = WarehouseModel.objects.create(name="Hala", floor_width_m=30, floor_depth_m=20)
         for i, y in enumerate((3, 8), start=1):
             WarehouseModelRack.objects.create(model=cls.wm, zone="B0", rack_id=f"0{i}",
@@ -53,6 +53,23 @@ class FlowSceneEndpointTests(TestCase):
         self.assertEqual(sc["source"]["picking"], "demo")
         self.assertTrue(sc["agents"] and sc["duration"] > 0)
 
+    def test_viewer_gets_default_cached_scene(self):
+        """Przegląd SEC (2), Z-3: Podgląd/gość nie zleca liczenia tras — parametry domyślne, scena z pamięci podręcznej."""
+        from unittest import mock
+
+        from django.core.cache import cache
+
+        from twin.views import warehouse_blender as v
+        cache.clear()
+        viewer = get_user_model().objects.create_user("zarzad", password="x")
+        viewer.groups.add(Group.objects.get_or_create(name="Podgląd")[0])
+        self.client.force_login(viewer)
+        with mock.patch.object(v, "build_scene_for_model", wraps=v.build_scene_for_model) as spy:
+            for _ in range(3):
+                self.assertEqual(self._get(forklifts="10", pickers="10", picks="25").status_code, 200)
+        self.assertEqual(spy.call_count, 1)                                    # liczone raz, potem z pamięci
+        self.assertNotIn("max_picks", spy.call_args.kwargs)                    # parametry z adresu pominięte
+
     def test_forklifts_param_and_no_pallets(self):
         sc = self._get(batch="demo", forklifts="0", pallets="0").json()
         self.assertFalse([a for a in sc["agents"] if a["kind"] == "forklift"])
@@ -76,3 +93,11 @@ class FlowPlayerPanelTests(TestCase):
         self.assertContains(r, reverse("twin:warehouse_model_flow_json", args=[wm.pk]))
         self.assertContains(r, "twin/js/flow-player.js")
         self.assertContains(r, "Symulacja demo")
+
+
+class ViewerSceneFilterTests(SimpleTestCase):
+    def test_simulation_batch_name_removed_for_viewer(self):
+        """Przegląd SEC (5): nazwa importu zadań w scenie symulacji nie trafia do Podglądu."""
+        from twin.views.warehouse_blender import _for_viewer
+        sc = _for_viewer({"source": {"simulation": {"hour": 8, "batch": "Import marzec", "day": "2026-03-02"}}})
+        self.assertEqual(sc["source"]["simulation"], {"hour": 8, "day": "2026-03-02"})

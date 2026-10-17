@@ -113,6 +113,9 @@ class MlRunTests(TestCase):
         csv = self.client.get(reverse("ml:segments_csv", args=[run.pk])).content.decode("utf-8")
         self.assertTrue(csv.startswith("﻿materiał;segment;nazwa segmentu"))
         self.assertIn("M0;0;", csv)                                           # najczęstszy → segment 1
+        self.assertContains(self.client.get(reverse("ml:detail", args=[run.pk])), "Np.: M")
+        self.client.force_login(self.viewer)                                  # przegląd SEC (3), BR-806
+        self.assertNotContains(self.client.get(reverse("ml:detail", args=[run.pk])), "Np.: M")
 
     def test_home_lists_runs(self):
         self.client.force_login(self.viewer)

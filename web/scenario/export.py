@@ -8,6 +8,8 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
+from twin.xlsx import safe_cell
+
 from .inbound import _hhmm
 from .services import run_costs
 from .sim.report import KPI_SPEC
@@ -20,11 +22,11 @@ NUM = "#,##0.0"
 
 def _sheet(wb, title, header, rows, widths=None):
     ws = wb.create_sheet(title)
-    ws.append(header)
+    ws.append([safe_cell(h) for h in header])        # nazwy scenariuszy i etykiety od użytkownika — bez formuł
     for c in ws[1]:
         c.font, c.fill = HEAD, HEAD_FILL
     for r in rows:
-        ws.append(list(r))
+        ws.append([safe_cell(v) for v in r])
     for i, h in enumerate(header, 1):
         width = (widths or {}).get(i) or min(60, max(10, len(str(h)) + 2,
                                                    *(len(str(r[i - 1])) + 2 for r in rows if len(r) >= i)))

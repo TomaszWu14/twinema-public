@@ -9,6 +9,7 @@ from django.views.decorators.http import require_POST
 from core import jobs
 from core.roles import any_role, designer
 from twin.models_tasks import WarehouseTaskBatch
+from twin.xlsx import safe_cell
 
 from . import services
 from .models import ModelRun
@@ -71,5 +72,5 @@ def segments_csv(request, pk):
     w = csv.writer(resp, delimiter=";")
     w.writerow(["materiał", "segment", "nazwa segmentu"])
     for m, sid in sorted(mr.result.get("assignment", {}).items()):
-        w.writerow([m if not m[:1] in "=+-@" else "'" + m, sid, names.get(sid, "")])
+        w.writerow([safe_cell(m), sid, names.get(sid, "")])         # bez formuł (także TAB/CR na początku)
     return resp

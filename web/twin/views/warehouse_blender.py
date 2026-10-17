@@ -18,6 +18,7 @@ MAX_FORKLIFTS, MAX_PICKERS, MAX_PICKS = 10, 10, 25
 # Dane źródłowe (stany, partie, HU, kody lokalizacji z mastera) — rola Podgląd ich nie widzi (ZALOZENIA #25).
 SOURCE_PALLET_KEYS = ("sku", "name", "lot", "hu", "qty", "unit", "expiry", "days_to_expiry")
 SIM_TRACE_TTL = 3600
+VIEWER_SCENE_TTL = 600     # scena dla Podglądu/gościa: parametry domyślne, liczona raz na 10 min na halę
 
 
 def _full_access(request):
@@ -37,6 +38,7 @@ def _for_viewer(scene):
     for key in ("batch", "tasks_batch", "snapshot"):
         (scene.get("source") or {}).pop(key, None)
     (scene.get("info") or {}).pop("batch", None)
+    ((scene.get("source") or {}).get("simulation") or {}).pop("batch", None)   # nazwa importu zadań (przegląd SEC)
     return scene
 
 
@@ -115,7 +117,18 @@ def _scene_from_request(request, wm):
     ?pallets=0 — bez palet w lokalizacjach. ?forklifts=0–10 (demo), ?pickers=1–10, ?picks=1–25.
     ?wt=… — wózki z zadań EWM (patrz `_wt_window`)."""
     full = _full_access(request)
-    scene = _sim_scene(request, wm) or build_scene_for_model(
+    scene = _sim_scene(request, wm)
+    if scene is None and not full:
+        # Z-3, przegląd SEC: Podgląd i gość nie zlecają liczenia tras (~6 s na żądanie) — parametry domyślne,
+        # wynik z pamięci podręcznej na halę; inaczej pętla żądań z /demo/ zajęłaby wszystkie workery serwera
+        with_pallets = request.GET.get("pallets") != "0"
+        key = "viewer-scene:" + cache_digest(wm.pk, wm.updated_at.timestamp(), with_pallets)
+        scene = cache.get(key)
+        if scene is None:
+            scene = _for_viewer(build_scene_for_model(wm, None, with_pallets=with_pallets))
+            cache.set(key, scene, VIEWER_SCENE_TTL)
+        return scene
+    scene = scene or build_scene_for_model(
         wm, None,
         forklifts=_clamped(request.GET.get("forklifts"), 3, 0, MAX_FORKLIFTS),
         max_pickers=_clamped(request.GET.get("pickers"), 6, 1, MAX_PICKERS),

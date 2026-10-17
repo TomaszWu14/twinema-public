@@ -43,7 +43,7 @@
     <div class="sg-bar" aria-hidden="true"><span data-pct="{{ s.share_pct|stringformat:'s' }}"></span></div>
     <div class="sg-meta">Śr. {{ s.avg_hits }} pobrań/materiał · CV {{ s.profile.cv }} · dni z ruchem {{ s.profile.active|floatformat:0 }} %{% if s.profile.volume %} · karton {{ s.profile.volume }} dm³{% endif %}</div>
     <div class="sg-place"><b>Gdzie:</b> {{ s.placement }}</div>
-    <div class="sg-meta">Np.: {{ s.examples|join:", " }}</div>
+    {% if is_designer %}<div class="sg-meta">Np.: {{ s.examples|join:", " }}</div>{% endif %}
   </section>
   {% endfor %}
 </div>

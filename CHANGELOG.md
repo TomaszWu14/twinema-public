@@ -59,6 +59,7 @@ trafiają do sekcji „Unreleased”.
 - Procedura czyszczenia historii repozytorium (`docs/operacje/CZYSZCZENIE_HISTORII.md`, R-01) — wykonuje PO.
 
 ### Fixed (przegląd kodu po #68, 2026-10-17)
+- Import CSV danych podstawowych bez rozpoznanego separatora nie zmienia już globalnego `csv.excel` całego procesu.
 - Symulacja dnia i kalibracja: zadanie z błędem nie wraca do kolejki przy każdym wejściu na stronę — widać komunikat,
   a Projektant ponawia obliczenie przyciskiem „Policz ponownie”.
 - Kolejka zadań: worker co minutę odświeża sygnał liczonego zadania (`core.Job.heartbeat_at`, migracja core 0004), więc
@@ -73,6 +74,14 @@ trafiają do sekcji „Unreleased”.
   (decyzja PO).
 
 ### Security
+- Przegląd bezpieczeństwa (2026-10-17): dane demo rozpoznaje rejestr `seed_demo` (`core.DemoObject`, migracja core 0005),
+  nie nazwy plików — hale, scenariusze i własny sprzęt spoza demo też blokują gościa; sesja gościa sprawdzana przy
+  każdym żądaniu; `/demo/` pokazuje prezentację z rejestru, nie po tytule (R-02). **Po wdrożeniu na instancji demo:
+  `manage.py seed_demo`.**
+- Scena animacji dla Podglądu i gościa: parametry domyślne i pamięć podręczna 10 min — bez liczenia tras na żądanie (R-21).
+- Segmentacja ML: przykładowe kody materiałów tylko dla Projektanta (BR-806); scena symulacji bez nazwy importu dla
+  Podglądu; eksporty xlsx scenariuszy i CSV segmentów bez formuł; import xlsx odrzuca pliki o podejrzanym rozmiarze
+  po rozpakowaniu (R-22).
 - Migracja `twin 0009`: pseudonimizuje też loginy systemu magazynowego w rodzaju „OP-0001”, które 0008 pomijała
   (RODO, US-012). **Nieodwracalna** — kopia bazy przed wdrożeniem.
 - `TRUSTED_PROXIES`: sieci proxy, od których brany jest adres klienta z `X-Forwarded-For` (blokada logowania, US-006);

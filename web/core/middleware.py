@@ -119,3 +119,28 @@ class TwoFactorMiddleware:
             from django.urls import reverse
             return redirect(reverse(target) + "?" + urlencode({"next": request.get_full_path()}))
         return self.get_response(request)
+
+
+# R-02 (przegląd SEC): ścieżki dostępne dla konta demo także wtedy, gdy na instancji są dane spoza demo
+_DEMO_GUARD_EXEMPT = ("/demo/", "/logout/", "/login/", "/static/", "/health/", "/favicon", "/p/")
+
+
+class DemoGuardMiddleware:
+    """Konto `demo` (wejście gościa) traci sesję, gdy na instancji pojawią się dane spoza demo — sprawdzane przy
+    każdym żądaniu konta demo (kilka zapytań EXISTS), nie tylko przy wejściu: sesja gościa trwa do 8 h."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        from .demo import DEMO_USER, exposure_reasons
+
+        user = getattr(request, "user", None)
+        if (user is not None and user.is_authenticated and user.get_username() == DEMO_USER
+                and not request.path.startswith(_DEMO_GUARD_EXEMPT) and exposure_reasons()):
+            from django.contrib.auth import logout
+            from django.shortcuts import render
+            logout(request)
+            return render(request, "core/403.html", {"reason": "Wejście gościa jest wyłączone: na tej instancji są "
+                                                                "dane spoza demo."}, status=403)
+        return self.get_response(request)

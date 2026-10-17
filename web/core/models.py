@@ -76,3 +76,17 @@ class Job(models.Model):
     @property
     def pending(self):
         return self.status in (self.QUEUED, self.RUNNING)
+
+
+class DemoObject(models.Model):
+    """Obiekty utworzone przez `seed_demo` (R-02, przegląd SEC 2026-10-17): hala, scenariusz, prezentacja, import stanów.
+    Wszystko spoza rejestru to dane spoza demo — blokują wejście gościa. Nazwa obiektu niczego nie przesądza."""
+
+    content_type = models.ForeignKey("contenttypes.ContentType", on_delete=models.CASCADE)
+    object_id = models.CharField(max_length=40)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["content_type", "object_id"], name="core_demo_object_unique")]
+
+    def __str__(self):
+        return f"demo {self.content_type.model} #{self.object_id}"
