@@ -10,7 +10,7 @@ wrażliwych wartości (zob. [Do anonimizacji](../05-decyzje-i-ograniczenia.md#do
 |---|---|---|
 | A-8 | dane rzeczywistego obiektu (liczba lokalizacji, typy składowania, kody procesów, daty decyzji) | wcześniejsze wersje plików reguł zadań magazynowych i adresowania — przed commitem z 2026-10-12 „generic example codes…”; przejrzeć także commit z 2026-10-09 „Przygotowanie repo do upublicznienia” i wcześniejsze |
 | A-9 | prywatny adres e-mail autora | metadane autora ponad stu commitów |
-| A-1…A-7, A-10…A-12 | nazwisko, domena, nazwy projektu źródłowego w bieżących plikach | bieżąca wersja plików — **poprawione 2026-10-17** (poza A-1 — zostaje, wymóg licencji — i A-6 — do potwierdzenia przez PO) |
+| A-1…A-7, A-10…A-12 | nazwisko, domena, nazwy projektu źródłowego w bieżących plikach | bieżąca wersja plików — **poprawione 2026-10-17** (A-1 zostaje — wymóg licencji; A-6 — konwencja ogólna, decyzja PO) |
 
 ## Dlaczego nie wystarczy „force push”
 
