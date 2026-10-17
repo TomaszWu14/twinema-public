@@ -1,5 +1,5 @@
 # Zależności runtime — PRZYPIĘTE. Podbijaj świadomie (zmień pin, odpal testy).
-django==5.2.17            # LTS
+django==6.1.2            # LTS
 pydantic-settings==2.14.2 # typowany env, fail-fast na starcie (twinema/config.py)
 psycopg[binary]==3.2.13   # PostgreSQL (gdy DATABASE_URL ustawiony)
 gunicorn==26.0.0
