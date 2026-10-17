@@ -2,7 +2,7 @@
 {% load static %}
 {% block title %}Animacja dnia — {{ run.scenario.name }} — {{ app_name }}{% endblock %}
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .dp-sec { font:600 var(--fs-xs) var(--font-mono); text-transform:uppercase; letter-spacing:.12em; color:var(--primary); margin:0 0 10px; }
   .dp-grid { display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:16px; align-items:start; }
   @media (max-width: 1100px) { .dp-grid { grid-template-columns:1fr; } }
@@ -74,7 +74,7 @@
     <p class="dp-keys">Spacja — odtwarzaj/pauza · ← → — ±1 min · ↑ ↓ — ±15 min · 1–5 — prędkość · F — pełny ekran · obracanie: myszą</p>
   </section>
 
-  <aside style="display:grid;gap:16px">
+  <aside class="u-d-grid u-gap-16">
     <div class="card"><div class="card-body">
       <h2 class="dp-sec">Teraz</h2>
       <dl class="dp-counters" id="dp-counters">
@@ -101,13 +101,13 @@
         </button></li>
         {% endfor %}
       </ul>
-      {% else %}<p class="text-sm" style="margin:0">Brak wąskich gardeł w tym dniu.</p>{% endif %}
+      {% else %}<p class="u-m-0 text-sm">Brak wąskich gardeł w tym dniu.</p>{% endif %}
     </div></div>
   </aside>
 </div>
 
-<details class="card" style="margin-top:16px"><summary class="card-body" style="cursor:pointer">Tabela godzinowa (tekstowa alternatywa animacji)</summary>
-  <div class="card-body" style="overflow-x:auto">
+<details class="u-mt-16 card"><summary class="u-cur-pointer card-body">Tabela godzinowa (tekstowa alternatywa animacji)</summary>
+  <div class="u-ox-auto card-body">
     <table class="dp-table" id="dp-hours"><caption class="sr-only">Stan magazynu o pełnych godzinach dnia</caption>
       <thead><tr><th scope="col">Godzina</th><th scope="col">Palet IN</th><th scope="col">Palet OUT</th><th scope="col">Paczek</th>
         <th scope="col">Auta w kolejce</th><th scope="col">Pole przyjęć</th><th scope="col">Pole wydań</th></tr></thead>

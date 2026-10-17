@@ -30,5 +30,5 @@ Status: ✅ spełnione · ⚠️ częściowo · ❌ niespełnione · n/d nie dot
 | V12 Pliki | limity rozmiaru, typ, przechowywanie poza katalogiem publicznym | ✅ | limity w importerach; media wydawane przez widoki |
 | V13 API | uwierzytelnienie i autoryzacja API | ✅ | token stanowiska + jednorazowy klucz przejęcia; JSON-y aplikacji za rolą |
 | V14.2 Zależności | aktualne komponenty | ✅ | Django 5.2 LTS, Dependabot |
-| V14.4 Nagłówki | CSP, X-Content-Type-Options, Referrer-Policy, ramki | ✅ | nosniff, X-Frame-Options, Permissions-Policy; CSP wymuszana z nonce dla skryptów, `object-src 'none'`, `form-action 'self'` (US-005); style inline — T-17 |
+| V14.4 Nagłówki | CSP, X-Content-Type-Options, Referrer-Policy, ramki | ✅ | nosniff, X-Frame-Options, Permissions-Policy; CSP wymuszana z nonce dla skryptów i stylów, bez `'unsafe-inline'`, `object-src 'none'`, `form-action 'self'` (US-005, R-20) |
 | V14.5 Konfiguracja | brak trybu debug w produkcji, sekrety z env | ✅ | walidacja konfiguracji przy starcie; `check --deploy` w CI |

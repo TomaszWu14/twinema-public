@@ -65,6 +65,10 @@ trafiają do sekcji „Unreleased”.
 - CSP wymuszana: skrypty tylko z serwera albo z jednorazowym nonce, bez `'unsafe-inline'`/`'unsafe-eval'` dla
   skryptów, `object-src 'none'`, `form-action 'self'`; obsługa zdarzeń w atrybutach zastąpiona `core/js/ui.js` (US-005).
   **Uwaga przy wdrożeniu:** `CSP_REPORT_ONLY=true` w środowisku zostawia tryb raportu — ustaw `false` albo usuń zmienną.
+- CSP także dla stylów bez `'unsafe-inline'` (`style-src 'self' 'nonce-…'`): 360 atrybutów `style=` w 52 szablonach
+  zastąpione klasami `core/utilities.css`, kolory i szerokości z danych przez `data-color`/`data-pct` (`core/js/ui.js`),
+  bloki `<style>` z nonce, dymki ECharts w trybie `richText`. Przy okazji paski udziałów segmentów ML pokazują właściwą
+  szerokość — wcześniej przecinek dziesiętny („12,0%”) unieważniał regułę `width` i pasek miał pełną długość (R-20).
 - Adres klienta do blokady logowania z nagłówka `X-Forwarded-For` tylko od proxy w sieci wewnętrznej (US-006).
 - Ostrzeżenie w logach i baner dla Administratora, gdy demo publiczne działa na instancji z danymi spoza demo (US-011);
   wejście gościa jest wtedy zablokowane (R-02, decyzja PO).

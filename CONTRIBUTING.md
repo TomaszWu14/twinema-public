@@ -103,5 +103,7 @@ Uzasadnienie wyboru narzędzi: [ADR-0002](docs/architektura/adr/0002-narzedzia-j
 Skrypt w szablonie musi mieć `nonce="{{ csp_nonce }}"`; atrybuty `onclick=`, `onchange=`, `onsubmit=` są zablokowane
 (test `core/tests/test_csp.py`). Potwierdzenie: `data-confirm="pytanie"` na formularzu albo przycisku; automatyczne
 wysłanie: `data-autosubmit` na `<select>` (`core/js/ui.js`). Nowy ekran ze skryptami — dopisz go do testu E2E.
-Nowe style tylko jako klasy w `core/*.css` — test nie przepuści nowych `style=` ani `<style>` w szablonach (T-17);
-usuwając style z szablonu, zmniejsz jego liczbę w `web/core/tests/inline_styles_baseline.json`.
+Style tylko w plikach CSS albo w `<style nonce="{{ csp_nonce }}">`; atrybut `style=` blokuje CSP (R-20) i test.
+Drobne odstępy i układ — klasy `u-…` z `core/utilities.css`; kolor albo szerokość z danych — `data-color="#hex"`
+(zmienna CSS `--c`) albo `data-pct="42.5"` (`core/js/ui.js`); w JS — `el.style…` (CSSOM), nie `setAttribute('style')`
+ani `style=` w `innerHTML`. Wykresy ECharts: `tooltip.renderMode: 'richText'`.

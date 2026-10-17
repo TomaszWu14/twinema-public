@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
 {% block title %}Stawki kosztowe — {{ app_name }}{% endblock %}
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .rt-table { width:100%; border-collapse:collapse; font-size:var(--fs-sm); }
   .rt-table th, .rt-table td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--border); vertical-align:top; }
   .rt-table thead th { color:var(--fg-muted); font-weight:600; }
@@ -16,7 +16,7 @@
   <div class="page-header__sub">Widełki od–do w zł netto. Z nich liczymy CAPEX layoutu (regały, doki, stanowiska, hala, flota) i OPEX roczny (praca, praca floty).
     Wartości domyślne są syntetyczne i przybliżone — podmień na własne oferty. Koszty konkretnego sprzętu wpisuje się w jego karcie w katalogu.</div>
 </div></div>
-<div class="card"><div class="card-body" style="overflow-x:auto">
+<div class="card"><div class="u-ox-auto card-body">
   <form method="post" novalidate>{% csrf_token %}
     {{ formset.management_form }}
     {% if formset.non_form_errors %}<div class="alert alert-error" role="alert">{{ formset.non_form_errors|join:" " }}</div>{% endif %}
@@ -29,7 +29,7 @@
           <td><label class="sr-only" for="{{ f.high.id_for_label }}">{{ f.instance.label }} — do</label>{{ f.high }}{% for e in f.high.errors %}<span class="rt-err" role="alert">{{ e }}</span>{% endfor %}</td></tr>
       {% endfor %}
       </tbody></table>
-    <div style="margin-top:14px"><button class="btn btn-primary" type="submit">Zapisz stawki</button></div>
+    <div class="u-mt-14"><button class="btn btn-primary" type="submit">Zapisz stawki</button></div>
   </form>
 </div></div>
 {% endblock %}

@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
 {% block title %}Materiały — {{ app_name }}{% endblock %}
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .mt-filters { display:flex; flex-wrap:wrap; gap:10px; align-items:end; margin:0 0 12px; }
   .mt-filters label { display:flex; flex-direction:column; gap:4px; font-size:var(--fs-sm); color:var(--fg-muted); }
   .mt-flag { display:inline-block; margin:0 4px 2px 0; }
@@ -34,7 +34,7 @@
   <button class="btn btn-secondary" type="submit">Filtruj</button>
   {% if query %}<a class="btn btn-ghost btn-sm" href="{% url 'masterdata:materials' %}">Wyczyść</a>{% endif %}
 </form>
-{% if groups %}<p class="text-sm" style="margin:0 0 12px">{% for g in groups %}<a class="badge badge-gray" href="?q={{ g.group|urlencode }}">{{ g.group }} · {{ g.n }}</a> {% endfor %}</p>{% endif %}
+{% if groups %}<p class="u-m-0-0-12 text-sm">{% for g in groups %}<a class="badge badge-gray" href="?q={{ g.group|urlencode }}">{{ g.group }} · {{ g.n }}</a> {% endfor %}</p>{% endif %}
 
 <div class="card">
   {% if page.object_list %}
@@ -54,9 +54,9 @@
   </table></div>
   {% else %}<div class="empty-state">Brak materiałów dla tych filtrów. Zaimportuj plik na ekranie Dane.</div>{% endif %}
 </div>
-{% if not has_history %}<p class="text-muted text-sm" style="margin-top:8px">ABC z historii pojawi się po segmentacji w module Prognozy i ML (na imporcie zadań). Ręczna klasa ma pierwszeństwo.</p>{% endif %}
+{% if not has_history %}<p class="u-mt-8 text-muted text-sm">ABC z historii pojawi się po segmentacji w module Prognozy i ML (na imporcie zadań). Ręczna klasa ma pierwszeństwo.</p>{% endif %}
 {% if page.has_other_pages %}
-<nav class="text-sm" style="margin-top:12px;display:flex;gap:8px;align-items:center" aria-label="Strony">
+<nav class="u-mt-12 u-d-flex u-gap-8 u-ai-center text-sm" aria-label="Strony">
   {% if page.has_previous %}<a class="btn btn-ghost btn-sm" href="?{{ query }}&amp;page={{ page.previous_page_number }}">← Poprzednia</a>{% endif %}
   <span class="text-muted">Strona {{ page.number }} z {{ page.paginator.num_pages }}</span>
   {% if page.has_next %}<a class="btn btn-ghost btn-sm" href="?{{ query }}&amp;page={{ page.next_page_number }}">Następna →</a>{% endif %}

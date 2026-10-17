@@ -118,7 +118,9 @@ class KeyPathsE2ETests(StaticLiveServerTestCase):
         self.assertEqual(self._problems(), [])
 
     def _pages_with_scripts_run_under_enforced_csp(self):
-        """US-005: ekrany ze skryptami (3D, edytory, wykresy) działają pod wymuszoną CSP — bez naruszeń i błędów JS."""
+        """US-005, R-20: ekrany ze skryptami (3D, edytory, wykresy) działają pod wymuszoną CSP — bez naruszeń i błędów JS;
+        style= są zablokowane, więc kolory i szerokości z danych ustawia ui.js (data-color, data-pct)."""
+        from equipment.models import Equipment
         from scenario.models import Scenario, ScenarioRun, Showcase
         from studio.models import Presentation
         from twin.models import WarehouseModel
@@ -131,7 +133,8 @@ class KeyPathsE2ETests(StaticLiveServerTestCase):
                  reverse("twin:warehouse_model_view", args=[wm.pk]), reverse("twin:warehouse_layout_editor", args=[wm.pk]),
                  reverse("twin:warehouse_model_features", args=[wm.pk]), reverse("twin:warehouse_model_coords", args=[wm.pk]),
                  reverse("twin:warehouse_rack_type_new"), reverse("render:jobs"), reverse("studio:detail", args=[film.pk]),
-                 reverse("ml:home")]
+                 reverse("ml:home"), reverse("twin:warehouse_rack_type_list"),
+                 reverse("equipment:detail", args=[Equipment.objects.order_by("pk").first().pk])]
         problems = {}
         for path in pages:
             self.console_errors.clear()
@@ -141,6 +144,15 @@ class KeyPathsE2ETests(StaticLiveServerTestCase):
             if found := self._problems():
                 problems[path] = found
         self.assertEqual(problems, {})
+
+        # zakładka planu 2D (atrybut hidden zamiast style="display:none") i kolor strefy z data-color
+        self._open(reverse("twin:warehouse_model_view", args=[wm.pk]))
+        self.page.click('.viz-tab[data-tab="2d"]')
+        self.assertTrue(self.page.is_visible("#panel-2d"))
+        self.assertFalse(self.page.is_visible("#panel-3d"))
+        dot = self.page.locator(".zone-dot").first.evaluate("e => getComputedStyle(e).backgroundColor")
+        self.assertNotIn(dot, ("", "rgba(0, 0, 0, 0)"))
+        self.assertEqual(self._problems(), [])
 
     def _guest_enters_demo_and_watches_public_showcase(self):
         self._open("/")

@@ -25,8 +25,8 @@
 </div>
 
 {% if types %}
-<div class="card" style="margin-bottom:16px">
-  <div style="padding:12px 16px;border-bottom:1px solid var(--gray-100);font-weight:700">Regały (z wymiarami do 3D)</div>
+<div class="u-mb-16 card">
+  <div class="u-p-12-16 u-bb-1-solid-gray-100 u-fw-700">Regały (z wymiarami do 3D)</div>
   <table class="table">
     <thead><tr>
       <th>Kod</th><th>Nazwa / opis</th>
@@ -38,82 +38,76 @@
     {% for t in racks %}
     <tr>
       <td>
-        <span style="font-family:monospace;font-weight:700;font-size:13px;
-                     background:{{ t.color_hex }}22;color:color-mix(in srgb, {{ t.color_hex }} 55%, var(--gray-900));
-                     border:1px solid {{ t.color_hex }}44;
-                     padding:2px 8px;border-radius:5px">{{ t.code }}</span>
+        <span class="color-code" data-color="{{ t.color_hex }}">{{ t.code }}</span>
       </td>
-      <td style="font-weight:600">{{ t.name }}
-        {% if t.description and t.description != t.name %}<div style="font-size:11px;font-weight:400;color:var(--gray-500)">{{ t.description }}</div>{% endif %}</td>
+      <td class="u-fw-600">{{ t.name }}
+        {% if t.description and t.description != t.name %}<div class="u-fs-11 u-fw-400 u-c-gray-500">{{ t.description }}</div>{% endif %}</td>
       <td>{{ t.width_mm }} mm</td>
       <td>{{ t.manip_mm }} mm</td>
       <td>{{ t.depth_mm }} mm</td>
-      <td>{% with h=t.level_heights.1 %}{% if h %}{{ h }} mm{% else %}<span style="color:var(--gray-400)">—</span>{% endif %}{% endwith %}</td>
-      <td>{% with h=t.level_heights.2 %}{% if h %}{{ h }} mm{% else %}<span style="color:var(--gray-400)">—</span>{% endif %}{% endwith %}</td>
-      <td>{% with h=t.level_heights.3 %}{% if h %}{{ h }} mm{% else %}<span style="color:var(--gray-400)">—</span>{% endif %}{% endwith %}</td>
-      <td>{% with h=t.level_heights.4 %}{% if h %}{{ h }} mm{% else %}<span style="color:var(--gray-400)">—</span>{% endif %}{% endwith %}</td>
+      <td>{% with h=t.level_heights.1 %}{% if h %}{{ h }} mm{% else %}<span class="u-c-gray-400">—</span>{% endif %}{% endwith %}</td>
+      <td>{% with h=t.level_heights.2 %}{% if h %}{{ h }} mm{% else %}<span class="u-c-gray-400">—</span>{% endif %}{% endwith %}</td>
+      <td>{% with h=t.level_heights.3 %}{% if h %}{{ h }} mm{% else %}<span class="u-c-gray-400">—</span>{% endif %}{% endwith %}</td>
+      <td>{% with h=t.level_heights.4 %}{% if h %}{{ h }} mm{% else %}<span class="u-c-gray-400">—</span>{% endif %}{% endwith %}</td>
       <td>{{ t.max_weight_kg|floatformat:0 }} kg</td>
-      <td><span style="display:inline-block;width:20px;height:20px;border-radius:4px;background:{{ t.color_hex }}"></span></td>
+      <td><span class="color-swatch" data-color="{{ t.color_hex }}"></span></td>
       <td>
         {% if is_designer %}<a href="{% url 'twin:warehouse_rack_type_edit' t.pk %}" class="btn btn-ghost btn-sm">Edytuj</a>
-        <form method="post" action="{% url 'twin:warehouse_rack_type_delete' t.pk %}" style="display:inline">
+        <form method="post" action="{% url 'twin:warehouse_rack_type_delete' t.pk %}" class="u-d-inline">
           {% csrf_token %}
-          <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--red)"
+          <button type="submit" class="u-c-red btn btn-ghost btn-sm"
                   data-confirm="Usunąć typ {{ t.code }}?">Usuń</button>
         </form>{% endif %}
       </td>
     </tr>
     {% empty %}
-    <tr><td colspan="12" style="color:var(--gray-400);text-align:center;padding:16px">Brak typów regałowych.</td></tr>
+    <tr><td colspan="12" class="u-c-gray-400 u-ta-center u-p-16">Brak typów regałowych.</td></tr>
     {% endfor %}
     </tbody>
   </table>
 </div>
 
 <div class="card">
-  <div style="padding:12px 16px;border-bottom:1px solid var(--gray-100);font-weight:700">Strefy (podłogowe / techniczne — bez geometrii regału)</div>
+  <div class="u-p-12-16 u-bb-1-solid-gray-100 u-fw-700">Strefy (podłogowe / techniczne — bez geometrii regału)</div>
   <table class="table">
     <thead><tr><th>Kod</th><th>Nazwa / opis</th><th>Kolor</th><th></th></tr></thead>
     <tbody>
     {% for t in zones %}
     <tr>
       <td>
-        <span style="font-family:monospace;font-weight:700;font-size:13px;
-                     background:{{ t.color_hex }}22;color:color-mix(in srgb, {{ t.color_hex }} 55%, var(--gray-900));
-                     border:1px solid {{ t.color_hex }}44;
-                     padding:2px 8px;border-radius:5px">{{ t.code }}</span>
+        <span class="color-code" data-color="{{ t.color_hex }}">{{ t.code }}</span>
       </td>
-      <td style="font-weight:600">{{ t.name }}
-        {% if t.description and t.description != t.name %}<div style="font-size:11px;font-weight:400;color:var(--gray-500)">{{ t.description }}</div>{% endif %}</td>
-      <td><span style="display:inline-block;width:20px;height:20px;border-radius:4px;background:{{ t.color_hex }}"></span></td>
+      <td class="u-fw-600">{{ t.name }}
+        {% if t.description and t.description != t.name %}<div class="u-fs-11 u-fw-400 u-c-gray-500">{{ t.description }}</div>{% endif %}</td>
+      <td><span class="color-swatch" data-color="{{ t.color_hex }}"></span></td>
       <td>
         {% if is_designer %}<a href="{% url 'twin:warehouse_rack_type_edit' t.pk %}" class="btn btn-ghost btn-sm">Edytuj</a>
-        <form method="post" action="{% url 'twin:warehouse_rack_type_delete' t.pk %}" style="display:inline">
+        <form method="post" action="{% url 'twin:warehouse_rack_type_delete' t.pk %}" class="u-d-inline">
           {% csrf_token %}
-          <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--red)"
+          <button type="submit" class="u-c-red btn btn-ghost btn-sm"
                   data-confirm="Usunąć typ {{ t.code }}?">Usuń</button>
         </form>{% endif %}
       </td>
     </tr>
     {% empty %}
-    <tr><td colspan="4" style="color:var(--gray-400);text-align:center;padding:16px">Brak stref.</td></tr>
+    <tr><td colspan="4" class="u-c-gray-400 u-ta-center u-p-16">Brak stref.</td></tr>
     {% endfor %}
     </tbody>
   </table>
 </div>
 {% else %}
-<div class="card" style="padding:40px;text-align:center;color:var(--gray-400)">
-  <div style="font-size:32px;margin-bottom:12px">{% icon "package" cls="icon--em" %}</div>
-  <div style="font-size:14px;font-weight:600;color:var(--gray-700);margin-bottom:6px">Brak zdefiniowanych typów</div>
-  {% if is_designer %}<div style="font-size:12px;margin-bottom:20px">
+<div class="u-p-40 u-ta-center u-c-gray-400 card">
+  <div class="u-fs-32 u-mb-12">{% icon "package" cls="icon--em" %}</div>
+  <div class="u-fs-14 u-fw-600 u-c-gray-700 u-mb-6">Brak zdefiniowanych typów</div>
+  {% if is_designer %}<div class="u-fs-12 u-mb-20">
     Utwórz typ lokalizacji — jego kod wpisz w pole <b>Typ magazynu</b> przy snapshocie lub generatorze.
   </div>
   <a href="{% url 'twin:warehouse_rack_type_new' %}" class="btn btn-primary">Utwórz pierwszy typ</a>
-  {% else %}<div style="font-size:12px">Typy regałów zakłada Projektant.</div>{% endif %}
+  {% else %}<div class="u-fs-12">Typy regałów zakłada Projektant.</div>{% endif %}
 </div>
 {% endif %}
 
-<div class="card" style="padding:16px;margin-top:16px;font-size:12px;color:var(--gray-500);line-height:1.7">
+<div class="u-p-16 u-mt-16 u-fs-12 u-c-gray-500 u-lh-1_7 card">
   <b>Jak działa przypisanie?</b> Każda lokalizacja w snapshocie ma pole <code>Typ magazynu</code> (np. <code>K01</code>).
   Jeśli istnieje typ o tym kodzie, renderer 3D automatycznie używa jego wymiarów (wysokość, szerokość, głębokość, kolor).
   Nie trzeba nic ręcznie przypisywać — kod w lokalizacji = typ.

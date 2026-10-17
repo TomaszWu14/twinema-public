@@ -2,7 +2,7 @@
 {% block title %}Prognoza #{{ run.pk }} — {{ app_name }}{% endblock %}
 {% block extra_head %}
 <script src="{% static 'twin/vendor/echarts.min.js' %}"></script>
-<style>.ml-chart { height:380px; } .ml-best td { font-weight:700; }</style>
+<style nonce="{{ csp_nonce }}">.ml-chart { height:380px; } .ml-best td { font-weight:700; }</style>
 {% endblock %}
 {% block content %}
 <nav class="breadcrumb" aria-label="Okruszki"><a href="{% url 'ml:home' %}">Prognozy i ML</a> <span aria-hidden="true">/</span> <span>Prognoza #{{ run.pk }}</span></nav>
@@ -20,14 +20,14 @@
 {% if not res.ok %}
 <div class="card"><div class="empty-state">{{ res.reason }}</div></div>
 {% else %}
-<div class="stats-grid" style="margin-bottom:20px">
+<div class="u-mb-20 stats-grid">
   <div class="stat-card"><div><div class="stat-value">{{ res.chosen_label }}</div><div class="stat-label">wybrany model · MAPE {{ res.ranking.0.mape }} %</div></div></div>
   <div class="stat-card"><div><div class="stat-value">{{ res.growth_p50_pct }} %</div><div class="stat-label">wzrost roczny P50 (P90: {{ res.growth_p90_pct }} %)</div></div></div>
   <div class="stat-card"><div><div class="stat-value">×{{ res.mult_p50 }} / ×{{ res.mult_p90 }}</div><div class="stat-label">mnożnik na {{ res.years }} lat (P50 / P90)</div></div></div>
   <div class="stat-card"><div><div class="stat-value">{% if res.improvement_pp is not None %}{{ res.improvement_pp }} pp{% else %}—{% endif %}</div><div class="stat-label">lepiej niż trend log-liniowy (baseline {{ res.baseline_mape }} %)</div></div></div>
 </div>
 
-<div class="card" style="margin-bottom:16px">
+<div class="u-mb-16 card">
   <div class="card-header"><span class="card-header__title">Historia ({{ res.weeks }} tyg.), dopasowanie i prognoza na 52 tyg. z przedziałem 80 %</span></div>
   <div class="card-body"><div id="ml-chart" class="ml-chart" role="img" aria-label="Wykres prognozy tygodniowej"></div></div>
 </div>
@@ -57,7 +57,7 @@
   var chart = echarts.init(document.getElementById('ml-chart'));
   chart.setOption({
     textStyle: {color: fg}, grid: {left: 60, right: 20, top: 30, bottom: 50},
-    tooltip: {trigger: 'axis'}, legend: {textStyle: {color: fg}, top: 0},
+    tooltip: {trigger: 'axis', renderMode: 'richText'}, legend: {textStyle: {color: fg}, top: 0},
     xAxis: {type: 'category', data: labels, axisLabel: {color: fg}, axisLine: {lineStyle: {color: line}}},
     yAxis: {type: 'value', axisLabel: {color: fg}, splitLine: {lineStyle: {color: line}}},
     series: [

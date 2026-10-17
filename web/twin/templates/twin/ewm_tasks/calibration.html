@@ -3,7 +3,7 @@
 {% block nav_warehouse_map %}topnav__link--active{% endblock %}
 
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .cal-form { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: flex-end; }
   .cal-form .form-group { margin: 0; }
   .cal-form select { min-width: 260px; }
@@ -44,18 +44,18 @@
     </div>
     {% if may_compute %}<button type="submit" class="btn btn-primary">Policz kalibrację</button>{% endif %}
   </form>
-  {% if not may_compute %}<p class="text-muted text-sm" style="margin-top:8px">Kalibrację liczy Projektant — rola Podgląd nie uruchamia obliczeń.</p>{% endif %}
-  <p class="cal-note" style="margin-top:12px">Cykl = odstęp między kolejnymi potwierdzeniami tego samego zasobu EWM (wózek; dla kompletacji — picker). Ten sam ruch liczony fizyką symulacji: droga wzdłuż alejek ÷ prędkość z katalogu, podnoszenie, chwyt. Odstępy &gt; {{ gap_max_min }} min to przerwy — pomijane; krótsze postoje zostają, więc współczynnik to ostrożne (górne) oszacowanie.</p>
+  {% if not may_compute %}<p class="u-mt-8 text-muted text-sm">Kalibrację liczy Projektant — rola Podgląd nie uruchamia obliczeń.</p>{% endif %}
+  <p class="u-mt-12 cal-note">Cykl = odstęp między kolejnymi potwierdzeniami tego samego zasobu EWM (wózek; dla kompletacji — picker). Ten sam ruch liczony fizyką symulacji: droga wzdłuż alejek ÷ prędkość z katalogu, podnoszenie, chwyt. Odstępy &gt; {{ gap_max_min }} min to przerwy — pomijane; krótsze postoje zostają, więc współczynnik to ostrożne (górne) oszacowanie.</p>
 </div></div>
 
 {% if wm and not day %}
-<div class="alert alert-warning" style="margin-top:16px">Brak potwierdzonych zadań w tym imporcie — nie ma dnia projektowego.</div>
+<div class="u-mt-16 alert alert-warning">Brak potwierdzonych zadań w tym imporcie — nie ma dnia projektowego.</div>
 {% elif job.pending or job.status == "error" %}
 {% include "core/_job_status.html" %}
 {% elif wm and not result and not may_compute %}
-<div class="alert alert-info" style="margin-top:16px">Dla tego modelu nie ma jeszcze policzonej kalibracji — poproś Projektanta.</div>
+<div class="u-mt-16 alert alert-info">Dla tego modelu nie ma jeszcze policzonej kalibracji — poproś Projektanta.</div>
 {% elif result %}
-<div class="card" style="margin-top:16px"><div class="card-body">
+<div class="u-mt-16 card"><div class="card-body">
   <div class="section-title">Współczynniki korekty</div>
   <div class="table-wrap"><table class="table cal-table">
     <thead><tr><th>Grupa</th><th class="num">Par cykli</th><th class="num">Mediana realna [s]</th><th class="num">Mediana symulacji [s]</th><th class="num">Współczynnik ×</th></tr></thead>
@@ -68,7 +68,7 @@
   <a class="btn btn-primary" href="{% url 'twin:ewm_tasks_simulate' batch.pk %}?{{ sim_query }}">Symuluj nową halę z tymi współczynnikami →</a>
 </div></div>
 
-<div class="card" style="margin-top:16px"><div class="card-body">
+<div class="u-mt-16 card"><div class="card-body">
   <div class="section-title">Według rodzaju zadania</div>
   <div class="table-wrap"><table class="table cal-table">
     <thead><tr><th>Rodzaj</th><th class="num">Par cykli</th><th class="num">Mediana realna [s]</th><th class="num">Mediana symulacji [s]</th></tr></thead>

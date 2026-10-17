@@ -197,7 +197,8 @@ export function createFlowPlayer({ scene, camera, canvas, requestRender, root, u
   }
 
   function renderLegend(palletEntries) {
-    const chip = (hex, text) => `<span class="flow-chip"><i style="background:${hex}"></i>${text}</span>`;
+    // R-20: kolor przez CSSOM (el.style) — atrybut style= w innerHTML blokuje CSP
+    const chip = (hex, text) => `<span class="flow-chip"><i data-c="${hex}"></i>${text}</span>`;
     const colors = data.flow_colors || {};
     const kinds = [...new Set(data.flows.map(f => f.kind))];
     let html = kinds.map(k => chip(colors[k] || '#6b7280', FLOW_LABELS[k] || k)).join('');
@@ -205,6 +206,7 @@ export function createFlowPlayer({ scene, camera, canvas, requestRender, root, u
       html += '<span class="flow-legend__sep"></span>' + [...palletEntries].map(([l, h]) => chip(h, l)).join('');
     }
     ui.legend.innerHTML = html;
+    ui.legend.querySelectorAll('i[data-c]').forEach(i => { i.style.background = i.dataset.c; });
   }
 
   function build(sc) {

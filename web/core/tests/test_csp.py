@@ -18,6 +18,9 @@ class CspHeaderTests(TestCase):
         script_src = re.search(r"script-src ([^;]+)", policy).group(1)
         self.assertNotIn("'unsafe-inline'", script_src)
         self.assertNotIn("'unsafe-eval'", script_src)
+        style_src = re.search(r"style-src ([^;]+)", policy).group(1)
+        self.assertNotIn("'unsafe-inline'", style_src)                    # R-20
+        self.assertIn("'nonce-", style_src)
         nonce = re.search(r"'nonce-([^']+)'", policy).group(1)
         self.assertNotEqual(nonce, re.search(r"'nonce-([^']+)'", b["Content-Security-Policy"]).group(1))
         self.assertIn("object-src 'none'", policy)
@@ -46,19 +49,25 @@ class TemplatesFollowCspTests(SimpleTestCase):
         self.assertEqual(bad, [])
 
 
-class InlineStylesDoNotGrowTests(SimpleTestCase):
-    """T-17: style w szablonach (`style=`, `<style>`) wymagają 'unsafe-inline' w style-src. Do czasu przeniesienia
-    ich do plików CSS liczba w żadnym szablonie nie może rosnąć — nowy kod używa klas z core/*.css.
-    Po usunięciu stylów z szablonu zaktualizuj `inline_styles_baseline.json` (liczba może tylko maleć)."""
+class InlineStylesTests(SimpleTestCase):
+    """R-20: CSP bez 'unsafe-inline' w style-src blokuje atrybuty style= (także wstawiane przez innerHTML
+    i setAttribute) oraz <style> bez nonce. Wygląd — klasy z core/utilities.css i plików CSS; wartości z danych —
+    data-pct / data-color (core/js/ui.js); z JS — el.style (CSSOM), którego CSP nie blokuje."""
 
-    def test_no_template_adds_inline_styles(self):
-        import json
-        baseline = json.loads((Path(__file__).parent / "inline_styles_baseline.json").read_text())
-        grown = {}
-        for p in Path(settings.BASE_DIR).glob("*/templates/**/*.html"):
-            text = p.read_text()
-            n = len(re.findall(r'\sstyle="', text)) + len(re.findall(r"<style\b", text))
-            key = str(p.relative_to(settings.BASE_DIR))
-            if n > baseline.get(key, 0):
-                grown[key] = f"{baseline.get(key, 0)} → {n}"
-        self.assertEqual(grown, {}, "Nowe style w szablonach — użyj klasy CSS (T-17)")
+    STYLE_ATTR = re.compile(r"""\sstyle\s*=\s*["'`]""")
+
+    def test_templates_have_no_style_attributes(self):
+        bad = [f"{p.relative_to(settings.BASE_DIR)}:{n}" for p in Path(settings.BASE_DIR).glob("*/templates/**/*.html")
+               for n, line in enumerate(p.read_text().splitlines(), 1) if self.STYLE_ATTR.search(line)]
+        self.assertEqual(bad, [], "Atrybut style= blokuje CSP — użyj klasy (core/utilities.css) albo data-pct/data-color")
+
+    def test_style_blocks_carry_nonce(self):
+        bad = [f"{p.relative_to(settings.BASE_DIR)}: {tag}" for p in Path(settings.BASE_DIR).glob("*/templates/**/*.html")
+               for tag in re.findall(r"<style\b[^>]*>", p.read_text()) if 'nonce="{{ csp_nonce }}"' not in tag]
+        self.assertEqual(bad, [])
+
+    def test_own_scripts_do_not_write_style_attributes(self):
+        pattern = re.compile(r"""\sstyle=["'`$]|setAttribute\(\s*["']style""")
+        bad = [f"{p.relative_to(settings.BASE_DIR)}:{n}" for p in Path(settings.BASE_DIR).glob("*/static/*/js/*.js")
+               for n, line in enumerate(p.read_text().splitlines(), 1) if pattern.search(line)]
+        self.assertEqual(bad, [], "Styl z JS ustawiaj przez el.style / el.style.cssText (CSSOM)")

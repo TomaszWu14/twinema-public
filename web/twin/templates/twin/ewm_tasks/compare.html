@@ -3,7 +3,7 @@
 {% block nav_warehouse_map %}topnav__link--active{% endblock %}
 
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .cmp-form { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; }
   .cmp-form .form-group { margin: 0; }
   .cmp-models { display: flex; flex-direction: column; gap: 4px; max-height: 180px; overflow: auto; padding: 6px 10px;
@@ -61,11 +61,11 @@
 </div></div>
 
 {% if not day %}
-<div class="alert alert-warning" style="margin-top:16px">Brak potwierdzonych zadań w tym imporcie — nie ma dnia projektowego.</div>
+<div class="u-mt-16 alert alert-warning">Brak potwierdzonych zadań w tym imporcie — nie ma dnia projektowego.</div>
 {% else %}
-{% if missing %}<div class="alert alert-info" role="status" style="margin-top:16px">Jeszcze niepoliczone: {{ missing|join:", " }} — porównanie liczy Projektant (kilka symulacji dnia na wariant); potem wynik widzą wszyscy.</div>{% endif %}
+{% if missing %}<div class="u-mt-16 alert alert-info" role="status">Jeszcze niepoliczone: {{ missing|join:", " }} — porównanie liczy Projektant (kilka symulacji dnia na wariant); potem wynik widzą wszyscy.</div>{% endif %}
 {% if table %}
-<div class="card" style="margin-top:16px"><div class="card-body">
+<div class="u-mt-16 card"><div class="card-body">
   <div class="table-wrap"><table class="table cmp-table">
     <thead><tr><th>Wskaźnik</th>{% for m in chosen %}<th class="num"><a href="{% url 'twin:warehouse_model_view' m.pk %}">{{ m.name }}</a></th>{% endfor %}</tr></thead>
     <tbody>{% for row in table %}<tr><td>{{ row.label }}{% if row.unit %} [{{ row.unit }}]{% endif %}</td>

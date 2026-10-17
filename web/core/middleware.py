@@ -20,10 +20,11 @@ class RequestIDLogFilter(logging.Filter):
 
 # US-005: skrypty tylko z serwera albo z jednorazowym nonce żądania (`csp_nonce` w szablonach) — bez
 # 'unsafe-inline' dla skryptów; obsługa zdarzeń w atrybutach (onclick=) jest zablokowana (core/js/ui.js).
-# Style zostają z 'unsafe-inline' (atrybuty style= w szablonach) — mniejsze ryzyko, dług T-17.
+# R-20: style tak samo — pliki CSS albo <style nonce=…>; atrybuty style= są blokowane (klasy z core/utilities.css,
+# wartości z danych przez data-pct/data-color i ui.js). Zmiany przez el.style z JS (CSSOM) CSP nie blokuje.
 # 'unsafe-eval' nie ma — three.js go nie potrzebuje; dodać świadomie, jeśli wejdzie biblioteka, która tak.
 _CSP = (
-    "default-src 'self'; script-src 'self' 'nonce-{nonce}'; style-src 'self' 'unsafe-inline'; "
+    "default-src 'self'; script-src 'self' 'nonce-{nonce}'; style-src 'self' 'nonce-{nonce}'; "
     "font-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; "
     "frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
 )

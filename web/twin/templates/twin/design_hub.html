@@ -1,7 +1,7 @@
 {% extends "twin/base.html" %}{% load twin_extras %}
 {% block title %}Projektowanie magazynu — {{ app_name }}{% endblock %}
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .dh-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:12px; margin-bottom:28px; }
   .dh-step { position:relative; display:block; padding:16px 16px 16px 48px; border:1px solid var(--border);
              border-radius:var(--radius-lg); background:var(--surface); text-decoration:none; color:var(--fg); }
@@ -25,7 +25,7 @@
 </div>
 
 <h2 class="dh-sec">Kroki po kolei</h2>
-{% if not design_batch %}<p class="text-muted text-sm" style="margin:-4px 0 12px">Kroki 3–7 liczą się z historii zadań magazynowych — najpierw zaimportuj plik w kroku 2 (eksport z WMS albo plik demonstracyjny z <code>tools/ewm_demo_tasks.py</code>).</p>{% endif %}
+{% if not design_batch %}<p class="u-m-4-0-12 text-muted text-sm">Kroki 3–7 liczą się z historii zadań magazynowych — najpierw zaimportuj plik w kroku 2 (eksport z WMS albo plik demonstracyjny z <code>tools/ewm_demo_tasks.py</code>).</p>{% endif %}
 <div class="dh-grid">
 {% if is_designer %}  <a class="dh-step" href="{% url 'twin:warehouse_model_generator' %}"><span class="dh-step__n">1</span>
     <div class="dh-step__t">{% icon "warehouse" %} Generator hali</div>

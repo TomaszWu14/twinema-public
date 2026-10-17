@@ -1,10 +1,18 @@
 {% extends "core/base.html" %}
 {% block title %}Segmentacja #{{ run.pk }} — {{ app_name }}{% endblock %}
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .sg-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; margin-bottom:20px; }
   .sg-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:16px;
              display:flex; flex-direction:column; gap:8px; border-top:3px solid var(--sg); }
+  .sg-c1 { --sg:#f2a93b; }
+  .sg-c2 { --sg:#4ade80; }
+  .sg-c3 { --sg:#60a5fa; }
+  .sg-c4 { --sg:#c084fc; }
+  .sg-c5 { --sg:#f87171; }
+  .sg-c6 { --sg:#2dd4bf; }
+  .sg-c7 { --sg:#facc15; }
+  .sg-c8 { --sg:#a3a3a3; }
   .sg-card h2 { margin:0; font-size:var(--fs-md); display:flex; gap:8px; align-items:center; }
   .sg-num { width:24px; height:24px; border-radius:50%; background:var(--sg); color:#111; font:700 12px/24px var(--font-sans); text-align:center; flex:none; }
   .sg-big { font-size:var(--fs-2xl); font-weight:700; }
@@ -29,10 +37,10 @@
 {% else %}
 <div class="sg-grid">
   {% for s in res.segments %}
-  <section class="sg-card" style="--sg:{% cycle '#f2a93b' '#4ade80' '#60a5fa' '#c084fc' '#f87171' '#2dd4bf' '#facc15' '#a3a3a3' %}">
+  <section class="sg-card {% cycle 'sg-c1' 'sg-c2' 'sg-c3' 'sg-c4' 'sg-c5' 'sg-c6' 'sg-c7' 'sg-c8' %}">
     <h2><span class="sg-num">{{ s.id|add:1 }}</span>{{ s.name }}</h2>
     <div><span class="sg-big">{{ s.share_pct }} %</span> <span class="sg-meta">pobrań · {{ s.skus }} materiałów</span></div>
-    <div class="sg-bar" aria-hidden="true"><span style="width:{{ s.share_pct }}%"></span></div>
+    <div class="sg-bar" aria-hidden="true"><span data-pct="{{ s.share_pct|stringformat:'s' }}"></span></div>
     <div class="sg-meta">Śr. {{ s.avg_hits }} pobrań/materiał · CV {{ s.profile.cv }} · dni z ruchem {{ s.profile.active|floatformat:0 }} %{% if s.profile.volume %} · karton {{ s.profile.volume }} dm³{% endif %}</div>
     <div class="sg-place"><b>Gdzie:</b> {{ s.placement }}</div>
     <div class="sg-meta">Np.: {{ s.examples|join:", " }}</div>

@@ -16,18 +16,18 @@
 </div>
 
 <!-- Steps indicator -->
-<div style="display:flex;gap:0;margin-bottom:28px">
-  <div style="display:flex;align-items:center;gap:10px;padding:12px 20px;background:var(--blue);color:#fff;border-radius:var(--radius) 0 0 var(--radius);font-weight:600;font-size:13px">
-    <span style="width:22px;height:22px;background:rgba(255,255,255,.3);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">1</span>
+<div class="u-d-flex u-gap-0 u-mb-28">
+  <div class="u-d-flex u-ai-center u-gap-10 u-p-12-20 u-bg-blue u-c-xfff u-br-radius-0-0-radius u-fw-600 u-fs-13">
+    <span class="u-w-22 u-h-22 u-bg-rgba-255-255-255-_3 u-br-50pct u-d-inline-flex u-ai-center u-jc-center u-fs-11 u-fw-700 u-fsh-0">1</span>
     Nazwij model i wgraj lokalizacje
   </div>
-  <div style="display:flex;align-items:center;gap:10px;padding:12px 20px;background:var(--gray-200);color:var(--gray-500);border-radius:0 var(--radius) var(--radius) 0;font-size:13px">
-    <span style="width:22px;height:22px;background:var(--gray-300);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;color:var(--gray-600)">2</span>
+  <div class="u-d-flex u-ai-center u-gap-10 u-p-12-20 u-bg-gray-200 u-c-gray-500 u-br-0-radius-radius-0 u-fs-13">
+    <span class="u-w-22 u-h-22 u-bg-gray-300 u-br-50pct u-d-inline-flex u-ai-center u-jc-center u-fs-11 u-fw-700 u-fsh-0 u-c-gray-600">2</span>
     Przypisz współrzędne regałów
   </div>
 </div>
 
-<div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;align-items:start">
+<div class="u-d-grid u-cols-2fr-1fr u-gap-20 u-ai-start">
 
   <!-- Form card -->
   <div class="card">
@@ -39,14 +39,14 @@
         {% csrf_token %}
 
         {% if form.non_field_errors %}
-        <div class="alert alert-error" style="margin-bottom:16px">
+        <div class="u-mb-16 alert alert-error">
           {% for err in form.non_field_errors %}<div>{{ err }}</div>{% endfor %}
         </div>
         {% endif %}
 
-        <div style="margin-bottom:20px">
+        <div class="u-mb-20">
           <div class="section-title">Informacje o modelu</div>
-          <div class="form-grid-2" style="gap:16px">
+          <div class="u-gap-16 form-grid-2">
             <div class="form-group form-group--full">
               <label for="id_name">Nazwa modelu *</label>
               <input type="text" name="name" id="id_name"
@@ -87,21 +87,21 @@
           </div>
         </div>
 
-        <div style="margin-bottom:20px">
+        <div class="u-mb-20">
           <div class="section-title">Plik z kodami lokalizacji</div>
           <div class="form-group">
             <label for="id_location_file">Plik CSV / TXT z lokalizacjami *</label>
             <input type="file" name="location_file" id="id_location_file"
                    accept=".csv,.txt"
-                   style="padding:6px 10px;border:1px solid var(--gray-300);border-radius:6px;font-size:13px;background:var(--surface);width:100%">
+                   class="u-p-6-10 u-b-1-solid-gray-300 u-br-6 u-fs-13 u-bg-surface u-w-100pct">
             <span class="help-text">
-              Format: jedna lokalizacja per linia, np. <code style="font-family:monospace;background:var(--gray-100);padding:1px 5px;border-radius:3px">B0-01-300A</code>
+              Format: jedna lokalizacja per linia, np. <code class="u-ff-monospace u-bg-gray-100 u-p-1-5 u-br-3">B0-01-300A</code>
               (strefa-regał-boczek-poziom). System automatycznie wyodrębni regały.
             </span>
           </div>
         </div>
 
-        <div style="display:flex;gap:10px;padding-top:8px;border-top:1px solid var(--gray-100)">
+        <div class="u-d-flex u-gap-10 u-pt-8 u-bt-1-solid-gray-100">
           <button type="submit" class="btn btn-primary">
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             Wczytaj i przejdź do współrzędnych
@@ -113,33 +113,33 @@
   </div>
 
   <!-- Help card -->
-  <div style="display:flex;flex-direction:column;gap:16px">
+  <div class="u-d-flex u-fd-column u-gap-16">
     <div class="card">
       <div class="card-header">
         <span class="card-header__title">Format pliku</span>
       </div>
       <div class="card-body">
-        <p style="font-size:13px;color:var(--gray-700);margin-bottom:12px">
+        <p class="u-fs-13 u-c-gray-700 u-mb-12">
           Plik CSV lub TXT z kodami lokalizacji — jedna lokalizacja per linia:
         </p>
-        <pre style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:6px;padding:12px;font-size:12px;font-family:monospace;line-height:1.8;overflow-x:auto">B0-01-300A
+        <pre class="u-bg-gray-50 u-b-1-solid-gray-200 u-br-6 u-p-12 u-fs-12 u-ff-monospace u-lh-1_8 u-ox-auto">B0-01-300A
 B0-01-300B
 B0-01-300C
 B0-02-300A
 B0-02-300B
 C1-01-100A
 C1-01-100B</pre>
-        <p style="font-size:12px;color:var(--gray-500);margin-top:10px">
+        <p class="u-fs-12 u-c-gray-500 u-mt-10">
           Format kodu: <strong>STREFA-REGAŁ-BOCZEK-POZIOM</strong><br>
-          Np. <code style="font-family:monospace">B0-01-300A</code>:<br>
+          Np. <code class="u-ff-monospace">B0-01-300A</code>:<br>
           • Strefa: <strong>B0</strong><br>
           • Regał: <strong>01</strong><br>
           • Boczek: <strong>300</strong><br>
           • Poziom: <strong>A</strong> (A–H = poziomy 1–8 od podłogi; P/Q/R = półki na poziomie 1; S/T = części poziomu 2)
         </p>
-        <p style="font-size:12px;color:var(--gray-500);margin-top:10px;padding-top:10px;border-top:1px solid var(--gray-100)">
+        <p class="u-fs-12 u-c-gray-500 u-mt-10 u-pt-10 u-bt-1-solid-gray-100">
           <strong>Plik geometrii</strong> (np. odczytany z rysunku hali) — CSV z nagłówkiem
-          <code style="font-family:monospace">zone;rack_id;x_m;y_m;angle_deg;n_bays;bay_width_cm;depth_cm;n_levels</code>.
+          <code class="u-ff-monospace">zone;rack_id;x_m;y_m;angle_deg;n_bays;bay_width_cm;depth_cm;n_levels</code>.
           Regały powstaną od razu z pozycjami, a hala dopasuje się do ich obrysu.
         </p>
       </div>
@@ -150,7 +150,7 @@ C1-01-100B</pre>
         <span class="card-header__title">Co się stanie?</span>
       </div>
       <div class="card-body">
-        <ol style="font-size:13px;color:var(--gray-700);padding-left:18px;line-height:2">
+        <ol class="u-fs-13 u-c-gray-700 u-pl-18 u-lh-2">
           <li>System wczyta plik i wyodrębni unikalne regały (strefa + nr regału)</li>
           <li>Zostaniesz przekierowany do edytora współrzędnych</li>
           <li>Ustaw pozycję X/Y każdego regału na planie hali</li>

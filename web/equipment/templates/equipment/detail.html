@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
 {% block title %}{{ eq.name }} — Katalog sprzętu — {{ app_name }}{% endblock %}
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .eq-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px; align-items:start; }
   @media (max-width: 900px) { .eq-grid { grid-template-columns:1fr; } }
   .eq-sec { font:600 var(--fs-xs) var(--font-mono); text-transform:uppercase; letter-spacing:.12em; color:var(--primary); margin:0 0 12px; }
@@ -28,7 +28,7 @@
     <h2 class="eq-sec">Parametry</h2>
     <dl class="eq-dl">{% if eq.manufacturer %}<dt>Producent</dt><dd>{{ eq.manufacturer }}</dd>{% endif %}
       <dt>Osprzęt</dt><dd>{{ eq.attachment_labels|join:", "|default:"widły standardowe" }}</dd>{% for label, v in rows %}<dt>{{ label }}</dt><dd>{{ v|default_if_none:"—" }}</dd>{% endfor %}</dl>
-    {% if eq.notes %}<p class="text-sm" style="margin:12px 0 0">{{ eq.notes }}</p>{% endif %}
+    {% if eq.notes %}<p class="u-m-12-0-0 text-sm">{{ eq.notes }}</p>{% endif %}
     {% if is_designer %}
     <div class="eq-actions">
       {% if can_edit %}<a class="btn btn-primary btn-sm" href="{% url 'equipment:edit' eq.pk %}">Edytuj</a>{% endif %}
@@ -42,14 +42,14 @@
     <h2 class="eq-sec">Udźwig na wysokości</h2>
     {% if bars %}
     <div class="eq-bars" aria-hidden="true">
-      {% for b in bars %}<div class="eq-bar"><span>{{ b.h|floatformat:"-1" }} m</span><span class="b" style="width:{{ b.pct }}%"></span><span>{{ b.kg }} kg</span></div>{% endfor %}
+      {% for b in bars %}<div class="eq-bar"><span>{{ b.h|floatformat:"-1" }} m</span><span class="b" data-pct="{{ b.pct|stringformat:'s' }}"></span><span>{{ b.kg }} kg</span></div>{% endfor %}
     </div>
     <table class="sr-only"><caption>Udźwig na wysokości</caption><thead><tr><th>Wysokość [m]</th><th>Udźwig [kg]</th></tr></thead>
       <tbody>{% for b in bars %}<tr><td>{{ b.h }}</td><td>{{ b.kg }}</td></tr>{% endfor %}</tbody></table>
     {% else %}
-    <p class="text-sm" style="margin:0">Udźwig stały: {{ eq.capacity_kg }} kg (brak krzywej redukcji).</p>
+    <p class="u-m-0 text-sm">Udźwig stały: {{ eq.capacity_kg }} kg (brak krzywej redukcji).</p>
     {% endif %}
-    <p class="text-muted text-sm" style="margin:12px 0 0">Edytor layoutu ostrzega, gdy nośność miejsca w regale przekracza udźwig na wysokości belki,
+    <p class="u-m-12-0-0 text-muted text-sm">Edytor layoutu ostrzega, gdy nośność miejsca w regale przekracza udźwig na wysokości belki,
       i zgłasza błąd, gdy najwyższa belka jest ponad maks. wysokością podnoszenia.</p>
   </div></div>
 </div>

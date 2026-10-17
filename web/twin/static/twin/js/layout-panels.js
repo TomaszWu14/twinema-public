@@ -50,6 +50,7 @@ function h(tag, attrs = {}, ...children) {
   const e = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
     if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+    else if (k === 'style') e.style.cssText = v;        // CSSOM — atrybut style= blokuje CSP (R-20)
     else if (v !== false && v !== null && v !== undefined) e.setAttribute(k, v === true ? '' : v);
   }
   e.append(...children.filter((c) => c !== null && c !== undefined));

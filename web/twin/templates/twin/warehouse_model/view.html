@@ -4,7 +4,7 @@
 {% block nav_warehouse_map %}topnav__link--active{% endblock %}
 
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   /* ── Tab strip ── */
   .viz-tabs {
     display: flex;
@@ -90,7 +90,9 @@
     height: 12px;
     border-radius: 50%;
     flex-shrink: 0;
+    background: var(--c);
   }
+  .zone-dot--square { border-radius: 2px; }
 
   /* ── Rack info sidebar ── */
   #rack-info {
@@ -170,7 +172,7 @@
        title="Plan z góry: przeciąganie regałów i bloków, doki, pola odkładcze, kolizje i KPI na żywo">Edytor layoutu</a>
     <a href="{% url 'twin:warehouse_model_zones' wm.pk %}" class="btn btn-secondary"
        title="Cała strefa regałów naraz: przesunięcie, długość rzędów, poziomy, usunięcie">Edycja stref</a>
-    <form method="post" action="{% url 'twin:warehouse_model_copy' wm.pk %}" style="display:inline">{% csrf_token %}
+    <form method="post" action="{% url 'twin:warehouse_model_copy' wm.pk %}" class="u-d-inline">{% csrf_token %}
       <button type="submit" class="btn btn-primary" title="Kopia hali do przebudowy w edytorze layoutu — oryginał zostaje bez zmian">Utwórz przyszły layout (kopia)</button>
     </form>{% endif %}
     {% if is_designer %}<a href="{% url 'twin:warehouse_model_coords' wm.pk %}" class="btn btn-secondary">
@@ -195,13 +197,13 @@
 <div class="zone-legend">
   {% for item in zone_legend %}
   <div class="zone-legend__item">
-    <span class="zone-dot" style="background:{{ item.color }}"></span>
+    <span class="zone-dot" data-color="{{ item.color }}"></span>
     Strefa {{ item.zone }}
   </div>
   {% endfor %}
   {% for item in feature_legend %}
   <div class="zone-legend__item">
-    <span class="zone-dot" style="background:{{ item.color }};border-radius:2px"></span>
+    <span class="zone-dot zone-dot--square" data-color="{{ item.color }}"></span>
     {{ item.label }}
   </div>
   {% endfor %}
@@ -210,19 +212,19 @@
 <!-- Tabs -->
 <div class="viz-tabs">
   <button class="viz-tab viz-tab--active" data-tab="3d" id="tab-3d">
-    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:5px"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" class="u-va-middle u-mr-5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
     Widok 3D
   </button>
   <button class="viz-tab" data-tab="2d" id="tab-2d">
-    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:5px"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" class="u-va-middle u-mr-5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
     Plan 2D
   </button>
 </div>
 
 <!-- 3D tab -->
 <div id="panel-3d">
-  <div class="card" style="margin-bottom:8px">
-    <div class="card-body" style="padding:0;position:relative">
+  <div class="u-mb-8 card">
+    <div class="u-p-0 u-pos-relative card-body">
       <div id="three-canvas-wrap">
         <canvas id="three-canvas"></canvas>
         {% include "twin/_3d_boot.html" with status_id="three-status" %}
@@ -236,9 +238,9 @@
 </div>
 
 <!-- 2D tab -->
-<div id="panel-2d" style="display:none">
-  <div class="card" style="margin-bottom:8px">
-    <div class="card-body" style="padding:12px;position:relative">
+<div id="panel-2d" hidden>
+  <div class="u-mb-8 card">
+    <div class="u-p-12 u-pos-relative card-body">
       <button type="button" class="btn btn-secondary btn-sm viz-fs" id="fs-2d" data-fs aria-pressed="false"
               title="Plan 2D na pełnym ekranie (F, wyjście Esc)">Pełny ekran</button>
       <div id="plan-wrap">
@@ -284,8 +286,8 @@ const CLEAR_H = {{ clear_h }};{% endlocalize %}
 window.switchTab = function(tab, btn) {
   document.querySelectorAll('.viz-tab').forEach(b => b.classList.remove('viz-tab--active'));
   btn.classList.add('viz-tab--active');
-  document.getElementById('panel-3d').style.display = tab === '3d' ? '' : 'none';
-  document.getElementById('panel-2d').style.display = tab === '2d' ? '' : 'none';
+  document.getElementById('panel-3d').hidden = tab !== '3d';
+  document.getElementById('panel-2d').hidden = tab !== '2d';
   if (tab === '2d') buildSVG();
   if (tab === '3d') viewer.resize();   // panel był ukryty — dorysuj klatkę (render na żądanie)
 };
@@ -331,7 +333,7 @@ const fs3d = bindFullscreenButton(document.getElementById('fs-3d'), document.get
 const fs2d = bindFullscreenButton(document.getElementById('fs-2d'), document.getElementById('panel-2d'), { live: fsLive });
 document.addEventListener('keydown', (e) => {
   if (e.key.toLowerCase() !== 'f' || e.ctrlKey || e.metaKey || e.altKey || e.target.closest('input, select, textarea')) return;
-  (document.getElementById('panel-2d').style.display === 'none' ? fs3d : fs2d).toggle();
+  (document.getElementById('panel-2d').hidden ? fs3d : fs2d).toggle();
 });
 
 // Animacja przepływów (ta sama scena co eksport do Blendera) — moduł ładowany osobno,

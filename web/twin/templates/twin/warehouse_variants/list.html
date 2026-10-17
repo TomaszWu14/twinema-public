@@ -4,7 +4,7 @@
 {% block nav_warehouse_map %}topnav__link--active{% endblock %}
 
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .var-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); gap: 16px; align-items: start; }
   @media (max-width: 960px) { .var-grid { grid-template-columns: 1fr; } }
   .cmp { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
@@ -38,7 +38,7 @@
 </nav>
 
 <div class="page-header">
-  <div class="panel-head" style="--pc:#0f766e;--pcbg:#ecfdf5">
+  <div class="u-var-pc-x0f766e u-var-pcbg-xecfdf5 panel-head">
     <div class="panel-head__chip">
       <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="11" rx="1"/><path d="M14 18h7M14 21h7"/></svg>
     </div>
@@ -50,9 +50,9 @@
 </div>
 
 <div class="var-grid">
-  <div class="card card--accent" style="--pc:#0f766e">
+  <div class="u-var-pc-x0f766e card card--accent">
     <div class="card-header"><span class="card-header__title">Porównanie wariantów</span></div>
-    <div class="card-body" style="overflow-x:auto">
+    <div class="u-ox-auto card-body">
     {% if chosen %}
     <table class="cmp">
       <thead>
@@ -73,7 +73,7 @@
           <td>{{ row.label }}</td>
           {% for c in row.cells %}
           <td class="{% if c.best %}best{% endif %}">
-            {% if c.value is None %}<span class="num" style="color:var(--gray-400)">—</span>
+            {% if c.value is None %}<span class="u-c-gray-400 num">—</span>
             {% else %}<span class="num">{{ c.value }}</span>{% if row.unit %} <span class="text-muted">{{ row.unit }}</span>{% endif %}{% endif %}
             {% if c.extra %}<span class="extra">{{ c.extra }}</span>{% endif %}
             {% if c.delta is not None %}
@@ -94,14 +94,14 @@
     {% for v in chosen %}{% for i in v.kpi.aisle_issues|slice:":5" %}
     <div class="var-issue">{% icon "triangle-alert" %} {{ v.name }}: {{ i.type }} {{ i.a }} ↔ {{ i.b }} — {{ i.gap_m }} m (wymagane {{ i.need_m }} m)</div>
     {% endfor %}{% endfor %}
-    <p class="hint" style="margin-top:12px">
+    <p class="u-mt-12 hint">
       Zielone tło = najlepsza wartość w wierszu; procent = różnica do pierwszej kolumny.
       Droga to odległość prostokątna od najbliższego doku / bramy / stanowiska do frontu boku regału,
       ważona liczbą miejsc — miara porównawcza wariantów, nie symulacja trasy.
       Pojemności i wydajności sprzętu z katalogu (typowe wartości; potwierdź u dostawcy).
     </p>
     {% else %}
-    <p class="text-muted" style="padding:24px 8px">
+    <p class="u-p-24-8 text-muted">
       {% if is_designer %}Brak wariantów. Dodaj wariant bazowy z modelu obecnego magazynu, a potem zaimportuj warianty
       zaprojektowane w Blenderze zestawem <code>twinema_design_kit.py</code>.{% else %}Brak wariantów — przygotowuje je Projektant.{% endif %}
     </p>
@@ -109,7 +109,7 @@
     </div>
   </div>
 
-  <div style="display:flex;flex-direction:column;gap:16px">
+  <div class="u-d-flex u-fd-column u-gap-16">
     {% if variants %}
     <form method="get" class="card">
       <div class="card-header"><span class="card-header__title">Porównaj warianty (max 6)</span></div>
@@ -125,7 +125,7 @@
         </li>
         {% endfor %}
       </ul>
-      <button type="submit" class="btn btn-primary btn-sm" style="margin-top:10px">Porównaj</button>
+      <button type="submit" class="u-mt-10 btn btn-primary btn-sm">Porównaj</button>
       </div>
     </form>
     {% if is_designer %}{% for v in variants %}
@@ -140,7 +140,7 @@
       <div class="card-header"><span class="card-header__title">Wariant bazowy z modelu magazynu</span></div>
       <div class="card-body">
       <p class="hint">Regały modelu (np. „Model obecnego magazynu”) jako punkt odniesienia porównania.</p>
-      <select aria-label="Model odniesienia" name="model_id" class="form-control" style="width:100%;margin:6px 0 10px" required>
+      <select aria-label="Model odniesienia" name="model_id" class="u-w-100pct u-m-6-0-10 form-control" required>
         {% for wm in models %}<option value="{{ wm.pk }}">{{ wm.name }}</option>{% empty %}<option value="">Brak modeli</option>{% endfor %}
       </select>
       <button type="submit" id="btn-baseline" class="btn btn-secondary btn-sm" {% if not models %}disabled{% endif %}>Dodaj wariant bazowy</button>
@@ -152,8 +152,8 @@
       <div class="card-header"><span class="card-header__title">Import wariantu z Blendera</span></div>
       <div class="card-body">
       <p class="hint">Plik z <code>kit["export_variant"](…)</code> (format twinema.design-variant). Wskaźniki TWINEMA przeliczy sam.</p>
-      <input aria-label="Plik wariantu (JSON)" type="file" name="variant_file" accept=".json,application/json" required style="margin:6px 0">
-      <input type="text" name="name" placeholder="Nazwa (opcjonalnie)" class="form-control" style="width:100%;margin-bottom:10px">
+      <input aria-label="Plik wariantu (JSON)" type="file" name="variant_file" accept=".json,application/json" required class="u-m-6-0">
+      <input type="text" name="name" placeholder="Nazwa (opcjonalnie)" class="u-w-100pct u-mb-10 form-control">
       <button type="submit" id="btn-import" class="btn btn-primary btn-sm">Importuj wariant</button>
       </div>
     </form>

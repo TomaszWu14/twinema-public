@@ -3,7 +3,7 @@
 {% block nav_warehouse_map %}topnav__link--active{% endblock %}
 
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .levels-table input, .levels-table select { width: 100%; padding: 5px 8px; font-size: 12px; }
   .levels-table td { vertical-align: middle; }
   .levels-table .col-letter { width: 70px; }
@@ -28,8 +28,8 @@
 
 <form method="post" class="card">
   {% csrf_token %}
-  <div class="card-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px">
-    <label class="form-group" style="grid-column:span 2">Nazwa
+  <div class="u-d-grid u-cols-repeat-auto-fill-minmax-180-1fr u-gap-14 card-body">
+    <label class="u-gcol-span-2 form-group">Nazwa
       <input type="text" name="name" value="{{ obj.name }}" class="form-control" required maxlength="100">
     </label>
     <label class="form-group">Palet na belce
@@ -41,7 +41,7 @@
     <label class="form-group">Głębokość [mm]
       <input type="number" name="depth_mm" value="{{ obj.depth_mm }}" class="form-control" min="1" step="1">
     </label>
-    <label class="form-group" style="grid-column:1/-1">Uwagi
+    <label class="u-gcol-1s-1 form-group">Uwagi
       <input type="text" name="notes" value="{{ obj.notes }}" class="form-control" maxlength="200">
     </label>
   </div>
@@ -54,7 +54,7 @@
       <tbody>
         {% for lv in rows %}
         <tr>
-          <td class="col-letter"><input type="text" name="lvl-{{ forloop.counter0 }}-letter" value="{{ lv.letter|default:'' }}" maxlength="1" style="text-transform:uppercase"></td>
+          <td class="col-letter"><input type="text" name="lvl-{{ forloop.counter0 }}-letter" value="{{ lv.letter|default:'' }}" maxlength="1" class="u-tt-uppercase"></td>
           <td><input type="number" name="lvl-{{ forloop.counter0 }}-height" value="{{ lv.height_mm|default:'' }}" min="1" step="1"></td>
           <td><input type="text" name="lvl-{{ forloop.counter0 }}-type" value="{{ lv.ewm_type|default:'' }}" list="ewm-types" maxlength="20"></td>
           <td>
@@ -71,10 +71,10 @@
   </div>
   <datalist id="ewm-types">{% for code in ewm_types %}<option value="{{ code }}">{% endfor %}</datalist>
 
-  <div class="card-footer" style="display:flex;gap:10px">
+  <div class="u-d-flex u-gap-10 card-footer">
     <button type="submit" class="btn btn-primary">Zapisz szablon</button>
     <a href="{% url 'twin:bay_template_list' %}" class="btn btn-ghost">Anuluj</a>
-    <span class="text-sm text-muted" style="margin-left:auto">Potrzebujesz więcej poziomów? Zapisz — pojawią się kolejne puste wiersze.</span>
+    <span class="u-ml-auto text-sm text-muted">Potrzebujesz więcej poziomów? Zapisz — pojawią się kolejne puste wiersze.</span>
   </div>
 </form>
 {% endblock %}

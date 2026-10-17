@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
 {% block title %}Dane — {{ app_name }}{% endblock %}
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .md-imports { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px; margin:0 0 24px; }
   .md-imp { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:16px;
             display:flex; flex-direction:column; gap:10px; }
@@ -24,12 +24,12 @@
     <a class="btn btn-ghost" href="{% url 'masterdata:catalog' %}">Nośniki i klasy</a></div>{% endif %}
 </div>
 {% if job %}{% include "core/_job_status.html" with may_compute=is_designer %}
-{% if job.status == "done" and job.result.error %}<div class="alert alert-error" role="alert" style="margin-top:16px">Ostatni import: {{ job.result.error }}</div>
-{% elif job.status == "done" %}<div class="alert {% if job.result.rows_rejected %}alert-warning{% else %}alert-success{% endif %}" role="status" style="margin-top:16px">
+{% if job.status == "done" and job.result.error %}<div class="u-mt-16 alert alert-error" role="alert">Ostatni import: {{ job.result.error }}</div>
+{% elif job.status == "done" %}<div class="u-mt-16 alert {% if job.result.rows_rejected %}alert-warning{% else %}alert-success{% endif %}" role="status">
   Ostatni import „{{ job.params.name }}”: zapisano {{ job.result.rows_ok }} z {{ job.result.rows_total }} wierszy{% if job.result.rows_rejected %}, odrzucono {{ job.result.rows_rejected }}{% endif %} —
   <a href="{% url 'masterdata:log_detail' job.result.log %}">raport importu</a>.</div>{% endif %}{% endif %}
 
-<div class="stats-grid" style="margin-bottom:24px">
+<div class="u-mb-24 stats-grid">
   <div class="stat-card"><div><div class="stat-value">{{ n_materials }}</div><div class="stat-label">materiałów · {{ n_groups }} grup towarowych</div></div></div>
   <div class="stat-card"><div><div class="stat-value">{% if master %}{{ master.location_count }}{% else %}—{% endif %}</div><div class="stat-label">lokalizacji w aktywnym masterze{% if master %} „{{ master.name }}”{% endif %}</div></div></div>
   <div class="stat-card"><div><div class="stat-value">{% if stock_log %}{{ stock_log.rows_ok }}{% else %}—{% endif %}</div><div class="stat-label">{% if stock_log %}pozycji stanu w {{ stock_locations }} lokalizacjach ({{ stock_log.uploaded_at|date:"d.m.Y H:i" }}){% else %}brak importu stanów{% endif %}</div></div></div>
@@ -39,11 +39,11 @@
 <h2 class="md-sec">Materiały w liczbach</h2>
 <div class="md-imports">
   <section class="md-imp" aria-label="Klasy wysokości palet"><h2>Klasy wysokości</h2>
-    <ul class="text-sm" style="margin:0;padding-left:18px">{% for label, n in by_height %}<li>{{ label }}: <b>{{ n }}</b></li>{% endfor %}</ul></section>
+    <ul class="u-m-0 u-pl-18 text-sm">{% for label, n in by_height %}<li>{{ label }}: <b>{{ n }}</b></li>{% endfor %}</ul></section>
   <section class="md-imp" aria-label="Klasy wagi palet"><h2>Klasy wagi</h2>
-    <ul class="text-sm" style="margin:0;padding-left:18px">{% for label, n in by_weight %}<li>{{ label }}: <b>{{ n }}</b></li>{% endfor %}</ul></section>
+    <ul class="u-m-0 u-pl-18 text-sm">{% for label, n in by_weight %}<li>{{ label }}: <b>{{ n }}</b></li>{% endfor %}</ul></section>
   <section class="md-imp" aria-label="Strefy specjalne"><h2>Strefy specjalne</h2>
-    <ul class="text-sm" style="margin:0;padding-left:18px">{% for label, n in by_flag %}<li>{{ label }}: <b>{{ n }}</b></li>{% endfor %}</ul></section>
+    <ul class="u-m-0 u-pl-18 text-sm">{% for label, n in by_flag %}<li>{{ label }}: <b>{{ n }}</b></li>{% endfor %}</ul></section>
 </div>
 {% endif %}
 
@@ -67,11 +67,11 @@
   </section>
   {% endfor %}
 </div>
-<p class="text-muted text-sm" style="margin:-12px 0 24px">Limit pliku: {{ max_mb }} MB. Kolumny rozpoznajemy po nazwach (PL / EN / typowe eksporty WMS) — kolejność nie ma znaczenia.</p>
+<p class="u-m-12-0-24 text-muted text-sm">Limit pliku: {{ max_mb }} MB. Kolumny rozpoznajemy po nazwach (PL / EN / typowe eksporty WMS) — kolejność nie ma znaczenia.</p>
 
 {% if is_designer %}
 <h2 class="md-sec">Dane demonstracyjne</h2>
-<div class="card" style="margin-bottom:24px"><div class="card-body">
+<div class="u-mb-24 card"><div class="card-body">
   {% if models %}
   <form class="md-demo" method="post" action="{% url 'masterdata:demo' %}">{% csrf_token %}
     <label>Model hali
@@ -79,9 +79,9 @@
     </label>
     <button class="btn btn-secondary" type="submit">Wczytaj materiały i stan demo</button>
   </form>
-  <p class="text-muted text-sm" style="margin:10px 0 0">Syntetyczne: 3 000 materiałów w 8 grupach (z opakowaniami sztuka → karton → paleta, klasami i strefami specjalnymi) (te same kody co w <code>tools/ewm_demo_tasks.py</code>) i ~70 % miejsc wybranego modelu zajętych paletami.</p>
+  <p class="u-m-10-0-0 text-muted text-sm">Syntetyczne: 3 000 materiałów w 8 grupach (z opakowaniami sztuka → karton → paleta, klasami i strefami specjalnymi) (te same kody co w <code>tools/ewm_demo_tasks.py</code>) i ~70 % miejsc wybranego modelu zajętych paletami.</p>
   {% else %}
-  <p class="text-muted text-sm" style="margin:0">Najpierw utwórz model hali w <a href="{% url 'twin:warehouse_model_generator' %}">generatorze</a> — stan demo rozkłada się po jego regałach.</p>
+  <p class="u-m-0 text-muted text-sm">Najpierw utwórz model hali w <a href="{% url 'twin:warehouse_model_generator' %}">generatorze</a> — stan demo rozkłada się po jego regałach.</p>
   {% endif %}
 </div></div>
 {% endif %}

@@ -31,7 +31,7 @@
       <thead>
         <tr>
           <th>Nazwa</th><th>Palet na belce</th><th>Belka [mm]</th><th>Poziomy od dołu</th>
-          <th>Typy EWM</th><th>Użycie</th><th style="text-align:right">Akcje</th>
+          <th>Typy EWM</th><th>Użycie</th><th class="u-ta-right">Akcje</th>
         </tr>
       </thead>
       <tbody>
@@ -46,13 +46,13 @@
           <td><code>{{ t.level_label }}</code></td>
           <td class="text-sm">{{ t.ewm_types_label|default:"—" }}</td>
           <td class="text-sm text-muted">{{ t.n_racks }} rzędów (domyślny) · {{ t.n_bays }} gniazd (wyjątek)</td>
-          <td style="text-align:right;white-space:nowrap">
+          <td class="u-ta-right u-ws-nowrap">
             {% if is_designer %}
             <a href="{% url 'twin:bay_template_edit' t.pk %}" class="btn btn-secondary btn-sm">Edytuj</a>
-            <form method="post" action="{% url 'twin:bay_template_delete' t.pk %}" style="display:inline"
+            <form method="post" action="{% url 'twin:bay_template_delete' t.pk %}" class="u-d-inline"
                   data-confirm="Usunąć szablon „{{ t.name }}”? Rzędów z tym szablonem domyślnym: {{ t.n_racks }} (stracą adresy do ponownego „Wykryj z EWM”).">
               {% csrf_token %}
-              <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--red)">Usuń</button>
+              <button type="submit" class="u-c-red btn btn-ghost btn-sm">Usuń</button>
             </form>
             {% endif %}
           </td>

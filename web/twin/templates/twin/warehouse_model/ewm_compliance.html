@@ -3,7 +3,7 @@
 {% block nav_warehouse_map %}topnav__link--active{% endblock %}
 
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .codes { font-family: var(--font-mono, monospace); font-size: 11px; line-height: 1.7; color: var(--gray-700); }
   details summary { cursor: pointer; font-size: 12px; color: var(--blue-mid); }
 </style>
@@ -30,7 +30,7 @@
   </div>
 </div>
 
-{% if not batch %}<div class="alert alert-warning" style="margin-bottom:16px">{{ no_master }}</div>{% endif %}
+{% if not batch %}<div class="u-mb-16 alert alert-warning">{{ no_master }}</div>{% endif %}
 
 <div class="stats-grid">
   <div class="stat-card"><div><div class="stat-value">{{ report.summary.pct }}%</div><div class="stat-label">zgodność kodów przejść na planie</div></div></div>

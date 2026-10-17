@@ -5,7 +5,7 @@
 
 {% block extra_head %}
 <script src="{% static 'twin/vendor/echarts.min.js' %}"></script>
-<style>
+<style nonce="{{ csp_nonce }}">
   .dd-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 16px; }
   .dd-h { font-size: 13px; font-weight: 700; color: var(--gray-700); margin-bottom: 4px; }
   .dd-sub { font-size: 13px; color: var(--gray-500); margin-bottom: 10px; }
@@ -59,19 +59,19 @@
 <div class="alert alert-warning">Brak potwierdzonych zadań w tym imporcie — nie ma z czego liczyć profilu.</div>
 {% else %}
 {% if profile.days_working < min_days %}
-<div class="alert alert-warning" style="margin-bottom:16px">Tylko {{ profile.days_working }} dni roboczych — percentyl z tak krótkiej historii jest mało wiarygodny (P{{ p }} z {{ profile.days_working }} dni to praktycznie maksimum). Do wymiarowania wgraj co najmniej kilka miesięcy zadań.</div>
+<div class="u-mb-16 alert alert-warning">Tylko {{ profile.days_working }} dni roboczych — percentyl z tak krótkiej historii jest mało wiarygodny (P{{ p }} z {{ profile.days_working }} dni to praktycznie maksimum). Do wymiarowania wgraj co najmniej kilka miesięcy zadań.</div>
 {% endif %}
 <div class="stats-grid">
   <div class="stat-card"><div><div class="stat-value">{{ profile.days_working }}</div><div class="stat-label">dni roboczych (z {{ profile.days_total }} z ruchem)</div></div></div>
   <div class="stat-card"><div><div class="stat-value">{{ profile.design_day.target|floatformat:0 }}</div><div class="stat-label">ruchów w dniu P{{ p }}</div></div></div>
-  <div class="stat-card"><div><div class="stat-value" style="font-size:18px">{{ profile.design_day.date|date:"D d.m.Y" }}</div><div class="stat-label">dzień reprezentatywny ({{ profile.design_day.total }} ruchów) — do symulacji</div></div></div>
+  <div class="stat-card"><div><div class="u-fs-18 stat-value">{{ profile.design_day.date|date:"D d.m.Y" }}</div><div class="stat-label">dzień reprezentatywny ({{ profile.design_day.total }} ruchów) — do symulacji</div></div></div>
   {% for s in profile.streams %}{% if s.key == "total" %}
   <div class="stat-card"><div><div class="stat-value">{{ s.peak_hour|floatformat:0 }}</div><div class="stat-label">ruchów w godzinie szczytu (P{{ p }} godzin)</div></div></div>
   {% endif %}{% endfor %}
   {% if snapshot %}<div class="stat-card"><div><div class="stat-value">{{ snapshot.occupied_count }}</div><div class="stat-label">zajętych lokalizacji (snapshot {{ snapshot.uploaded_at|date:"d.m.Y" }}, z {{ snapshot.row_count }})</div></div></div>{% endif %}
 </div>
 
-<div class="card" style="margin-bottom:16px"><div class="card-body">
+<div class="u-mb-16 card"><div class="card-body">
   <div class="dd-h">Strumienie — wartości dzienne na dni robocze</div>
   <div class="dd-sub">Kolumna P{{ p }} = wartość projektowa. Godzina szczytu = P{{ p }} wolumenów godzinowych (tylko godziny z ruchem).</div>
   <div class="table-wrap"><table class="table dd-table">
@@ -144,7 +144,7 @@
   const S1 = '#2563eb', S2 = '#ea580c';          // paleta zwalidowana (jasny i ciemny motyw)
   const axis = { axisLine: { lineStyle: { color: grid } }, axisLabel: { color: ink }, splitLine: { lineStyle: { color: grid } } };
   const base = { animation: false, grid: { left: 44, right: 16, top: 28, bottom: 36 },
-                 textStyle: { color: ink }, tooltip: { trigger: 'axis' } };
+                 textStyle: { color: ink }, tooltip: { trigger: 'axis', renderMode: 'richText' } };
 
   const daily = echarts.init(document.getElementById('dd-daily'));
   daily.setOption({ ...base,

@@ -4,7 +4,7 @@
 {% block nav_warehouse_map %}topnav__link--active{% endblock %}
 
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .feat-table th { white-space: nowrap; font-size: 12px; }
   .feat-table td { vertical-align: middle; }
   .feat-table input[type=number] { width: 68px; padding: 5px 7px; font-size: 12px; }
@@ -91,13 +91,13 @@
                 {% endfor %}
               </select>
             </td>
-            <td><input type="text" name="zone_code" value="{{ f.zone_code }}" placeholder="np. ZWROTY" style="width:90px"></td>
+            <td><input type="text" name="zone_code" value="{{ f.zone_code }}" placeholder="np. ZWROTY" class="u-w-90"></td>
             <td><input aria-label="X [m]" type="number" name="x_m" value="{{ f.x_m }}" step="0.1" min="0"></td>
             <td><input aria-label="Y [m]" type="number" name="y_m" value="{{ f.y_m }}" step="0.1" min="0"></td>
             <td><input aria-label="Szer. [m]" type="number" name="width_m" value="{{ f.width_m }}" step="0.1" min="0.1"></td>
             <td><input aria-label="Głęb. [m]" type="number" name="depth_m" value="{{ f.depth_m }}" step="0.1" min="0.1"></td>
             <td>
-              <input aria-label="Kąt [°]" type="number" name="angle_deg" value="{{ f.angle_deg }}" step="5" min="-180" max="180" style="width:58px">
+              <input aria-label="Kąt [°]" type="number" name="angle_deg" value="{{ f.angle_deg }}" step="5" min="-180" max="180" class="u-w-58">
               <span class="angle-btns">
                 <button type="button" data-set="0" title="Poziomo (0°)">{% icon "arrow-left-right" cls="icon--em" %}</button>
                 <button type="button" data-set="90" title="Pionowo (90°)">{% icon "arrow-up-down" cls="icon--em" %}</button>
@@ -113,10 +113,10 @@
       </table>
     </div>
 
-    <div class="card-footer" style="display:flex;gap:10px;align-items:center">
+    <div class="u-d-flex u-gap-10 u-ai-center card-footer">
       <button type="button" id="add-row" class="btn btn-secondary">+ Dodaj element</button>
       <button type="submit" class="btn btn-primary">Zapisz elementy</button>
-      <span class="text-sm text-muted" style="margin-left:auto">X = od lewej, Y = od dołu hali</span>
+      <span class="u-ml-auto text-sm text-muted">X = od lewej, Y = od dołu hali</span>
     </div>
   </form>
 </div>
@@ -141,13 +141,13 @@
         {% endfor %}
       </select>
     </td>
-    <td><input type="text" name="zone_code" placeholder="np. ZWROTY" style="width:90px"></td>
+    <td><input type="text" name="zone_code" placeholder="np. ZWROTY" class="u-w-90"></td>
     <td><input aria-label="X [m]" type="number" name="x_m" value="0" step="0.1" min="0"></td>
     <td><input aria-label="Y [m]" type="number" name="y_m" value="0" step="0.1" min="0"></td>
     <td><input aria-label="Szer. [m]" type="number" name="width_m" value="2" step="0.1" min="0.1"></td>
     <td><input aria-label="Głęb. [m]" type="number" name="depth_m" value="2" step="0.1" min="0.1"></td>
     <td>
-      <input aria-label="Kąt [°]" type="number" name="angle_deg" value="0" step="5" min="-180" max="180" style="width:58px">
+      <input aria-label="Kąt [°]" type="number" name="angle_deg" value="0" step="5" min="-180" max="180" class="u-w-58">
       <span class="angle-btns">
         <button type="button" data-set="0" title="Poziomo (0°)">{% icon "arrow-left-right" cls="icon--em" %}</button>
         <button type="button" data-set="90" title="Pionowo (90°)">{% icon "arrow-up-down" cls="icon--em" %}</button>

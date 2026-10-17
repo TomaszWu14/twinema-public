@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
 {% block title %}Render 3D — {{ app_name }}{% endblock %}
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .rj-top { display:grid; grid-template-columns:minmax(0,3fr) minmax(0,2fr); gap:16px; margin-bottom:24px; }
   @media (max-width: 900px) { .rj-top { grid-template-columns:1fr; } }
   .rj-form { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; }
@@ -50,21 +50,21 @@
       <div class="rj-wide"><button class="btn btn-primary" type="submit">Dodaj do kolejki</button></div>
     </form>
     {% else %}
-    <p class="text-muted text-sm" style="margin:0">Zlecenia dodaje Projektant — tutaj możesz oglądać gotowe ujęcia.</p>
+    <p class="u-m-0 text-muted text-sm">Zlecenia dodaje Projektant — tutaj możesz oglądać gotowe ujęcia.</p>
     {% endif %}
   </div></div>
 
   <div class="card"><div class="card-body">
     <h2 class="rj-sec">Worker</h2>
     {% if worker_enabled %}
-      <p class="text-sm" style="margin:0 0 8px">API workera włączone.
+      <p class="u-m-0-0-8 text-sm">API workera włączone.
         {% if last_worker %}Ostatnio zlecenie przejął <b>{{ last_worker.worker|default:"worker" }}</b> {{ last_worker.claimed_at|date:"d.m.Y H:i" }}.{% else %}Żaden worker jeszcze się nie zgłosił.{% endif %}</p>
       <div class="rj-cmd">set TWINEMA_URL={{ request.scheme }}://{{ request.get_host }}
 set TWINEMA_WORKER_TOKEN=…   (ten sam co RENDER_WORKER_TOKEN)
 python tools/render_worker.py</div>
-      <p class="text-muted text-sm" style="margin:8px 0 0">Worker szuka Blendera sam (albo <code>BLENDER_BIN</code>), odpytuje co 10 s i renderuje po jednym zleceniu.</p>
+      <p class="u-m-8-0-0 text-muted text-sm">Worker szuka Blendera sam (albo <code>BLENDER_BIN</code>), odpytuje co 10 s i renderuje po jednym zleceniu.</p>
     {% else %}
-      <p class="text-sm" style="margin:0">API workera wyłączone — ustaw <code>RENDER_WORKER_TOKEN</code> (≥ 32 znaki) w zmiennych serwera. Zlecenia czekają w kolejce.</p>
+      <p class="u-m-0 text-sm">API workera wyłączone — ustaw <code>RENDER_WORKER_TOKEN</code> (≥ 32 znaki) w zmiennych serwera. Zlecenia czekają w kolejce.</p>
     {% endif %}
   </div></div>
 </div>
@@ -100,7 +100,7 @@ python tools/render_worker.py</div>
 {% else %}
 <div class="card"><div class="empty-state">Brak ujęć. Wybierz model hali i ujęcie powyżej.</div></div>
 {% endif %}
-<p class="text-muted text-sm" style="margin-top:12px"><span id="rj-live" aria-live="polite"></span> <button type="button" class="btn btn-secondary btn-sm" id="rj-refresh" hidden>Odśwież</button></p>
+<p class="u-mt-12 text-muted text-sm"><span id="rj-live" aria-live="polite"></span> <button type="button" class="btn btn-secondary btn-sm" id="rj-refresh" hidden>Odśwież</button></p>
 {% endblock %}
 {% block extra_scripts %}
 <script nonce="{{ csp_nonce }}">

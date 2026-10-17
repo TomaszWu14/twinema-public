@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
 {% block title %}{% if eq %}Edycja: {{ eq.name }}{% else %}Nowy sprzęt{% endif %} — {{ app_name }}{% endblock %}
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .eq-form { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; }
   .eq-form label { display:flex; flex-direction:column; gap:4px; font-size:var(--fs-sm); color:var(--fg-muted); }
   .eq-form .wide { grid-column:1 / -1; }
@@ -24,7 +24,7 @@
         {% for e in f.errors %}<span class="eq-err" role="alert">{{ e }}</span>{% endfor %}</label>
       {% endfor %}
     </div>
-    <div style="margin-top:14px;display:flex;gap:8px"><button class="btn btn-primary" type="submit">Zapisz</button>
+    <div class="u-mt-14 u-d-flex u-gap-8"><button class="btn btn-primary" type="submit">Zapisz</button>
       <a class="btn btn-ghost" href="{% if eq %}{% url 'equipment:detail' eq.pk %}{% else %}{% url 'equipment:list' %}{% endif %}">Anuluj</a></div>
   </form>
 </div></div>
