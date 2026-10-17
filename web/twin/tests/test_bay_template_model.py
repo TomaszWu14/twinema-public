@@ -38,7 +38,7 @@ class BayTemplateTests(TestCase):
 class RackRuleAndOverrideTests(TestCase):
     def setUp(self):
         self.wm = WarehouseModel.objects.create(name="M")
-        self.rack = WarehouseModelRack.objects.create(model=self.wm, zone="B0", rack_id="07", n_bays=2)
+        self.rack = WarehouseModelRack.objects.create(model=self.wm, zone="Z1", rack_id="07", n_bays=2)
         self.tpl = BayTemplate.objects.create(name="T", pallets_per_beam=3, levels=levels("A"))
 
     def test_rack_defaults_and_bay_numbers_validation(self):

@@ -28,7 +28,7 @@ TMP_MEDIA = tempfile.mkdtemp(prefix="wt-media-")
 
 
 def _racks():
-    return [{"id": i, "zone": "B0", "rack_id": f"0{i}", "x": 4.0, "y": y, "angle": 0.0, "width": 10.0,
+    return [{"id": i, "zone": "Z1", "rack_id": f"0{i}", "x": 4.0, "y": y, "angle": 0.0, "width": 10.0,
              "depth": 1.1, "level_h": 1.5, "n_bays": 4, "n_levels": 3} for i, y in ((1, 3.0), (2, 8.0))]
 
 
@@ -38,13 +38,13 @@ def _row(minutes, kind, src, dst, resource="WOZEK01", user="OPER01"):
 
 class ResolveMovesTests(SimpleTestCase):
     def setUp(self):
-        self.loc = SlotLocator(_racks(), ["B0-01-100A", "B0-01-300A", "B0-02-100A"])
+        self.loc = SlotLocator(_racks(), ["Z1-01-100A", "Z1-01-300A", "Z1-02-100A"])
 
     def test_endpoints_by_kind_and_unmapped_skipped(self):
-        rows = [_row(0, "putaway", "GR-ZONE", "B0-01-100A"),        # dok → gniazdo
-                _row(5, "outbound", "B0-02-100A", "GI-ZONE"),        # gniazdo → dok
-                _row(6, "picking", "B0-01-300A", "PACK-01"),         # gniazdo → stanowisko
-                _row(7, "move", "B0-01-100A", "GI-ZONE"),            # przesunięcie poza model
+        rows = [_row(0, "putaway", "GR-ZONE", "Z1-01-100A"),        # dok → gniazdo
+                _row(5, "outbound", "Z1-02-100A", "GI-ZONE"),        # gniazdo → dok
+                _row(6, "picking", "Z1-01-300A", "PACK-01"),         # gniazdo → stanowisko
+                _row(7, "move", "Z1-01-100A", "GI-ZONE"),            # przesunięcie poza model
                 _row(8, "putaway", "GR-ZONE", "C9-99-999A")]         # regał spoza modelu
         moves, skipped = resolve_moves(rows, self.loc, T0)
         self.assertEqual(skipped, 2)
@@ -55,27 +55,27 @@ class ResolveMovesTests(SimpleTestCase):
         self.assertEqual(moves[2][4], ("station",))
 
     def test_times_from_confirmation_with_compression(self):
-        rows = [_row(0, "putaway", "", "B0-01-100A"), _row(10, "putaway", "", "B0-01-100A")]
+        rows = [_row(0, "putaway", "", "Z1-01-100A"), _row(10, "putaway", "", "Z1-01-100A")]
         self.assertEqual([m[0] for m in resolve_moves(rows, self.loc, T0)[0]], [0.0, 600.0])
         self.assertEqual([m[0] for m in resolve_moves(rows, self.loc, T0, scale=20)[0]], [0.0, 30.0])
 
     def test_agent_is_resource_or_user(self):
-        rows = [_row(0, "putaway", "", "B0-01-100A", resource=""), _row(1, "putaway", "", "B0-01-100A")]
+        rows = [_row(0, "putaway", "", "Z1-01-100A", resource=""), _row(1, "putaway", "", "Z1-01-100A")]
         self.assertEqual([m[1] for m in resolve_moves(rows, self.loc, T0)[0]], ["OPER01", "WOZEK01"])
 
 
 class SceneFromTasksTests(SimpleTestCase):
     def _scene(self, rows, **kw):
         racks = _racks()
-        loc = SlotLocator(racks, ["B0-01-100A", "B0-01-300A", "B0-02-100A"])
+        loc = SlotLocator(racks, ["Z1-01-100A", "Z1-01-300A", "Z1-02-100A"])
         moves, _ = resolve_moves(rows, loc, T0, **kw)
         feats = [{"kind": "dock", "x": 5, "y": 17, "width": 3, "depth": 2, "angle": 0}]
         return build_scene({"id": 1, "name": "Hala"}, {"width": 30, "depth": 20}, racks, feats,
                            moves=moves, demo_pickers=0)
 
     def test_agents_from_resources_no_demo_forklifts(self):
-        sc = self._scene([_row(0, "putaway", "GR", "B0-01-100A"), _row(1, "outbound", "B0-02-100A", "GI"),
-                          _row(2, "putaway", "GR", "B0-01-300A", resource="WOZEK02")])
+        sc = self._scene([_row(0, "putaway", "GR", "Z1-01-100A"), _row(1, "outbound", "Z1-02-100A", "GI"),
+                          _row(2, "putaway", "GR", "Z1-01-300A", resource="WOZEK02")])
         self.assertEqual(sc["source"]["forklifts"], "ewm_tasks")
         trucks = [a for a in sc["agents"] if a["kind"] == "forklift"]
         self.assertEqual([a["label"] for a in trucks], ["WOZEK01", "WOZEK02"])
@@ -83,7 +83,7 @@ class SceneFromTasksTests(SimpleTestCase):
         self.assertEqual({f["kind"] for f in sc["flows"]}, {"inbound", "outbound"})
 
     def test_task_starts_at_confirmation_and_times_monotonic(self):
-        sc = self._scene([_row(0, "putaway", "GR", "B0-01-100A"), _row(30, "replenishment", "B0-01-300A", "B0-02-100A")])
+        sc = self._scene([_row(0, "putaway", "GR", "Z1-01-100A"), _row(30, "replenishment", "Z1-01-300A", "Z1-02-100A")])
         kfs = sc["agents"][0]["keyframes"]
         ts = [k["t"] for k in kfs]
         self.assertEqual(ts, sorted(ts))
@@ -96,7 +96,7 @@ class SceneFromTasksTests(SimpleTestCase):
         self.assertIn("replenishment", sc["flow_colors"])
 
     def test_busy_agent_starts_next_task_right_after(self):
-        sc = self._scene([_row(0, "putaway", "GR", "B0-01-100A"), _row(0, "putaway", "GR", "B0-02-100A")])
+        sc = self._scene([_row(0, "putaway", "GR", "Z1-01-100A"), _row(0, "putaway", "GR", "Z1-02-100A")])
         pallets = [i for i in sc["items"] if i["kind"] == "pallet"]
         self.assertGreater(pallets[1]["keyframes"][-1]["t"], pallets[0]["keyframes"][-1]["t"])
 
@@ -111,14 +111,14 @@ class TasksEndpointAndImportTests(TestCase):
         cls.plain = User.objects.create_user("plain", password="x")
         cls.wm = WarehouseModel.objects.create(name="Hala", floor_width_m=30, floor_depth_m=20)
         for i, y in ((1, 3), (2, 8)):
-            WarehouseModelRack.objects.create(model=cls.wm, zone="B0", rack_id=f"0{i}", n_bays=4, n_levels=3, x_m=4, y_m=y)
+            WarehouseModelRack.objects.create(model=cls.wm, zone="Z1", rack_id=f"0{i}", n_bays=4, n_levels=3, x_m=4, y_m=y)
         WarehouseHallFeature.objects.create(model=cls.wm, kind="dock", label="Dok A", x_m=5, y_m=17, width_m=3, depth_m=2)
         cls.batch = WarehouseTaskBatch.objects.create(name="Marzec", status="done", first_confirmed=T0,
                                                       last_confirmed=T0 + timedelta(hours=3), row_count=5)
         for n, (m, kind, src, dst, res) in enumerate([
-                (5, "putaway", "GR-ZONE", "B0-01-100A", "WOZEK01"), (10, "outbound", "B0-02-300A", "GI-ZONE", "WOZEK02"),
-                (20, "move", "B0-01-100A", "XX-99", "WOZEK01"), (50, "putaway", "GR-ZONE", "B0-02-100A", ""),
-                (150, "putaway", "GR-ZONE", "B0-01-200A", "WOZEK03")]):
+                (5, "putaway", "GR-ZONE", "Z1-01-100A", "WOZEK01"), (10, "outbound", "Z1-02-300A", "GI-ZONE", "WOZEK02"),
+                (20, "move", "Z1-01-100A", "XX-99", "WOZEK01"), (50, "putaway", "GR-ZONE", "Z1-02-100A", ""),
+                (150, "putaway", "GR-ZONE", "Z1-01-200A", "WOZEK03")]):
             WarehouseTask.objects.create(batch=cls.batch, task_no=str(n), kind=kind, src_location=src, dst_location=dst,
                                          resource=res, user="OPER01", confirmed_at=T0 + timedelta(minutes=m))
 
@@ -179,8 +179,8 @@ class TasksEndpointAndImportTests(TestCase):
     # ── ekrany importu ──────────────────────────────────────────────────────
     CSV = ("Zadanie magazynowe;Rodzaj procesu magazynowego;Źródłowe miejsce składowania;Docelowe miejsce składowania;"
            "Data potwierdzenia;Czas potwierdzenia;Zasób\n"
-           "1;1010;GR-ZONE;B0-01-100A;02.03.2026;06:10:00;WOZEK01\n"
-           "2;2010;B0-02-100A;GI-ZONE;02.03.2026;06:20:00;WOZEK02\n"
+           "1;1010;GR-ZONE;Z1-01-100A;02.03.2026;06:10:00;WOZEK01\n"
+           "2;2010;Z1-02-100A;GI-ZONE;02.03.2026;06:20:00;WOZEK02\n"
            "3;2010;;;02.03.2026;06:30:00;WOZEK02\n")
 
     def _preview(self, text=None, **extra):
@@ -292,7 +292,7 @@ class OperatorLoginNotStoredTests(TestCase):
         self.client.force_login(u)
         csv = ("Zadanie magazynowe;Rodzaj procesu magazynowego;Źródłowe miejsce składowania;"
                "Docelowe miejsce składowania;Data potwierdzenia;Czas potwierdzenia;Użytkownik\n"
-               "1;1010;GR-ZONE;B0-01-100A;02.03.2026;06:10:00;OPER01\n")
+               "1;1010;GR-ZONE;Z1-01-100A;02.03.2026;06:10:00;OPER01\n")
         f = SimpleUploadedFile("wt.csv", csv.encode("utf-8"), content_type="text/csv")
         preview = self.client.post(reverse("twin:ewm_tasks_preview"), {"file": f, "tz": "UTC"})
         self.assertNotContains(preview, "OPER01")                                 # podgląd też bez loginu

@@ -1,6 +1,5 @@
 # Generator hali od parametrów → zwykły model magazynu (regały + elementy hali), więc
 # widok 3D, odtwarzacz przepływów i „wariant z modelu” działają bez zmian.
-# Plan: docs/superpowers/plans/2026-10-02-model-nowego-magazynu.md (etap 1).
 from django import forms
 
 from equipment.services import assign_classes

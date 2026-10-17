@@ -3,7 +3,7 @@
 Gdy nie ma prawdziwego eksportu: N tygodni (pn–pt, zmiany 5–13 i 13–21) w skali scenariusza
 referencyjnego — dziennie ~1 020 przyjęć palet, ~410 wydań, ~7 500 linii kompletacji (paczki
 2–3 kartony), ~200 uzupełnień, ~50 przesunięć; trend ~8 %/rok + szum. Lokalizacje to kody syntetycznej
-hali B0 (B0-<przejście 01–54>-<gniazdo><pozycja><poziom>), więc kalibracja na modelu
+hali Z1 (Z1-<przejście 01–54>-<gniazdo><pozycja><poziom>), więc kalibracja na modelu
 tej hali je rozpozna. Wózki W01–W12 i pickerzy P01–P20 mają realistyczne odstępy między
 potwierdzeniami. Dane SZTUCZNE — tylko do sprawdzenia ścieżki projektowania magazynu.
 
@@ -15,7 +15,7 @@ from datetime import date, datetime, timedelta
 
 from openpyxl import Workbook
 
-# Gniazda w przejściach 01–54 syntetycznej hali B0: krótkie rzędy przy czołach, długie w środku.
+# Gniazda w przejściach 01–54 syntetycznej hali Z1: krótkie rzędy przy czołach, długie w środku.
 BAYS = [22] * 6 + [38] * 36 + [24] * 12
 LEVELS = "ABCDE"
 DAILY = {"putaway": 1020, "outbound": 410, "picking": 7500, "replenishment": 200, "move": 50}
@@ -33,7 +33,7 @@ HEADERS = ["Zadanie magazynowe", "Rodzaj procesu magazynowego", "Źródłowe mie
 def bin_code(rng, level=None):
     aisle = rng.randrange(len(BAYS))
     bay = 10 + rng.randrange(BAYS[aisle])
-    return f"B0-{aisle + 1:02d}-{bay}{rng.randrange(3)}{level or rng.choice(LEVELS)}"
+    return f"Z1-{aisle + 1:02d}-{bay}{rng.randrange(3)}{level or rng.choice(LEVELS)}"
 
 
 def day_tasks(rng, day, week, scale, materials, weights):

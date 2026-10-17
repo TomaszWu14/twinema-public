@@ -1,12 +1,11 @@
-"""Eksport modelu magazynu (moduł B — `WarehouseModel`) do sceny animacji Blendera.
+"""Eksport modelu magazynu (`WarehouseModel`) do sceny animacji Blendera.
 
 Wynik to JSON „twinema.scene" czytany przez `tools/blender/twinema_warehouse_anim.py`
 (uruchamiany w Blenderze ręcznie, headless `blender -b -P …` albo przez Blender MCP).
 Scena niesie geometrię hali (regały, doki, stanowiska) oraz policzone tutaj osie czasu:
   • wózki widłowe — przyjęcie (dok → gniazdo regału) i wydanie (gniazdo → dok) palet,
-  • ludzie — kompletacja kartonów wg `PickerActivity` (realna kolejność pobrań pickera);
-    bez importu aktywności — deterministyczna symulacja demo (oznaczona w `source`),
-  • palety w lokalizacjach — realny stan (palety HU + snapshot SAP), patrz blender_stock.
+  • ludzie — kompletacja kartonów: deterministyczna symulacja demo (oznaczona w `source`),
+  • palety w lokalizacjach — stan z ostatniego importu stanów, patrz blender_stock.
 
 `build_scene` jest czystą funkcją na dictach (testowalna bez bazy);
 `build_scene_for_model` dociąga dane z ORM.
@@ -414,8 +413,8 @@ def model_floor(wm, racks):
 
 def build_scene_for_model(wm, batch=None, *, snapshot=None, with_pallets=True,
                           max_pickers=6, max_picks=12, wt=None, **kwargs):
-    """Scena dla `WarehouseModel`. `batch` = PickerActivityBatch (None → demo kompletacji),
-    `snapshot` = WarehouseSnapshot (zajętość/blokady z SAP); palety HU na stanie zawsze.
+    """Scena dla `WarehouseModel`. `batch` / `snapshot` — aktywność kompletacji i migawka zajętości
+    (TWINEMA ich nie importuje, None → demo kompletacji); palety ze stanów modułu Dane.
     `wt` = okno zadań EWM z `blender_tasks.load_window` (None → wózki demo)."""
     from twin.shared import hall_feature_dict, model_columns
 

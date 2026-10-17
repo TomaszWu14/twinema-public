@@ -8,7 +8,7 @@
 
 📹 [Prezentacja działania — 2 min](<DO UZUPEŁNIENIA: link YouTube>)
 
-🔗 **Demo:** [twinema.twapp.pl](https://twinema.twapp.pl) — konto `demo` (rola Podgląd, tylko odczyt), hasło: \<DO UZUPEŁNIENIA\>. Dane w demo są syntetyczne.
+🔗 **Demo:** \<adres instancji demo — podaje właściciel projektu\> — konto `demo` (rola Podgląd, tylko odczyt), hasło: \<DO UZUPEŁNIENIA\>. Dane w demo są syntetyczne.
 
 ## Problem → rozwiązanie
 
@@ -93,7 +93,7 @@ w Git Bash i PowerShell z Pythonem 3.11.
 **Git Bash / Linux / macOS**
 
 ```bash
-git clone https://github.com/TomaszWu14/twinema-public.git && cd twinema-public
+git clone <adres-repozytorium> twinema-public && cd twinema-public
 python -m venv .venv
 source .venv/Scripts/activate          # Linux/macOS: source .venv/bin/activate
 PYTHONUTF8=1 pip install -r requirements-dev.txt
@@ -110,7 +110,7 @@ python manage.py run_jobs                # w drugim terminalu: worker kolejki (s
 **PowerShell**
 
 ```powershell
-git clone https://github.com/TomaszWu14/twinema-public.git; cd twinema-public
+git clone <adres-repozytorium> twinema-public; cd twinema-public
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 $env:PYTHONUTF8 = "1"; pip install -r requirements-dev.txt

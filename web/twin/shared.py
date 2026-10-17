@@ -51,7 +51,7 @@ _COL_CODE_MAP = {
 
 
 def _parse_location_code(code: str):
-    """B0-01-300A → (zone, rack, bay, level_letter, level_num)."""
+    """Z1-01-300A → (zone, rack, bay, level_letter, level_num)."""
     m = re.match(r'^([A-Z]\d+)-(\d+)-(\d+)([A-Z])$', code.strip())
     if not m:
         return None
@@ -61,9 +61,9 @@ def _parse_location_code(code: str):
 
 
 def _parse_loc_code(code):
-    """B0-01-100A → (aisle, stack, col_code, col_idx, level); aisle zawiera strefę ('B0-01')."""
+    """Z1-01-100A → (aisle, stack, col_code, col_idx, level); aisle zawiera strefę ('Z1-01')."""
     parts = code.split('-')
-    # Format 4-częściowy: zone-aisle-stack-{level}{col}, np. B0-01-100-2X — przed 3-częściowym.
+    # Format 4-częściowy: zone-aisle-stack-{level}{col}, np. Z1-01-100-2X — przed 3-częściowym.
     if len(parts) >= 4 and parts[3] and parts[3][-1].isalpha() and parts[3][:-1].isdigit():
         zone = parts[0]
         col_code = parts[3][-1].upper()

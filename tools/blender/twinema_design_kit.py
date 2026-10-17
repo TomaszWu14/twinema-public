@@ -10,7 +10,7 @@ Typowy przebieg (ręcznie w Scripting albo przez Blender MCP → execute_blender
     import runpy
     kit = runpy.run_path("/ścieżka/TWINEMA/tools/blender/twinema_design_kit.py", run_name="kit")
     kit["start"]("/ścieżka/twinema_model_1_blender.json")      # obecny magazyn jako punkt wyjścia
-    kit["remove"]("B0-0")                                       # usuń regały o etykiecie B0-0…
+    kit["remove"]("Z1-0")                                       # usuń regały o etykiecie Z1-0…
     kit["add_block"]("rack_vna", x=4, y=6, rows=6, bays=30)     # blok VNA z korytarzami 1,8 m
     kit["add"]("conveyor", x=4, y=38, length=40)
     kit["add"]("amr", x=10, y=36)
@@ -199,7 +199,7 @@ def add_block(kind, x, y, rows, angle=0.0, back_to_back=True, aisle=None, label=
 
 
 def remove(label_prefix):
-    """Usuwa elementy, których etykieta zaczyna się od `label_prefix` (np. „B0-0")."""
+    """Usuwa elementy, których etykieta zaczyna się od `label_prefix` (np. „Z1-0")."""
     n = 0
     for ob in [o for o in _coll().objects if str(o.get("twinema_label", "")).startswith(label_prefix)]:
         for ch in list(ob.children):

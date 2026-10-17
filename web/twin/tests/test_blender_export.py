@@ -17,7 +17,7 @@ from twin.blender_scene import FORMAT, build_scene
 
 
 def _rack(rid, x, y, angle=0, width=10.0, bays=5, levels=3):
-    return {"id": rid, "zone": "B0", "rack_id": f"{rid:02d}", "x": x, "y": y, "angle": angle,
+    return {"id": rid, "zone": "Z1", "rack_id": f"{rid:02d}", "x": x, "y": y, "angle": angle,
             "width": width, "depth": 1.1, "level_h": 1.5, "n_bays": bays, "n_levels": levels}
 
 
@@ -118,7 +118,7 @@ class BlenderExportViewTests(TestCase):
         cls.user.groups.add(Group.objects.get_or_create(name="Podgląd")[0])  # _planner wymaga roli
         cls.wm = WarehouseModel.objects.create(name="Hala", floor_width_m=30, floor_depth_m=20)
         for i, y in enumerate((3, 8), start=1):
-            WarehouseModelRack.objects.create(model=cls.wm, zone="B0", rack_id=f"0{i}",
+            WarehouseModelRack.objects.create(model=cls.wm, zone="Z1", rack_id=f"0{i}",
                                               n_bays=4, n_levels=3, x_m=4, y_m=y)
         WarehouseHallFeature.objects.create(model=cls.wm, kind="dock", label="Dok A",
                                             x_m=5, y_m=17, width_m=3, depth_m=2)

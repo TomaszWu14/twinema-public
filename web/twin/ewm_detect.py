@@ -58,7 +58,7 @@ def detect(rows, master, templates=()):
 
     → {"templates": [{key, pk, name, pallets_per_beam, beam_mm, levels, bays}],
        "rows": [{zone, rack_id, template, bay_numbers, overrides, codes}],
-       "missing_rows": ["B0-99", …]}   (rzędy bez żadnego kodu w masterze)"""
+       "missing_rows": ["Z1-99", …]}   (rzędy bez żadnego kodu w masterze)"""
     wanted = {(r["zone"], r["rack_id"]): r for r in rows}
     loc = defaultdict(lambda: defaultdict(dict))            # (zone, rack) → bay → komórka → typ
     stats = defaultdict(lambda: ([], []))                    # (zone, rack, bay, litera) → (wys., kg)

@@ -11,11 +11,11 @@ class WarehouseModelViewTests(TestCase):
 
     def test_view_renders_with_racks(self):
         wm = WarehouseModel.objects.create(name="M")
-        WarehouseModelRack.objects.create(model=wm, zone="B0", rack_id="01")
+        WarehouseModelRack.objects.create(model=wm, zone="Z1", rack_id="01")
         WarehouseModelRack.objects.create(model=wm, zone="C0", rack_id="02")
         r = self.client.get(f"/magazyn/model/{wm.pk}/view/")
         self.assertEqual(r.status_code, 200)
-        self.assertContains(r, "Strefa B0")
+        self.assertContains(r, "Strefa Z1")
 
     def test_view_renders_without_racks(self):
         wm = WarehouseModel.objects.create(name="Empty")

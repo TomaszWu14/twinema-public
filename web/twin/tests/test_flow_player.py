@@ -29,7 +29,7 @@ class FlowSceneEndpointTests(TestCase):
         cls.user.groups.add(Group.objects.get_or_create(name="Projektant")[0])  # parametry sceny ustawia Projektant
         cls.wm = WarehouseModel.objects.create(name="Hala", floor_width_m=30, floor_depth_m=20)
         for i, y in enumerate((3, 8), start=1):
-            WarehouseModelRack.objects.create(model=cls.wm, zone="B0", rack_id=f"0{i}",
+            WarehouseModelRack.objects.create(model=cls.wm, zone="Z1", rack_id=f"0{i}",
                                               n_bays=4, n_levels=3, x_m=4, y_m=y)
         WarehouseHallFeature.objects.create(model=cls.wm, kind="dock", label="Dok A",
                                             x_m=5, y_m=17, width_m=3, depth_m=2)
