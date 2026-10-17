@@ -1,6 +1,6 @@
 """Litera kodu lokalizacji EWM → fizyczne miejsce w stosie (JEDNO źródło prawdy).
 
-Kod EWM: ``{strefa}-{przejście}-{gniazdo:02}{pozycja}{litera}[-1|-2]``, np. ``B0-07-300C-1``.
+Kod EWM: ``{strefa}-{przejście}-{gniazdo:02}{pozycja}{litera}[-1|-2]``, np. ``Z1-07-300C-1``.
 Litera NIE jest kolumną w boku — to poziom (i ewentualnie półka / część) w jednym stosie.
 Konwencja adresowania przyjęta w projekcie — jedna dla wszystkich stref, od podłogi:
 
@@ -70,8 +70,8 @@ def letter_slot(zone, letter, half=0):
 
 
 def code_slot(code):
-    """Pełny kod EWM („B0-07-300P-1”) → LetterSlot albo None (brak litery / nieznana /
-    4-członowy kod generatora „B0-01-100-2X”, gdzie litera jest kolumną, nie poziomem)."""
+    """Pełny kod EWM („Z1-07-300P-1”) → LetterSlot albo None (brak litery / nieznana /
+    4-członowy kod generatora „Z1-01-100-2X”, gdzie litera jest kolumną, nie poziomem)."""
     parts = (code or "").strip().upper().split("-")
     if len(parts) < 3 or not parts[2][-1:].isalpha():
         return None

@@ -4,8 +4,8 @@ Kod skopiowany z innych repozytoriów autora. Każdy wpis: źródło, ścieżki,
 
 | Data | Źródło | Ścieżki | Uwagi |
 |---|---|---|---|
-| 2026-10-05 | PalViz (prywatne repo autora) | wzorce fundamentu: `config.py`, `roles.py`, `middleware.py`, `health_urls.py`, workflowy, Dockerfile | odchudzone, przepisane |
-| 2026-10-05 | PalViz (prywatne repo autora) | `web/wh3d/` (modele, generator, symulacja, kalibracja, prognoza, warianty, eksport sceny, import zadań, widoki i szablony), `tools/blender/`, `tools/ewm_demo_tasks.py`, tokeny i komponenty CSS, sprite ikon | moduł `twin`; bez mapy operacyjnej, heatmapy, migawek i stanów HU; nazwy firm/lokalizacji usunięte, próbka mastera i hala demo syntetyczne |
+| 2026-10-05 | projekt źródłowy (prywatne repo autora) | wzorce fundamentu: `config.py`, `roles.py`, `middleware.py`, `health_urls.py`, workflowy, Dockerfile | odchudzone, przepisane |
+| 2026-10-05 | projekt źródłowy (prywatne repo autora) | moduł 3D projektu źródłowego (modele, generator, symulacja, kalibracja, prognoza, warianty, eksport sceny, import zadań, widoki i szablony), `tools/blender/`, `tools/ewm_demo_tasks.py`, tokeny i komponenty CSS, sprite ikon | moduł `twin`; bez mapy operacyjnej, heatmapy, migawek i stanów HU; nazwy firm/lokalizacji usunięte, próbka mastera i hala demo syntetyczne |
 
 ## Zasoby zewnętrzne
 

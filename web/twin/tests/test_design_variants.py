@@ -55,9 +55,9 @@ class KpiTests(SimpleTestCase):
         self.assertEqual(cap["sorter"]["throughput_h"], 3000)
 
     def test_rack_to_element(self):
-        e = rack_to_element({"zone": "B0", "rack_id": "01", "x": 1, "y": 2, "angle": 180,
+        e = rack_to_element({"zone": "Z1", "rack_id": "01", "x": 1, "y": 2, "angle": 180,
                              "width": 27.0, "depth": 1.1, "level_h": 1.8, "n_bays": 10, "n_levels": 5})
-        self.assertEqual((e["label"], e["kind"], e["angle"]), ("B0-01", "rack_std", 180))
+        self.assertEqual((e["label"], e["kind"], e["angle"]), ("Z1-01", "rack_std", 180))
         self.assertEqual(e["params"]["pallets_per_bay"], 3)          # 2,7 m / 0,9
         self.assertEqual(compute_kpi([e], [], 40, 30)["pallet_positions"], 150)
 
@@ -79,8 +79,8 @@ class VariantViewTests(TestCase):
     def setUp(self):
         self.md = get_user_model().objects.create_superuser(username="md", password="x")
         self.client.force_login(self.md)
-        self.wm = m.WarehouseModel.objects.create(name="Obecny B0", floor_width_m=40, floor_depth_m=30)
-        m.WarehouseModelRack.objects.create(model=self.wm, zone="B0", rack_id="01", n_bays=10,
+        self.wm = m.WarehouseModel.objects.create(name="Obecny Z1", floor_width_m=40, floor_depth_m=30)
+        m.WarehouseModelRack.objects.create(model=self.wm, zone="Z1", rack_id="01", n_bays=10,
                                             n_levels=5, bay_width_cm=270, x_m=2, y_m=5)
         m.WarehouseHallFeature.objects.create(model=self.wm, kind="dock", label="Dok 1",
                                               x_m=2, y_m=26, width_m=4, depth_m=2)
@@ -97,7 +97,7 @@ class VariantViewTests(TestCase):
         v = WarehouseDesignVariant.objects.get()
         self.assertEqual((v.source, v.base_model, v.kpi["pallet_positions"]), ("model", self.wm, 150))
         self.assertIsNotNone(v.kpi["travel"]["avg_m"])
-        self.assertContains(r, "Obecny: Obecny B0")
+        self.assertContains(r, "Obecny: Obecny Z1")
 
     def test_import_recomputes_kpi_and_compares(self):
         self.client.post(reverse("twin:warehouse_variant_from_model"), {"model_id": self.wm.pk})

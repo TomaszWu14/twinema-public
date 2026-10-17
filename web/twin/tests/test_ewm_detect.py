@@ -13,7 +13,7 @@ def master_of(pairs):
 
 
 def rows_of(n_bays):
-    return [{"zone": "B0", "rack_id": a, "n_bays": n} for a, n in n_bays.items()]
+    return [{"zone": "Z1", "rack_id": a, "n_bays": n} for a, n in n_bays.items()]
 
 
 def expand_proposal(prop, n_bays, width_cm=280):
@@ -38,9 +38,9 @@ class DetectIrregularBayTests(SimpleTestCase):
     def test_irregular_bay_gets_nearest_template_plus_skip_and_add(self):
         pairs = []
         for bay in (10, 11, 12):
-            pairs += [(f"B0-01-{bay}{p}{L}", "0010") for p in range(3) for L in "AB"]
-        pairs += [("B0-01-130A", "0010"), ("B0-01-131A", "0010"), ("B0-01-130P", "0010")]
-        pairs += [(f"B0-01-13{p}B", "0010") for p in range(3)]
+            pairs += [(f"Z1-01-{bay}{p}{L}", "0010") for p in range(3) for L in "AB"]
+        pairs += [("Z1-01-130A", "0010"), ("Z1-01-131A", "0010"), ("Z1-01-130P", "0010")]
+        pairs += [(f"Z1-01-13{p}B", "0010") for p in range(3)]
         prop = detect(rows_of({"01": 4}), master_of(pairs))
         row = prop["rows"][0]
         self.assertEqual(len(prop["templates"]), 1)
@@ -54,8 +54,8 @@ class DetectHeightsTests(SimpleTestCase):
     def test_level_heights_and_weights_are_medians_from_master(self):
         master = []
         for bay, (height, kg) in zip((10, 11, 12), ((1400, 900), (1500, 1000), (1600, 1100)), strict=True):
-            master += [(f"B0-01-{bay}{p}A", "0020", height, kg) for p in range(3)]
-            master += [(f"B0-01-{bay}{p}B", "0010", 0, 0) for p in range(3)]
+            master += [(f"Z1-01-{bay}{p}A", "0020", height, kg) for p in range(3)]
+            master += [(f"Z1-01-{bay}{p}B", "0010", 0, 0) for p in range(3)]
         prop = detect(rows_of({"01": 3}), master)
         self.assertEqual(len(prop["templates"]), 1)
         levels = {lv["letter"]: lv for lv in prop["templates"][0]["levels"]}

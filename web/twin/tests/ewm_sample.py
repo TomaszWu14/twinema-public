@@ -1,4 +1,4 @@
-"""Syntetyczna próbka mastera lokalizacji (hala B0) dla testów „Wykryj z EWM” i zgodności.
+"""Syntetyczna próbka mastera lokalizacji (hala Z1) dla testów „Wykryj z EWM” i zgodności.
 
 Trzy rzędy, dwa szablony gniazd, jedna nieregularność numeracji:
   07 — gniazda 10–48, 3 palety na belce, poziomy A B C D (A = 0020, reszta 0010),
@@ -16,7 +16,7 @@ SAMPLE_CODES = 39 * 3 * 4 + 39 * 3 * 4 + 36 * 3 * 6     # 1584 miejsc
 
 
 def load_sample():
-    """[(kod, typ EWM)] — kod B0-<rząd>-<gniazdo><pozycja palety><litera poziomu>."""
-    return [(f"B0-{aisle}-{bay}{pos}{letter}", typ)
+    """[(kod, typ EWM)] — kod Z1-<rząd>-<gniazdo><pozycja palety><litera poziomu>."""
+    return [(f"Z1-{aisle}-{bay}{pos}{letter}", typ)
             for aisle, (bays, levels) in _ROWS.items()
             for bay in bays for pos in range(3) for letter, typ in levels.items()]

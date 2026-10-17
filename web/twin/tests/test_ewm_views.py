@@ -17,7 +17,7 @@ class EwmViewsTests(TestCase):
         self.admin = User.objects.create_superuser(username="adm", password="x")
         self.viewer = User.objects.create_user(username="podglad", password="x")
         self.viewer.groups.add(Group.objects.get_or_create(name="Podgląd")[0])
-        self.wm, self.batch = make_model_and_master(extra_codes=["B0-60-100A"])
+        self.wm, self.batch = make_model_and_master(extra_codes=["Z1-60-100A"])
 
     def test_detect_preview_lists_templates_and_rows_without_saving(self):
         self.client.force_login(self.admin)

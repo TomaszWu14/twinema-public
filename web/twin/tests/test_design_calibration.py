@@ -15,14 +15,14 @@ from twin.tests.test_ewm_tasks_flow import T0, _racks
 from core.jobs import run_pending
 from core.models import Job
 
-CODES = ["B0-01-100A", "B0-01-300A", "B0-02-100A", "B0-02-300C"]
+CODES = ["Z1-01-100A", "Z1-01-300A", "Z1-02-100A", "Z1-02-300C"]
 FEATURES = [{"kind": "dock", "label": "Dok", "x": 0, "y": 5, "width": 2, "depth": 2, "angle": 0},
             {"kind": "station", "label": "Pakowanie", "x": 18, "y": 5, "width": 2, "depth": 2, "angle": 0}]
 
 
 def _rows(gap_s, n=30, resource="WOZEK01", kind="move"):
     """Wózek przewozi palety między dwoma gniazdami co `gap_s` sekund."""
-    locs = [("B0-01-100A", "B0-02-300C"), ("B0-02-300C", "B0-01-100A")]
+    locs = [("Z1-01-100A", "Z1-02-300C"), ("Z1-02-300C", "Z1-01-100A")]
     return [(T0 + timedelta(seconds=i * gap_s), resource, "U", kind, *locs[i % 2], "M1") for i in range(n)]
 
 
@@ -50,7 +50,7 @@ class CalibrationTests(SimpleTestCase):
         self.assertEqual(next(g["pairs"] for g in r["groups"] if g["key"] == "trucks"), 18)
 
     def test_picking_is_its_own_group(self):
-        rows = [(T0 + timedelta(seconds=60 * i), "P1", "U", "picking", "B0-01-300A", "PACK", "M1")
+        rows = [(T0 + timedelta(seconds=60 * i), "P1", "U", "picking", "Z1-01-300A", "PACK", "M1")
                 for i in range(25)]
         r = calibrate(rows, self.loc, FEATURES)
         g = {x["key"]: x for x in r["groups"]}
@@ -58,7 +58,7 @@ class CalibrationTests(SimpleTestCase):
         self.assertTrue(g["picking"]["reliable"])
 
     def test_unmapped_locations_are_counted(self):
-        rows = _rows(120, n=5) + [(T0, "W", "U", "move", "X9-99-999Z", "B0-01-100A", "M1")]
+        rows = _rows(120, n=5) + [(T0, "W", "U", "move", "X9-99-999Z", "Z1-01-100A", "M1")]
         r = calibrate(sorted(rows), self.loc, FEATURES)
         self.assertEqual(r["skipped"], 1)
 
@@ -78,7 +78,7 @@ class CalibrationTests(SimpleTestCase):
 class CalibrationViewTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.wm = WarehouseModel.objects.create(name="Hala B0")
+        cls.wm = WarehouseModel.objects.create(name="Hala Z1")
         for r in _racks():
             WarehouseModelRack.objects.create(model=cls.wm, zone=r["zone"], rack_id=r["rack_id"], n_bays=4,
                                               n_levels=3, bay_width_cm=250, depth_cm=110, level_height_cm=150,

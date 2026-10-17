@@ -3,7 +3,7 @@
 Czysty Python (bez ORM): funkcje czytają atrybuty obiektów, więc przyjmują zarówno
 instancje modeli (BayTemplate / WarehouseModelRack / LocationOverride), jak i proste
 obiekty w testach. Konwencja kodu EWM: `{strefa}-{przejście}-{gniazdo:02}{pozycja}{litera}`
-+ `-1`/`-2` dla połówek, np. `B0-07-300C-1`.
++ `-1`/`-2` dla połówek, np. `Z1-07-300C-1`.
 """
 import re
 from collections import defaultdict
@@ -124,7 +124,7 @@ def expand_row(row, template, overrides=()):
 
 
 def expand_model(rows):
-    """[(rząd, szablon, wyjątki), …] → (miejsca z kluczami zone/aisle, {kod: [„B0-07”, …]} duplikatów)."""
+    """[(rząd, szablon, wyjątki), …] → (miejsca z kluczami zone/aisle, {kod: [„Z1-07”, …]} duplikatów)."""
     locations, seen = [], defaultdict(list)
     for row, template, overrides in rows:
         for loc in expand_row(row, template, overrides):

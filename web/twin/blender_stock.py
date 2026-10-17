@@ -1,9 +1,9 @@
 """Rzeczywiste palety w lokalizacjach → scena Blendera („cyfrowe zdjęcie" magazynu).
 
 Źródła (każde opcjonalne, łączone po kodzie lokalizacji):
-  • WarehouseSnapshot (eksport SAP) — zajętość, blokady pobrania/odłożenia, max wysokość,
-  • palety HU na stanie (Shipment.is_stock) — SKU, nazwa, LOT, termin ważności, ilość,
-  • PickerActivityBatch — liczba pobrań z lokalizacji i klasa ABC SKU (wg liczby pobrań).
+  • migawka zajętości — blokady pobrania/odłożenia, max wysokość (TWINEMA jej nie importuje),
+  • stany z modułu Dane — materiał, nazwa, partia, termin ważności, ilość,
+  • aktywność kompletacji — liczba pobrań z lokalizacji i klasa ABC (TWINEMA jej nie importuje).
 
 Kod lokalizacji jest parsowany tą samą konwencją co mapa 3D (`_parse_loc_code`):
 litera EWM = poziom w stosie (twin.ewm_levels), legacy J/K/… = kolumna w boku.
@@ -112,7 +112,7 @@ _HALF = re.compile(r"-([12])$")
 
 
 def _half(code):
-    """1/2 dla połówki miejsca (kod z końcówką -1/-2, np. B0-07-300C-1), inaczej 0.
+    """1/2 dla połówki miejsca (kod z końcówką -1/-2, np. Z1-07-300C-1), inaczej 0.
     Parser mapy (parse_code) tę końcówkę pomija — obie połówki dają ten sam bok i kolumnę."""
     m = _HALF.search((code or "").strip())
     return int(m.group(1)) if m else 0

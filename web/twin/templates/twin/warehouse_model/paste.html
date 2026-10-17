@@ -35,10 +35,10 @@
         <div class="u-mb-20 form-group form-group--full">
           <label for="id_codes">Adresy — jedna lokalizacja per linia *</label>
           <textarea name="codes" id="id_codes" rows="12" required
-                    placeholder="B0-01-300A&#10;B0-01-300B&#10;B0-01-301A&#10;B0-02-300A"
+                    placeholder="Z1-01-300A&#10;Z1-01-300B&#10;Z1-01-301A&#10;Z1-02-300A"
                     class="u-ff-monospace u-fs-13 u-lh-1_7">{{ codes }}</textarea>
           <span class="help-text">
-            Format: <code class="u-ff-monospace u-bg-gray-100 u-p-1-5 u-br-3">B0-01-300A</code>
+            Format: <code class="u-ff-monospace u-bg-gray-100 u-p-1-5 u-br-3">Z1-01-300A</code>
             (strefa-regał-boczek-poziom). Kolumny po przecinku/tabie są tolerowane — liczy się pierwsza.
           </span>
         </div>
@@ -100,7 +100,7 @@
       <div class="card-header"><span class="card-header__title">Jak to działa</span></div>
       <div class="card-body">
         <ol class="u-fs-13 u-c-gray-700 u-pl-18 u-lh-2">
-          <li>Adresy są grupowane po <strong>strefie i regale</strong> (np. B0-01)</li>
+          <li>Adresy są grupowane po <strong>strefie i regale</strong> (np. Z1-01)</li>
           <li>Boczki i poziomy wyliczane z listy — <strong>nigdy nie maleją</strong> przy scalaniu</li>
           <li>Regały ustawiane w linii od punktu startowego, każdy przesunięty o swoją szerokość</li>
           <li>Kąt ustawiany automatycznie: 0° poziomo, 90° pionowo</li>
@@ -110,12 +110,12 @@
     <div class="card">
       <div class="card-header"><span class="card-header__title">Przykład</span></div>
       <div class="card-body">
-        <pre class="u-bg-gray-50 u-b-1-solid-gray-200 u-br-6 u-p-12 u-fs-12 u-ff-monospace u-lh-1_8 u-ox-auto">B0-01-300A
-B0-01-300B
-B0-01-301A
-B0-02-300A</pre>
+        <pre class="u-bg-gray-50 u-b-1-solid-gray-200 u-br-6 u-p-12 u-fs-12 u-ff-monospace u-lh-1_8 u-ox-auto">Z1-01-300A
+Z1-01-300B
+Z1-01-301A
+Z1-02-300A</pre>
         <p class="u-fs-12 u-c-gray-500 u-mt-10">
-          Da 2 regały: <strong>B0-01</strong> (2 boczki, 2 poziomy) i <strong>B0-02</strong> (1 boczek, 1 poziom).
+          Da 2 regały: <strong>Z1-01</strong> (2 boczki, 2 poziomy) i <strong>Z1-02</strong> (1 boczek, 1 poziom).
         </p>
       </div>
     </div>

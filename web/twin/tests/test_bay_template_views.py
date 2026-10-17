@@ -66,7 +66,7 @@ class BayTemplateViewTests(TestCase):
         t = BayTemplate.objects.create(name="Przejazd", pallets_per_beam=4,
                                        levels=[{"letter": "Y", "height_mm": 1800, "ewm_type": "", "split": False}])
         wm = WarehouseModel.objects.create(name="M")
-        rack = WarehouseModelRack.objects.create(model=wm, zone="B0", rack_id="07")
+        rack = WarehouseModelRack.objects.create(model=wm, zone="Z1", rack_id="07")
         LocationOverride.objects.create(rack=rack, bay=29, action="template", template=t)
         self.client.force_login(self.admin)
         r = self.client.post(reverse("twin:bay_template_delete", args=[t.pk]), follow=True)
@@ -79,7 +79,7 @@ class CoordsRuleColumnsTests(TestCase):
         self.admin = get_user_model().objects.create_superuser(username="adm", password="x")
         self.client.force_login(self.admin)
         self.wm = WarehouseModel.objects.create(name="M")
-        self.rack = WarehouseModelRack.objects.create(model=self.wm, zone="B0", rack_id="07", n_bays=39)
+        self.rack = WarehouseModelRack.objects.create(model=self.wm, zone="Z1", rack_id="07", n_bays=39)
         self.tpl = BayTemplate.objects.create(name="T", pallets_per_beam=3,
                                               levels=[{"letter": "A", "height_mm": 1500, "ewm_type": "", "split": False}])
 

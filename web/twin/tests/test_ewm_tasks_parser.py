@@ -93,7 +93,7 @@ class RowTests(SimpleTestCase):
     cols = map_columns(PL_HEADERS)
 
     def _row(self, **over):
-        base = dict(zip(PL_HEADERS, ["000100200300", "1010", "GR-ZONE", "B0-01-100A", "M1", "L1", "12,5",
+        base = dict(zip(PL_HEADERS, ["000100200300", "1010", "GR-ZONE", "Z1-01-100A", "M1", "L1", "12,5",
                                      "KAR", "", "HU1", "180001", "02.03.2026", "06:00:00", "02.03.2026",
                                      "06:10:00", "OPER01", "WOZEK01", "ZQ01/PUTAWAY"], strict=True))
         base.update(over)
@@ -101,7 +101,7 @@ class RowTests(SimpleTestCase):
 
     def test_valid_row(self):
         r = parse_row(self._row(), self.cols, "UTC")
-        self.assertEqual((r["kind"], r["src_location"], r["dst_location"]), ("putaway", "GR-ZONE", "B0-01-100A"))
+        self.assertEqual((r["kind"], r["src_location"], r["dst_location"]), ("putaway", "GR-ZONE", "Z1-01-100A"))
         self.assertEqual((r["qty"], r["unit"], r["resource"]), (12.5, "KAR", "WOZEK01"))
         self.assertEqual(r["user"], pseudonym("OPER01"))                    # US-012: login operatora → pseudonim
         self.assertEqual(r["confirmed_at"], datetime(2026, 3, 2, 6, 10, tzinfo=dt_tz.utc))
@@ -158,12 +158,12 @@ class ScanFileTests(SimpleTestCase):
         text = ("Lista zadań magazynowych\n"
                 "Zadanie magazynowe;Rodzaj procesu magazynowego;Źródłowe miejsce składowania;"
                 "Docelowe miejsce składowania;Ilość;Data potwierdzenia;Czas potwierdzenia;Zasób;Status\n"
-                "1;1010;GR-ZONE;B0-01-100A;1,5;02.03.2026;06:10:00;WÓZEK1;C\n"
-                "2;2010;B0-01-200A;GI-ZONE;2;02.03.2026;06:05:00;WÓZEK2;C\n"
-                "3;2010;B0-01-200A;GI-ZONE;x;02.03.2026;06:06:00;WÓZEK2;C\n"
+                "1;1010;GR-ZONE;Z1-01-100A;1,5;02.03.2026;06:10:00;WÓZEK1;C\n"
+                "2;2010;Z1-01-200A;GI-ZONE;2;02.03.2026;06:05:00;WÓZEK2;C\n"
+                "3;2010;Z1-01-200A;GI-ZONE;x;02.03.2026;06:06:00;WÓZEK2;C\n"
                 ";;;;;;;;\n"
-                "4;3030;B0-01-100A;B0-02-100A;1;;;;C\n"
-                "5;3030;B0-01-100A;B0-02-100A;1;02.03.2026;06:20:00;;A\n")
+                "4;3030;Z1-01-100A;Z1-02-100A;1;;;;C\n"
+                "5;3030;Z1-01-100A;Z1-02-100A;1;02.03.2026;06:20:00;;A\n")
         scan = Scan(self._file(".csv", text.encode("cp1250")), "wt.csv", "UTC")
         rows = list(scan)
         scan.close()
@@ -184,7 +184,7 @@ class ScanFileTests(SimpleTestCase):
         ws = wb.active
         ws.append(["Zadanie magazynowe", "Docelowe miejsce składowania", "Potwierdzono dn.", "Potwierdzono o",
                    "Rodzaj procesu magazynowego"])
-        ws.append([100200300, "B0-01-100A", datetime(2026, 3, 2), time(8, 30), 1010])
+        ws.append([100200300, "Z1-01-100A", datetime(2026, 3, 2), time(8, 30), 1010])
         fd, path = tempfile.mkstemp(suffix=".xlsx")
         os.close(fd)
         self.addCleanup(os.remove, path)

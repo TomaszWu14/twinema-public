@@ -145,7 +145,7 @@ def warehouse_model_paste(request, pk):
 
     rack_map, skipped = _parse_pasted_codes(codes_text)
     if not rack_map:
-        messages.error(request, "Nie rozpoznano żadnego adresu — sprawdź format (np. B0-01-300A).")
+        messages.error(request, "Nie rozpoznano żadnego adresu — sprawdź format (np. Z1-01-300A).")
         return render(request, "twin/warehouse_model/paste.html", ctx)
 
     from django.db import transaction

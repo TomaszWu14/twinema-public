@@ -74,6 +74,9 @@ trafiają do sekcji „Unreleased”.
   (decyzja PO).
 
 ### Security
+- Anonimizacja bieżących plików przed czyszczeniem historii (R-01, decyzja PO): bez nazwy konta i domeny autora,
+  nazwy projektu źródłowego, nazw jego modułów w komentarzach i ścieżki do wewnętrznego planu; przykładowy kod strefy
+  w testach i generatorach zastąpiony neutralnym. Zostaje autor w `LICENSE` (wymóg licencji); A-6 do potwierdzenia.
 - Przegląd bezpieczeństwa (2026-10-17): dane demo rozpoznaje rejestr `seed_demo` (`core.DemoObject`, migracja core 0005),
   nie nazwy plików — hale, scenariusze i własny sprzęt spoza demo też blokują gościa; sesja gościa sprawdzana przy
   każdym żądaniu; `/demo/` pokazuje prezentację z rejestru, nie po tytule (R-02). **Po wdrożeniu na instancji demo:

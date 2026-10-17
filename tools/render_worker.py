@@ -5,7 +5,7 @@ przejmuje zlecenie, pobiera scenę, renderuje `tools/blender/twinema_render.py` 
 i odsyła PNG/MP4. Gdy kolejka renderów pusta, a jest ffmpeg — montuje filmy ze Studia
 (`twinema_montage.py`). Tylko biblioteka standardowa Pythona.
 
-  set TWINEMA_URL=https://twinema.twapp.pl
+  set TWINEMA_URL=https://twinema.example.com
   set TWINEMA_WORKER_TOKEN=<RENDER_WORKER_TOKEN z serwera>
   python tools/render_worker.py [--once] [--poll 10] [--blender "C:/.../blender.exe"] [--engine eevee]
 """

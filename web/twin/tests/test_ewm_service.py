@@ -11,9 +11,9 @@ from twin.tests.ewm_sample import SAMPLE_CODES, SAMPLE_N_BAYS, load_sample
 
 
 def make_model_and_master(extra_codes=()):
-    wm = WarehouseModel.objects.create(name="Hala B0")
+    wm = WarehouseModel.objects.create(name="Hala Z1")
     for aisle, n in SAMPLE_N_BAYS.items():
-        WarehouseModelRack.objects.create(model=wm, zone="B0", rack_id=aisle, n_bays=n, bay_width_cm=280)
+        WarehouseModelRack.objects.create(model=wm, zone="Z1", rack_id=aisle, n_bays=n, bay_width_cm=280)
     batch = WarehouseLocationMasterBatch.objects.create(name="EWM", is_active=True)
     pairs = load_sample() + [(c, "0010") for c in extra_codes]
     WarehouseLocationMaster.objects.bulk_create(
@@ -23,7 +23,7 @@ def make_model_and_master(extra_codes=()):
 
 class ServiceTests(TestCase):
     def test_detect_apply_and_compliance_is_100_percent(self):
-        wm, batch = make_model_and_master(extra_codes=["B0-60-100A", "C9-01-100A"])
+        wm, batch = make_model_and_master(extra_codes=["Z1-60-100A", "C9-01-100A"])
         created, rows, overrides = ewm_service.apply_proposal(wm, ewm_service.detect_for_model(wm, batch))
         self.assertEqual((created, rows), (2, 3))
         self.assertEqual(LocationOverride.objects.count(), overrides)
@@ -61,7 +61,7 @@ class ServiceTests(TestCase):
         wm, batch = make_model_and_master(extra_codes=["C9-01-100A"])
         WarehouseLocationMasterBatch.objects.create(name="stary", is_active=False)
         self.assertEqual(ewm_service.active_master(), batch)
-        codes = [r[0] for r in ewm_service.master_rows(batch, {"B0"})]
+        codes = [r[0] for r in ewm_service.master_rows(batch, {"Z1"})]
         self.assertNotIn("C9-01-100A", codes)
         self.assertEqual(len(codes), SAMPLE_CODES)
         self.assertEqual(ewm_service.master_rows(batch, set()), [])
@@ -69,20 +69,20 @@ class ServiceTests(TestCase):
 
 class CompliancePureTests(SimpleTestCase):
     def test_statuses_and_percent(self):
-        rows = [{"zone": "B0", "rack_id": "01", "has_template": True},
-                {"zone": "B0", "rack_id": "02", "has_template": True}]
-        locs = [{"zone": "B0", "aisle": "01", "code": c} for c in ("B0-01-100A", "B0-01-101A")]
-        locs += [{"zone": "B0", "aisle": "02", "code": "B0-02-100A"}]
-        dups = {"B0-02-100A": ["B0-02", "B0-02"]}
-        ewm = ["B0-01-100A", "B0-01-102A", "B0-02-100A", "B0-03-100A", "B0-XX"]
+        rows = [{"zone": "Z1", "rack_id": "01", "has_template": True},
+                {"zone": "Z1", "rack_id": "02", "has_template": True}]
+        locs = [{"zone": "Z1", "aisle": "01", "code": c} for c in ("Z1-01-100A", "Z1-01-101A")]
+        locs += [{"zone": "Z1", "aisle": "02", "code": "Z1-02-100A"}]
+        dups = {"Z1-02-100A": ["Z1-02", "Z1-02"]}
+        ewm = ["Z1-01-100A", "Z1-01-102A", "Z1-02-100A", "Z1-03-100A", "Z1-XX"]
         rep = compliance(rows, locs, dups, ewm)
         a = {x["aisle"]: x for x in rep["aisles"]}
         self.assertEqual(a["01"]["status"], "diff")
-        self.assertEqual(a["01"]["plan_only"], ["B0-01-101A"])
-        self.assertEqual(a["01"]["ewm_only"], ["B0-01-102A"])
+        self.assertEqual(a["01"]["plan_only"], ["Z1-01-101A"])
+        self.assertEqual(a["01"]["ewm_only"], ["Z1-01-102A"])
         self.assertEqual(a["01"]["pct"], 33.3)
         self.assertEqual(a["02"]["status"], "diff")                  # duplikat
-        self.assertEqual(a["02"]["duplicates"], ["B0-02-100A"])
+        self.assertEqual(a["02"]["duplicates"], ["Z1-02-100A"])
         self.assertEqual(a["03"]["status"], "no_row")
         self.assertEqual(rep["summary"]["unparsed"], 1)
         self.assertEqual(rep["summary"]["pct"], 50.0)                 # tylko przejścia 01+02 (03 = no_row)

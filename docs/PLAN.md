@@ -16,7 +16,7 @@ Status: F0 ✅, F1 ✅ (przeszczep rdzenia), F2 ✅ (Dane), F3 ✅ (Render), F4 
 
 | # | Decyzja | Wybór |
 |---|---|---|
-| D1 | Repo | prywatne, `TomaszWu14/TWINEMA` |
+| D1 | Repo | prywatne repozytorium robocze autora (adres poza dokumentacją) |
 | D2 | Historia | czysta; pochodzenie kodu w `PROVENANCE.md` |
 | D3 | Odbiorcy | zarząd + zewnętrzni oceniający (nacisk) → wygląd i README „portfolio-grade” |
 | D4 | Logowanie | własne konta; bez SSO |
@@ -24,7 +24,7 @@ Status: F0 ✅, F1 ✅ (przeszczep rdzenia), F2 ✅ (Dane), F3 ✅ (Render), F4 
 | D6 | Render | **worker Blendera na własnym PC** (GPU, Blender już jest), pobiera zlecenia z aplikacji po HTTPS; serwer trzyma tylko aplikację i bazę. Później ten sam worker na wynajętej maszynie GPU, jeśli trzeba |
 | D7 | Lektor | własny głos z ElevenLabs Voice Design (plan Creator lub wyższy) |
 | D8 | Zakres | tylko projektowanie i animacja przepływów magazynu; bez paletyzacji kartonów (`palletizer`), HU, transportu |
-| D9 | Relacja z PalViz | kopia kodu (fork-and-diverge), PalViz nietknięty; nic nie płynie z powrotem |
+| D9 | Relacja z projektem źródłowym | kopia kodu (fork-and-diverge), projekt źródłowy nietknięty; nic nie płynie z powrotem |
 
 ---
 

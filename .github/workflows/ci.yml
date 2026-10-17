@@ -58,7 +58,7 @@ jobs:
         env:
           DJANGO_SECRET_KEY: a-sufficiently-long-random-ci-only-secret-key-0000000000
           DJANGO_DEBUG: 'false'
-          DJANGO_ALLOWED_HOSTS: twinema.twapp.pl
+          DJANGO_ALLOWED_HOSTS: twinema.example.com
           DJANGO_SSL_REDIRECT: 'true'
         run: python manage.py check --deploy --fail-level WARNING
 

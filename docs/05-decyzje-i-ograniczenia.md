@@ -223,18 +223,18 @@ celowo nie są tu przytaczane** — podano tylko lokalizację i rodzaj danych.
 
 | Nr | Miejsce | Rodzaj danych | Zalecenie |
 |---|---|---|---|
-| A-1 | `LICENSE` | imię i nazwisko autora | potwierdzić, czy ma zostać (wymóg licencji) |
-| A-2 | `README.md`, `docs/PLAN.md` | nazwa konta autora w serwisie kodu i nazwa prywatnego repozytorium | zastąpić opisem ogólnym |
-| A-3 | `README.md`, `.github/workflows/ci.yml`, `tools/render_worker.py` (opis uruchomienia) | domena autora | zastąpić przykładową domeną |
-| A-4 | `PROVENANCE.md`, `docs/PLAN.md`, `docs/architektura/adr/0001-kopia-nie-przeniesienie.md` | nazwa prywatnego projektu źródłowego | zastąpić określeniem „projekt źródłowy” |
-| A-5 | `web/twin/models.py` (komentarz przy masterze lokalizacji), `web/twin/blender_stock.py`, `web/twin/blender_scene.py` | nazwy aplikacji i bloków z projektu źródłowego | usunąć z komentarzy |
-| A-6 | `web/twin/ewm_levels.py`, `web/twin/locations.py` | oznaczenia poziomów z obiektu źródłowego | potwierdzić, czy to konwencja ogólna, czy specyfika obiektu |
-| A-7 | dane przykładowe w testach i generatorach | kod hali z obiektu źródłowego | zastąpić neutralnym kodem |
+| A-1 | `LICENSE` | imię i nazwisko autora | potwierdzić, czy ma zostać (wymóg licencji) — **zostaje** (wymóg licencji, decyzja PO 2026-10-17) |
+| A-2 | `README.md`, `docs/PLAN.md` | nazwa konta autora w serwisie kodu i nazwa prywatnego repozytorium | zastąpić opisem ogólnym — **poprawione 2026-10-17** (decyzja PO) |
+| A-3 | `README.md`, `.github/workflows/ci.yml`, `tools/render_worker.py` (opis uruchomienia) | domena autora | zastąpić przykładową domeną — **poprawione 2026-10-17** (decyzja PO) |
+| A-4 | `PROVENANCE.md`, `docs/PLAN.md`, `docs/architektura/adr/0001-kopia-nie-przeniesienie.md` | nazwa prywatnego projektu źródłowego | zastąpić określeniem „projekt źródłowy” — **poprawione 2026-10-17** (decyzja PO) |
+| A-5 | `web/twin/models.py` (komentarz przy masterze lokalizacji), `web/twin/blender_stock.py`, `web/twin/blender_scene.py` | nazwy aplikacji i bloków z projektu źródłowego | usunąć z komentarzy — **poprawione 2026-10-17** (decyzja PO) |
+| A-6 | `web/twin/ewm_levels.py`, `web/twin/locations.py` | oznaczenia poziomów z obiektu źródłowego | potwierdzić, czy to konwencja ogólna, czy specyfika obiektu — **otwarte**: konwencja liter poziomów jest częścią logiki adresowania; potwierdzenie PO |
+| A-7 | dane przykładowe w testach i generatorach | kod hali z obiektu źródłowego | zastąpić neutralnym kodem — **poprawione 2026-10-17** (decyzja PO); przykładowy kod strefy w testach i generatorach: neutralny |
 | A-8 | historia repozytorium (wcześniejsze wersje plików reguł zadań magazynowych) | liczba lokalizacji, typy składowania, kody procesów i daty decyzji z rzeczywistego obiektu | przepisać historię albo opublikować repozytorium od nowa; przejrzeć także pozostałe wczesne wersje |
 | A-9 | historia repozytorium (autor zmian) | prywatny adres e-mail | ustawić adres zastępczy dla przyszłych zmian; ocenić przepisanie historii |
 | A-10 | `web/twin/tests/test_ewm_tasks_parser.py`, `test_ewm_tasks_flow.py` | login testowy przypominający nazwisko | zastąpić neutralnym loginem |
-| A-11 | `web/twin/views/warehouse_generator.py` (opis modułu) | ścieżka do wewnętrznego planu autora | usunąć |
-| A-12 | `README.md` | przykładowe hasło demo | zastąpić symbolem zastępczym |
+| A-11 | `web/twin/views/warehouse_generator.py` (opis modułu) | ścieżka do wewnętrznego planu autora | usunąć — **poprawione 2026-10-17** (decyzja PO) |
+| A-12 | `README.md` | przykładowe hasło demo | zastąpić symbolem zastępczym — **poprawione** (w README symbol zastępczy) |
 
 W danych demo (generatory materiałów, stanów, zadań i scenariusza) nie znaleziono nazw kontrahentów, materiałów
 ani osób — dane są syntetyczne. Dokumentacja analityczna nie przenosi żadnej z powyższych wartości.
