@@ -63,6 +63,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django_otp.middleware.OTPMiddleware",
     "core.middleware.TwoFactorMiddleware",
+    "core.middleware.DemoGuardMiddleware",
     "axes.middleware.AxesMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -188,6 +189,8 @@ AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]
 AXES_COOLOFF_TIME = 1
 AXES_RESET_ON_SUCCESS = True
 AXES_CLIENT_IP_CALLABLE = None if DEBUG else "core.middleware.client_ip"
+# US-006: od których adresów przyjmujemy X-Forwarded-For; puste = sieci prywatne (core.middleware.client_ip)
+TRUSTED_PROXIES = [n.strip() for n in env.TRUSTED_PROXIES.split(",") if n.strip()]
 
 GIT_SHA = (env.GIT_SHA or env.SOURCE_COMMIT or "unknown")[:40]   # /health/ i release Sentry
 

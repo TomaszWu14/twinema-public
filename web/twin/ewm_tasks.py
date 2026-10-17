@@ -15,6 +15,8 @@ from datetime import date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
 # Pole → aliasy nagłówka po normalizacji (`norm_header`: małe litery, bez ogonków i kropek).
+MAX_XLSX_BYTES = 4 * 1024 ** 3     # xlsx po rozpakowaniu (plik do 300 MB; przegląd SEC)
+
 FIELD_ALIASES = {
     "task_no": ["zadanie magazynowe", "zad mag", "zadanie mag", "nr zadania magazynowego",
                 "nr zadania", "nr wt", "wt", "warehouse task", "whse task", "tanum"],
@@ -334,6 +336,9 @@ def iter_table(path, filename=None):
     name = (filename or str(path)).lower()
     if name.endswith((".xlsx", ".xlsm")):
         import openpyxl
+
+        from twin.xlsx import check_xlsx_size
+        check_xlsx_size(path, MAX_XLSX_BYTES)
         wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
         try:
             for row in wb.active.iter_rows(values_only=True):

@@ -40,9 +40,28 @@ def ensure_showcase(wm, run):
     return sc
 
 
+def mark_demo(*objs):
+    """Zapisuje obiekty jako dane demo (wywołuje `seed_demo`); idempotentnie."""
+    from django.contrib.contenttypes.models import ContentType
+
+    from .models import DemoObject
+    for obj in objs:
+        DemoObject.objects.get_or_create(content_type=ContentType.objects.get_for_model(obj), object_id=str(obj.pk))
+
+
+def demo_pks(model):
+    """Klucze obiektów danego modelu zapisanych w rejestrze demo."""
+    from django.contrib.contenttypes.models import ContentType
+
+    from .models import DemoObject
+    ids = DemoObject.objects.filter(content_type=ContentType.objects.get_for_model(model))
+    return [int(i) for i in ids.values_list("object_id", flat=True)]
+
+
 def demo_showcase():
-    """Prezentacja demo z aktywnym linkiem albo None (demo nie zasiane / link wyłączony)."""
-    return (Showcase.objects.filter(title=SHOWCASE, share_token__isnull=False, share_expires__gt=timezone.now())
+    """Prezentacja demo (z rejestru `seed_demo`, nie po tytule) z aktywnym linkiem albo None."""
+    return (Showcase.objects.filter(pk__in=demo_pks(Showcase), share_token__isnull=False,
+                                    share_expires__gt=timezone.now())
             .only("pk", "title", "share_token").order_by("-pk").first())
 
 
@@ -50,9 +69,12 @@ def exposure_reasons():
     """US-011 (SEC, R-02): dane spoza demo na instancji — powody (puste = tylko dane demo).
 
     Demo publiczne wpuszcza każdego jako Podgląd, więc na instancji z prawdziwymi danymi je ujawnia.
-    Znaki rozpoznawcze danych spoza demo: import zadań, master lokalizacji, import danych spoza `seed_demo`."""
+    Dane demo to obiekty z rejestru `seed_demo` (`mark_demo`) — nazwa pliku czy obiektu niczego nie przesądza.
+    Prezentacje, filmy, rendery i wyniki symulacji należą do hali, więc wystarczy sprawdzić hale i scenariusze."""
+    from equipment.models import Equipment
     from masterdata.models import ImportLog
-    from twin.models import WarehouseLocationMasterBatch
+    from scenario.models import Scenario
+    from twin.models import WarehouseLocationMasterBatch, WarehouseModel
     from twin.models_tasks import WarehouseTaskBatch
 
     reasons = []
@@ -60,6 +82,13 @@ def exposure_reasons():
         reasons.append("importy zadań magazynowych")
     if WarehouseLocationMasterBatch.objects.exists():
         reasons.append("master lokalizacji")
-    if ImportLog.objects.exclude(name__startswith="Demo — ").exists():
+    if ImportLog.objects.exclude(pk__in=demo_pks(ImportLog)).exists():
         reasons.append("importy danych spoza demo")
+    if WarehouseModel.objects.exclude(pk__in=demo_pks(WarehouseModel)).exists():
+        reasons.append("hale spoza demo")
+    if Scenario.objects.exclude(pk__in=demo_pks(Scenario)).exists():
+        reasons.append("scenariusze spoza demo")
+    if Equipment.objects.exclude(created_by=None).exists():
+        reasons.append("własne modele sprzętu")
     return reasons
+

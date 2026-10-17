@@ -1,6 +1,6 @@
 {% comment %}Animacja przepływów w widoku 3D modelu — sterowanie odtwarzaczem twin/js/flow-player.js.
    Ta sama scena co „Eksport do Blendera"; trasy i osie czasu liczy TWINEMA.{% endcomment %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .flow-card .card-body { padding: 14px 16px; }
   .flow-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
   .flow-head__title { font-weight: 700; font-size: 15px; }
@@ -87,19 +87,19 @@
         <button type="button" class="flow-bar__play" data-f="play" aria-label="Odtwórz">▶</button>
         <input type="range" class="flow-bar__seek" data-f="seek" min="0" max="1" step="0.1" value="0" aria-label="Oś czasu animacji">
         <span class="flow-bar__time" data-f="time">0:00 / 0:00</span>
-        <select class="form-control" data-f="speed" aria-label="Prędkość odtwarzania" style="width:auto">
+        <select class="u-w-auto form-control" data-f="speed" aria-label="Prędkość odtwarzania">
           <option value="1">1×</option><option value="2">2×</option><option value="4" selected>4×</option>
           <option value="8">8×</option><option value="16">16×</option><option value="32">32×</option>
         </select>
       </div>
-      <div class="flow-bar" style="margin-top:10px">
+      <div class="u-mt-10 flow-bar">
         <div class="flow-bar__toggles">
           <label><input type="checkbox" data-f="show-flows" checked> Trasy</label>
           <label><input type="checkbox" data-f="show-pallets" checked> Palety na stanie</label>
           <label><input type="checkbox" data-f="show-labels" checked> Podpisy</label>
         </div>
-        <label style="display:inline-flex;align-items:center;gap:6px;font-size:13px;margin-left:auto">Kolor palet
-          <select class="form-control" data-f="color-by" style="width:auto">
+        <label class="u-d-inline-flex u-ai-center u-gap-6 u-fs-13 u-ml-auto">Kolor palet
+          <select class="u-w-auto form-control" data-f="color-by">
             <option value="state">Stan</option><option value="abc">Klasa ABC</option>
             <option value="expiry">Termin ważności</option><option value="picks">Liczba pobrań</option>
             <option value="sku">SKU</option>

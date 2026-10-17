@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
 {% block title %}Prognozy i ML — {{ app_name }}{% endblock %}
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .ml-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:16px; margin-bottom:24px; }
   .ml-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:18px;
              display:flex; flex-direction:column; gap:10px; }
@@ -22,11 +22,11 @@
 </div>
 
 {% if job %}{% include "core/_job_status.html" with may_compute=is_designer %}
-{% if job.status == "done" %}<div class="alert {% if job.result.ok %}alert-success{% else %}alert-warning{% endif %}" role="status" style="margin-bottom:16px">
+{% if job.status == "done" %}<div class="u-mb-16 alert {% if job.result.ok %}alert-success{% else %}alert-warning{% endif %}" role="status">
   {% if job.result.ok %}Ostatni przebieg gotowy{% else %}{{ job.result.reason|default:"Model nie dał wyniku." }}{% endif %} —
   <a href="{% url 'ml:detail' job.result.run %}">zobacz wynik</a>.</div>{% endif %}{% endif %}
 {% if not batches %}
-<div class="card" style="margin-bottom:24px"><div class="empty-state">Najpierw zaimportuj zadania magazynowe w <a href="{% url 'twin:ewm_tasks_list' %}">Zadaniach i symulacji</a> — modele uczą się na historii ruchów.</div></div>
+<div class="u-mb-24 card"><div class="empty-state">Najpierw zaimportuj zadania magazynowe w <a href="{% url 'twin:ewm_tasks_list' %}">Zadaniach i symulacji</a> — modele uczą się na historii ruchów.</div></div>
 {% endif %}
 
 <div class="ml-grid">

@@ -3,7 +3,7 @@
 {% block nav_warehouse_map %}topnav__link--active{% endblock %}
 
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .zn-table input[type=number] { width: 96px; }
   .zn-table td.num, .zn-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
   .zn-note { font-size: 13px; color: var(--gray-500); line-height: 1.55; }
@@ -54,7 +54,7 @@
       </tr>{% empty %}<tr><td colspan="7" class="text-muted">Model nie ma regałów.</td></tr>{% endfor %}</tbody>
     </table></div>
     <p class="zn-note">Hala rośnie sama, gdy regały wyjdą poza obrys. Po zapisie sprawdzane są kolizje regałów (ostrzeżenie, nie blokada). Chcesz zachować oryginał? Najpierw „Utwórz przyszły layout (kopia)” w widoku modelu.</p>
-    <div style="display:flex;gap:10px">
+    <div class="u-d-flex u-gap-10">
       <button type="submit" class="btn btn-primary">Zapisz i pokaż w 3D</button>
       <a href="{% url 'twin:warehouse_model_view' wm.pk %}" class="btn btn-secondary">Anuluj</a>
     </div>

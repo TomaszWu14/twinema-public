@@ -29,6 +29,21 @@ class ReadTableTests(SimpleTestCase):
         self.assertEqual(headers, ["Kod", "Ilość"])
         self.assertEqual(rows, [["A1", 5], ["A2", 7]])
 
+    def test_xlsx_bomb_rejected_before_opening(self):
+        """Przegląd SEC (7): plik o podejrzanie wysokiej kompresji odrzucony przed openpyxl."""
+        import zipfile
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+            z.writestr("xl/sharedStrings.xml", "0" * (20 * 1024 * 1024))
+        with self.assertRaisesRegex(im.ImportFileError, "po rozpakowaniu"):
+            im.read_table("m.xlsx", buf.getvalue())
+
+    def test_csv_fallback_does_not_change_global_dialect(self):
+        """Przegląd SEC (8): plik bez rozpoznanego separatora nie zmienia csv.excel dla reszty procesu."""
+        import csv
+        im.read_table("m.csv", "Kod\nA1\n".encode())
+        self.assertEqual(csv.excel.delimiter, ",")
+
     def test_bad_files(self):
         with self.assertRaises(im.ImportFileError):
             im.read_table("m.pdf", b"x")

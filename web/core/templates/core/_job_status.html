@@ -1,9 +1,9 @@
 {% load static %}
 {# Stan zadania z kolejki (US-007). Bez meta-refresh (WCAG 2.2.1): stan sprawdza core/js/job_status.js. #}
 {% if job.pending %}
-<div class="alert alert-info" id="job-progress" data-status-url="{% url 'core:job_status' job.pk %}"
-     style="margin-top:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-  <div style="flex:1 1 320px">
+<div class="u-mt-16 u-d-flex u-gap-12 u-ai-center u-fwrap-wrap alert alert-info" id="job-progress" data-status-url="{% url 'core:job_status' job.pk %}"
+    >
+  <div class="u-flex-1-1-320">
     <div id="job-progress-live" role="status" aria-live="polite">{% if job.status == "queued" %}Obliczenie czeka w kolejce{% else %}Liczymy w tle{% endif %} —
       stan sprawdzamy co 5 s bez przeładowania strony. Możesz ją zamknąć i wrócić później; wynik zostanie zapisany.</div>
     <div id="job-progress-meta" class="text-muted text-sm"></div>
@@ -13,5 +13,8 @@
 </div>
 <script src="{% static 'core/js/job_status.js' %}" defer></script>
 {% elif job.status == "error" %}
-<div class="alert alert-error" role="alert" style="margin-top:16px">{{ job.message }}{% if may_compute %} Uruchom obliczenie ponownie.{% endif %}</div>
+<div class="u-mt-16 alert alert-error" role="alert">{{ job.message }}{% if may_compute and not retry %} Uruchom obliczenie ponownie.{% endif %}</div>
+{% if may_compute and retry %}
+<form method="post" class="u-mt-12">{% csrf_token %}<button type="submit" class="btn btn-primary">Policz ponownie</button></form>
+{% endif %}
 {% endif %}

@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
 {% block title %}Prezentacje 3D — {{ app_name }}{% endblock %}
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .sh-sec { font:600 var(--fs-xs) var(--font-mono); text-transform:uppercase; letter-spacing:.12em; color:var(--primary); margin:0 0 12px; }
   .sh-new { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1.3fr) auto; gap:12px; align-items:end; }
   @media (max-width: 900px) { .sh-new { grid-template-columns:1fr; } }
@@ -31,7 +31,7 @@
     <label for="{{ form.run.id_for_label }}">{{ form.run.label }} (opcjonalnie) {{ form.run }}</label>
     <button class="btn btn-primary" type="submit">Utwórz ze szablonu</button>
   </form>
-  <p class="text-muted text-sm" style="margin:8px 0 0">Szablon: działka → hala → strefy → doki → wyniki → szczyt dnia → wąskie gardła → podsumowanie z liczbami. Potem poprawiasz podpisy i dodajesz własne ujęcia.</p>
+  <p class="u-m-8-0-0 text-muted text-sm">Szablon: działka → hala → strefy → doki → wyniki → szczyt dnia → wąskie gardła → podsumowanie z liczbami. Potem poprawiasz podpisy i dodajesz własne ujęcia.</p>
 </div></div>
 {% endif %}
 
@@ -46,6 +46,6 @@
   {% endfor %}
 </div>
 {% else %}
-<div class="card" style="margin-top:24px"><div class="empty-state">Brak prezentacji.{% if is_designer %} Wybierz model hali (i wynik symulacji) powyżej.{% endif %}</div></div>
+<div class="u-mt-24 card"><div class="empty-state">Brak prezentacji.{% if is_designer %} Wybierz model hali (i wynik symulacji) powyżej.{% endif %}</div></div>
 {% endif %}
 {% endblock %}

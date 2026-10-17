@@ -87,6 +87,45 @@ class JobQueueTests(TestCase):
         job.refresh_from_db()
         self.assertEqual((job.status, job.message), (Job.ERROR, jobs.GAVE_UP))
 
+    @override_settings(JOB_STALE_MIN=60)
+    def test_long_job_with_live_heartbeat_stays_running(self):
+        """Przegląd kodu (C): zadanie liczone dłużej niż JOB_STALE_MIN, ale z sygnałem workera, nie wraca do kolejki."""
+        with _with(test=OK):
+            job = jobs.enqueue("test", {"n": 1})
+        now = timezone.now()
+        Job.objects.filter(pk=job.pk).update(status=Job.RUNNING, attempts=1, started_at=now - timedelta(hours=3),
+                                             heartbeat_at=now - timedelta(minutes=1))
+        jobs.requeue_stale()
+        job.refresh_from_db()
+        self.assertEqual(job.status, Job.RUNNING)
+        Job.objects.filter(pk=job.pk).update(heartbeat_at=now - timedelta(minutes=61))      # worker padł
+        jobs.requeue_stale()
+        job.refresh_from_db()
+        self.assertEqual(job.status, Job.QUEUED)
+
+    def test_result_of_a_taken_over_job_is_not_overwritten(self):
+        """Wynik zapisuje tylko worker, który wciąż „ma” zadanie — inaczej nadpisałby stan innego workera."""
+        def taken_over(params):
+            Job.objects.filter(kind="test").update(status=Job.QUEUED)        # np. wróciło do kolejki
+            return {"late": True}
+        with _with(test=OK):
+            job = jobs.enqueue("test", {"n": 1})
+        with mock.patch.dict(jobs.HANDLERS, {"test": "core.tests.test_jobs.ok_handler"}), \
+                mock.patch("core.tests.test_jobs.ok_handler", side_effect=taken_over):
+            jobs.run_next()
+        job.refresh_from_db()
+        self.assertEqual((job.status, job.result), (Job.QUEUED, None))
+
+    def test_heartbeat_marks_running_job(self):
+        with _with(test=OK):
+            job = jobs.enqueue("test", {"n": 1})
+        job = jobs.claim()
+        beat = jobs._Heartbeat(job)
+        with mock.patch.object(beat.done, "wait", side_effect=[False, True]), mock.patch.object(jobs, "connection"):
+            beat.run()                                                   # w wątku testu — bez własnego połączenia
+        job.refresh_from_db()
+        self.assertIsNotNone(job.heartbeat_at)
+
     def test_prune_removes_old_finished_jobs_only(self):
         with _with(test=OK):
             old = jobs.enqueue("test", {"n": 1})

@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
 {% block title %}Nośniki i klasy — {{ app_name }}{% endblock %}
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .ct-sec { font:600 var(--fs-xs) var(--font-mono); text-transform:uppercase; letter-spacing:.12em; color:var(--primary); margin:0 0 12px; }
   .ct-table td { vertical-align:middle; }
   .ct-table .form-control { min-width:70px; }
@@ -25,15 +25,15 @@
       <thead><tr><th>Nazwa</th><th>Dł. [cm]</th><th>Szer. [cm]</th><th>Wys. własna [cm]</th><th>Waga własna [kg]</th>
         <th>Max wys. ładunku [cm]</th><th>Max waga ładunku [kg]</th><th>Domyślny</th><th>Usuń</th></tr></thead>
       <tbody>{% for f in carriers %}
-        <tr>{% for field in f.visible_fields %}<td>{{ field }}{% for e in field.errors %}<div class="text-sm" style="color:var(--danger-fg)">{{ e }}</div>{% endfor %}</td>{% endfor %}{% for h in f.hidden_fields %}{{ h }}{% endfor %}</tr>
+        <tr>{% for field in f.visible_fields %}<td>{{ field }}{% for e in field.errors %}<div class="u-c-danger-fg text-sm">{{ e }}</div>{% endfor %}</td>{% endfor %}{% for h in f.hidden_fields %}{{ h }}{% endfor %}</tr>
       {% endfor %}</tbody>
     </table></div>
-    <div style="margin-top:12px"><button class="btn btn-primary" type="submit">Zapisz nośniki</button>
+    <div class="u-mt-12"><button class="btn btn-primary" type="submit">Zapisz nośniki</button>
       <span class="text-muted text-sm">Pusty ostatni wiersz = nowy nośnik. Materiał bez nośnika używa domyślnego.</span></div>
   </form>
 </div></section>
 
-<section class="card" style="margin-top:16px" aria-labelledby="ct-k"><div class="card-body">
+<section class="u-mt-16 card" aria-labelledby="ct-k"><div class="card-body">
   <h2 class="ct-sec" id="ct-k">Klasy wysokości i wagi</h2>
   <form method="post">{% csrf_token %}<input type="hidden" name="which" value="classes">
     {{ classes.management_form }}
@@ -41,10 +41,10 @@
     <div class="table-wrap"><table class="table ct-table">
       <thead><tr><th>Rodzaj</th><th>Nazwa klasy</th><th>Do (włącznie)</th><th>Usuń</th></tr></thead>
       <tbody>{% for f in classes %}
-        <tr>{% for field in f.visible_fields %}<td>{{ field }}{% for e in field.errors %}<div class="text-sm" style="color:var(--danger-fg)">{{ e }}</div>{% endfor %}</td>{% endfor %}{% for h in f.hidden_fields %}{{ h }}{% endfor %}</tr>
+        <tr>{% for field in f.visible_fields %}<td>{{ field }}{% for e in field.errors %}<div class="u-c-danger-fg text-sm">{{ e }}</div>{% endfor %}</td>{% endfor %}{% for h in f.hidden_fields %}{{ h }}{% endfor %}</tr>
       {% endfor %}</tbody>
     </table></div>
-    <div style="margin-top:12px"><button class="btn btn-primary" type="submit">Zapisz klasy</button>
+    <div class="u-mt-12"><button class="btn btn-primary" type="submit">Zapisz klasy</button>
       <span class="text-muted text-sm">Paleta trafia do najmniejszej klasy, której limit ją mieści (np. 120 cm → „do 140 cm”).</span></div>
   </form>
 </div></section>

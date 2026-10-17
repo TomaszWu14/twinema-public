@@ -81,3 +81,13 @@ a.hub-tile:hover { border-color: var(--primary); }
 .tf-submit { margin-top: var(--sp-4); }
 .login-card--plain { margin-top: var(--sp-3); background: none; border: 0; box-shadow: none; }
 @media (max-width: 600px) { .tf-grid { grid-template-columns: 1fr; } }
+
+/* R-20: kolor z danych (typ regału, strefa) — wartość podaje data-color, ui.js ustawia zmienną --c */
+.color-swatch { display: inline-block; width: 20px; height: 20px; border-radius: 4px; background: var(--c); }
+.color-swatch--lg { width: 36px; height: 36px; border-radius: 6px; border: 1px solid var(--gray-200); }
+.color-code {
+  font-family: monospace; font-weight: 700; font-size: 13px; padding: 2px 8px; border-radius: 5px;
+  background: color-mix(in srgb, var(--c) 13%, transparent);
+  color: color-mix(in srgb, var(--c) 55%, var(--gray-900));
+  border: 1px solid color-mix(in srgb, var(--c) 27%, transparent);
+}

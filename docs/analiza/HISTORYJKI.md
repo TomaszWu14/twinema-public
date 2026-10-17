@@ -15,7 +15,7 @@
 | US-009 | Jako Administrator chcę kopii zapasowej bazy i plików z procedurą odtworzenia, aby po awarii odzyskać dane | Must | R-10, T-16 | **zrobione** (PR #68) — `manage.py backup`, harmonogram i kopia poza serwerem ustawia Administrator platformy |
 | US-013 | Jako PO chcę, aby każdy merge do `main` wymagał mojego zatwierdzenia, aby żadna zmiana nie trafiła na produkcję bez akceptacji | Must | R-09 | częściowo — auto-merge usunięty (PR #68); ochronę gałęzi ustawia PO |
 | US-007 | Jako Administrator chcę, aby długie obliczenia szły w tle i nie mogła ich uruchamiać rola Podgląd, aby nikt nie zablokował serwera | Should | R-07, T-1 | **zrobione** (PR #68, ADR-0004) — symulacja dnia i scenariusza, kalibracja; reszta długich operacji: T-1 |
-| US-005 | Jako Administrator chcę wymuszonej polityki CSP, aby ograniczyć skutki ewentualnego XSS | Should | R-04 | **zrobione** (PR #68) — skrypty z nonce, testy E2E; style inline — T-17 |
+| US-005 | Jako Administrator chcę wymuszonej polityki CSP, aby ograniczyć skutki ewentualnego XSS | Should | R-04 | **zrobione** (PR #68) — skrypty i style z nonce, bez `'unsafe-inline'` (R-20), testy E2E |
 | US-006 | Jako Administrator chcę, aby nagłówek adresu klienta był brany pod uwagę tylko od proxy w sieci wewnętrznej, aby blokady logowania nie dało się obejść podmianą adresu | Should | R-05 | **zrobione** (PR #68) |
 | US-008 | Jako Administrator chcę dziennika operacji wrażliwych, aby wiedzieć, kto usunął dane albo udostępnił link | Should | R-08 | **zrobione** (PR #68) — retencja 365 dni (Z-33, decyzja PO) |
 | US-014 | Jako SEC chcę, aby semgrep i trivy blokowały PR po triażu pierwszych wyników, aby nowe ustalenia nie przechodziły | Should | R-18 | **zrobione** (PR #68) — [triaż](../bezpieczenstwo/TRIAZ_SKANOW.md) |
@@ -133,6 +133,8 @@
 - *Given* ekrany ze skryptami (3D, edytory, wykresy, prezentacja, odtwarzacz, studio), *When* test E2E je otwiera, *Then* przeglądarka nie zgłasza naruszeń CSP ani błędów JavaScript.
 - *Given* szablon z `onclick=`/`onchange=`/`onsubmit=`, *Then* test zgłasza błąd — potwierdzenia i automatyczne wysyłanie działają przez `data-confirm` i `data-autosubmit`.
 - *Given* awaria strony po wdrożeniu, *Then* `CSP_REPORT_ONLY=true` przywraca tryb raportu bez zmiany kodu.
+- *Given* dowolna strona, *Then* `style-src` nie zawiera `'unsafe-inline'`; szablony i własne skrypty nie mają atrybutów `style=`, bloki `<style>` mają nonce (R-20).
+- *Given* kolor albo szerokość z danych (strefa, typ regału, pasek udziału), *When* strona się ładuje, *Then* `ui.js` ustawia je z `data-color`/`data-pct` — tylko kolor HEX i liczba 0–100.
 
 **US-009**
 - *Given* ustawione `BACKUP_DIR`, *When* działa `manage.py backup`, *Then* powstaje zestaw z kopią bazy, archiwum mediów (bez plików tymczasowych) i manifestem z sumami SHA-256; z kopii SQLite odczytuje się dane.

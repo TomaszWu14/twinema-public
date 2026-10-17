@@ -58,13 +58,44 @@ trafiają do sekcji „Unreleased”.
   `postgresql-client` (US-009). **Do ustawienia:** `BACKUP_DIR` i zadanie zaplanowane w Coolify (RUNBOOK).
 - Procedura czyszczenia historii repozytorium (`docs/operacje/CZYSZCZENIE_HISTORII.md`, R-01) — wykonuje PO.
 
+### Fixed (przegląd kodu po #68, 2026-10-17)
+- Import CSV danych podstawowych bez rozpoznanego separatora nie zmienia już globalnego `csv.excel` całego procesu.
+- Symulacja dnia i kalibracja: zadanie z błędem nie wraca do kolejki przy każdym wejściu na stronę — widać komunikat,
+  a Projektant ponawia obliczenie przyciskiem „Policz ponownie”.
+- Kolejka zadań: worker co minutę odświeża sygnał liczonego zadania (`core.Job.heartbeat_at`, migracja core 0004), więc
+  długie zadanie nie wraca do kolejki i nie liczy się drugi raz równolegle; wynik zapisuje tylko worker, który wciąż ma
+  zadanie. Ponowiony import zadań, który już się udał, nie oznacza partii jako błędnej.
+- Weryfikacja dwuetapowa: adres powrotu z kilkoma parametrami nie gubi ich; po 5 błędnych kodach przy konfiguracji
+  strona pokazuje nowy kod QR zamiast nieważnego starego.
+- `manage.py backup --keep 0` (albo ujemne) kończy się błędem zamiast skasować wszystkie kopie, w tym nową.
+- Dymki wykresów (prognoza ML, symulacja scenariusza, profil zadań) pokazują liczby po polsku z jednym miejscem
+  po przecinku zamiast „9.600000000000001”.
+- Prognoza ML: dymek pokazuje przedział 80 % jako zakres „od–do” (np. 37,3–46,9) zamiast szerokości pasma
+  (decyzja PO).
+
 ### Security
+- Przegląd bezpieczeństwa (2026-10-17): dane demo rozpoznaje rejestr `seed_demo` (`core.DemoObject`, migracja core 0005),
+  nie nazwy plików — hale, scenariusze i własny sprzęt spoza demo też blokują gościa; sesja gościa sprawdzana przy
+  każdym żądaniu; `/demo/` pokazuje prezentację z rejestru, nie po tytule (R-02). **Po wdrożeniu na instancji demo:
+  `manage.py seed_demo`.**
+- Scena animacji dla Podglądu i gościa: parametry domyślne i pamięć podręczna 10 min — bez liczenia tras na żądanie (R-21).
+- Segmentacja ML: przykładowe kody materiałów tylko dla Projektanta (BR-806); scena symulacji bez nazwy importu dla
+  Podglądu; eksporty xlsx scenariuszy i CSV segmentów bez formuł; import xlsx odrzuca pliki o podejrzanym rozmiarze
+  po rozpakowaniu (R-22).
+- Migracja `twin 0009`: pseudonimizuje też loginy systemu magazynowego w rodzaju „OP-0001”, które 0008 pomijała
+  (RODO, US-012). **Nieodwracalna** — kopia bazy przed wdrożeniem.
+- `TRUSTED_PROXIES`: sieci proxy, od których brany jest adres klienta z `X-Forwarded-For` (blokada logowania, US-006);
+  puste = jak dotąd (sieci prywatne).
 - Weryfikacja dwuetapowa (TOTP, `django-otp`): obowiązkowa dla Administratorów, opcjonalna dla pozostałych; hasła kont
   uprzywilejowanych ≥ 12 znaków; `manage.py two_factor_reset <login>` (US-017). **Uwaga przy wdrożeniu:** Administratorzy
   po pierwszym logowaniu konfigurują aplikację uwierzytelniającą; `DJANGO_SUPERUSER_PASSWORD` musi mieć ≥ 12 znaków.
 - CSP wymuszana: skrypty tylko z serwera albo z jednorazowym nonce, bez `'unsafe-inline'`/`'unsafe-eval'` dla
   skryptów, `object-src 'none'`, `form-action 'self'`; obsługa zdarzeń w atrybutach zastąpiona `core/js/ui.js` (US-005).
   **Uwaga przy wdrożeniu:** `CSP_REPORT_ONLY=true` w środowisku zostawia tryb raportu — ustaw `false` albo usuń zmienną.
+- CSP także dla stylów bez `'unsafe-inline'` (`style-src 'self' 'nonce-…'`): 360 atrybutów `style=` w 52 szablonach
+  zastąpione klasami `core/utilities.css`, kolory i szerokości z danych przez `data-color`/`data-pct` (`core/js/ui.js`),
+  bloki `<style>` z nonce, dymki ECharts w trybie `richText`. Przy okazji paski udziałów segmentów ML pokazują właściwą
+  szerokość — wcześniej przecinek dziesiętny („12,0%”) unieważniał regułę `width` i pasek miał pełną długość (R-20).
 - Adres klienta do blokady logowania z nagłówka `X-Forwarded-For` tylko od proxy w sieci wewnętrznej (US-006).
 - Ostrzeżenie w logach i baner dla Administratora, gdy demo publiczne działa na instancji z danymi spoza demo (US-011);
   wejście gościa jest wtedy zablokowane (R-02, decyzja PO).

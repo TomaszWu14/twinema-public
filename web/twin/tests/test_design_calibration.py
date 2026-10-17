@@ -104,6 +104,25 @@ class CalibrationViewTests(TestCase):
         self.assertContains(r, f"/magazyn/zadania-ewm/{self.batch.pk}/symulacja/?p=95&amp;kt=")
         self.assertEqual(next(g for g in r.context["result"]["groups"] if g["key"] == "trucks")["pairs"], 29)
 
+    def test_failed_job_waits_for_explicit_retry(self):
+        """Przegląd kodu (A): zadanie z błędem nie wraca do kolejki przy samym wejściu — dopiero „Policz ponownie”."""
+        from unittest.mock import patch
+
+        from twin.views import warehouse_calibration as v
+        url = f"/magazyn/zadania-ewm/{self.batch.pk}/kalibracja/"
+        self.client.get(url, {"model": self.wm.pk})
+        with patch.object(v, "calibrate", side_effect=RuntimeError("awaria")):
+            run_pending()
+        job = Job.objects.get()
+        self.assertEqual(job.status, Job.ERROR)
+        r = self.client.get(url, {"model": self.wm.pk})
+        self.assertEqual(Job.objects.get().status, Job.ERROR)          # samo wejście nie liczy od nowa
+        self.assertContains(r, "Policz ponownie")
+        self.assertContains(r, 'role="alert"')
+        r = self.client.post(f"{url}?model={self.wm.pk}")
+        self.assertRedirects(r, f"{url}?model={self.wm.pk}", fetch_redirect_response=False)
+        self.assertEqual(Job.objects.get().status, Job.QUEUED)
+
     def test_simulation_form_carries_factors(self):
         r = self.client.get(f"/magazyn/zadania-ewm/{self.batch.pk}/symulacja/", {"kt": "1,7", "kp": "2"})
         self.assertContains(r, 'name="kt" value="1.7"')

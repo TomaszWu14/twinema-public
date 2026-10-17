@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
 {% block title %}Scenariusze — {{ app_name }}{% endblock %}
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .sc-sec { font:600 var(--fs-xs) var(--font-mono); text-transform:uppercase; letter-spacing:.12em; color:var(--primary); margin:0 0 12px; }
   .sc-new { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px; align-items:end; }
   .sc-new label { display:flex; flex-direction:column; gap:4px; font-size:var(--fs-sm); color:var(--fg-muted); }
@@ -29,14 +29,14 @@
     <label for="{{ form.name.id_for_label }}">Nazwa {{ form.name }}</label>
     <button class="btn btn-primary" type="submit">Utwórz</button>
   </form>
-  <p class="text-muted text-sm" style="margin:8px 0 0">Startuje z przykładowym planem przyjęć (kontenery 40', auta 33-paletowe, solówki) — liczby syntetyczne do poprawienia.</p>
+  <p class="u-m-8-0-0 text-muted text-sm">Startuje z przykładowym planem przyjęć (kontenery 40', auta 33-paletowe, solówki) — liczby syntetyczne do poprawienia.</p>
   {% else %}
-  <p class="text-muted text-sm" style="margin:0">Scenariusze tworzy Projektant — tutaj oglądasz wyniki.</p>
+  <p class="u-m-0 text-muted text-sm">Scenariusze tworzy Projektant — tutaj oglądasz wyniki.</p>
   {% endif %}
 </div></div>
 
 {% if target_model and scenarios %}
-<p class="alert alert-info" role="status" style="margin-top:16px">Wybierz scenariusz — symulacja otworzy się z halą
+<p class="u-mt-16 alert alert-info" role="status">Wybierz scenariusz — symulacja otworzy się z halą
   „{{ target_model.name }}” wybraną w formularzu.</p>
 {% endif %}
 {% if scenarios %}
@@ -51,7 +51,7 @@
   {% endfor %}
 </div>
 {% else %}
-<div class="card" style="margin-top:24px"><div class="empty-state">
+<div class="u-mt-24 card"><div class="empty-state">
   <p>Brak scenariuszy. Utwórz pierwszy powyżej{% if is_designer %} albo wczytaj scenariusz demo (dane syntetyczne
     i hala do symulacji){% endif %}.</p>
   {% if is_designer %}<form method="post" action="{% url 'scenario:demo' %}">{% csrf_token %}

@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="page-header">
-  <div class="panel-head" style="--pc:#4f46e5;--pcbg:#eef2ff">
+  <div class="u-var-pc-x4f46e5 u-var-pcbg-xeef2ff panel-head">
     <div class="panel-head__chip">
       <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 21V8l9-5 9 5v13"/><path d="M3 21h18M7 21v-6h4v6M13 21v-9h4v9"/></svg>
     </div>
@@ -36,7 +36,7 @@
   </div>
 </div>
 
-<div class="card card--accent" style="--pc:#4f46e5">
+<div class="u-var-pc-x4f46e5 card card--accent">
   {% if models %}
   <div class="table-wrap">
     <table class="table">
@@ -46,14 +46,14 @@
           <th>Liczba regałów</th>
           <th>Wymiary hali</th>
           <th>Utworzono</th>
-          <th style="text-align:right">Akcje</th>
+          <th class="u-ta-right">Akcje</th>
         </tr>
       </thead>
       <tbody>
         {% for wm in models %}
         <tr>
           <td>
-            <a href="{% url 'twin:warehouse_model_view' wm.pk %}" style="color:var(--blue-mid);text-decoration:none;font-weight:600">
+            <a href="{% url 'twin:warehouse_model_view' wm.pk %}" class="u-c-blue-mid u-text-decoration-none u-fw-600">
               {{ wm.name }}
             </a>
             {% if wm.notes %}
@@ -74,7 +74,7 @@
                 Wizualizacja
               </a>
               {% if is_designer %}<a href="{% url 'twin:warehouse_layout_editor' wm.pk %}" class="btn btn-secondary btn-sm">Edytor layoutu</a>
-              <form method="post" action="{% url 'twin:warehouse_model_copy' wm.pk %}" style="display:inline">{% csrf_token %}
+              <form method="post" action="{% url 'twin:warehouse_model_copy' wm.pk %}" class="u-d-inline">{% csrf_token %}
                 <button type="submit" class="btn btn-secondary btn-sm" title="Kopia hali do przebudowy w edytorze — oryginał zostaje">Przyszły layout (kopia)</button>
               </form>{% endif %}
               {% if is_designer %}<a href="{% url 'twin:warehouse_model_coords' wm.pk %}" class="btn btn-secondary btn-sm">
@@ -97,7 +97,7 @@
     <div class="empty-state__icon">{% icon "factory" cls="icon--em" %}</div>
     <div class="empty-state__title">Brak modeli magazynu</div>
     <div class="empty-state__desc">{% if is_designer %}Wczytaj kody lokalizacji, aby zbudować pierwszy model hali.{% else %}Modele hal przygotowuje Projektant.{% endif %}</div>
-    <div style="margin-top:20px">
+    <div class="u-mt-20">
       {% if is_designer %}<a href="{% url 'twin:warehouse_model_upload' %}" class="btn btn-primary">
         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Utwórz pierwszy model

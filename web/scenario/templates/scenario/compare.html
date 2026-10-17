@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}{% load static %}
 {% block title %}Porównanie layout × scenariusz — {{ app_name }}{% endblock %}
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .sc-sec { font:600 var(--fs-xs) var(--font-mono); text-transform:uppercase; letter-spacing:.12em; color:var(--primary); margin:0 0 12px; }
   .sc-pick { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:6px 16px; margin:0 0 12px; padding:0; list-style:none; }
   .sc-pick label { display:flex; gap:8px; align-items:flex-start; font-size:var(--fs-sm); }
@@ -42,16 +42,16 @@
     </ul>
     <button class="btn btn-primary" type="submit">Porównaj</button>
   </form>
-  <p class="text-muted text-sm" style="margin:8px 0 0">Brakuje kombinacji? Uruchom symulację na stronie scenariusza, wybierając inny model hali.</p>
+  <p class="u-m-8-0-0 text-muted text-sm">Brakuje kombinacji? Uruchom symulację na stronie scenariusza, wybierając inny model hali.</p>
   {% else %}
-  <p class="text-sm" style="margin:0">Nie ma jeszcze wyników symulacji — uruchom ją na stronie <a href="{% url 'scenario:list' %}">scenariusza</a>.</p>
+  <p class="u-m-0 text-sm">Nie ma jeszcze wyników symulacji — uruchom ją na stronie <a href="{% url 'scenario:list' %}">scenariusza</a>.</p>
   {% endif %}
 </div></section>
 
 {% if chosen %}
-<section class="card" style="margin-top:16px" aria-labelledby="cmp-h" id="cmp-box"><div class="card-body">
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-    <h2 class="sc-sec" id="cmp-h" style="margin:0">Wyniki</h2>
+<section class="u-mt-16 card" aria-labelledby="cmp-h" id="cmp-box"><div class="card-body">
+  <div class="u-d-flex u-jc-space-between u-ai-center u-gap-8">
+    <h2 class="u-m-0 sc-sec" id="cmp-h">Wyniki</h2>
     <button type="button" class="btn btn-ghost btn-sm" aria-pressed="false" id="cmp-fs">Pełny ekran</button>
   </div>
   <div class="sc-scroll">
@@ -70,7 +70,7 @@
       </tbody>
     </table>
   </div>
-  <p style="margin:12px 0 0"><a class="btn btn-ghost btn-sm" href="?{{ query }}&amp;xlsx=1">Pobierz porównanie (xlsx)</a></p>
+  <p class="u-m-12-0-0"><a class="btn btn-ghost btn-sm" href="?{{ query }}&amp;xlsx=1">Pobierz porównanie (xlsx)</a></p>
 </div></section>
 {% endif %}
 <p class="sr-only" id="cmp-fs-live" aria-live="polite"></p>

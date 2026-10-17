@@ -3,7 +3,7 @@
 {% block nav_warehouse_map %}topnav__link--active{% endblock %}
 
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .wt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 16px; }
   .wt-h { font-size: 13px; font-weight: 700; color: var(--gray-700); margin-bottom: 8px; }
   .codes { font-family: var(--font-mono, monospace); font-size: 12px; line-height: 1.7; color: var(--gray-700); }
@@ -22,7 +22,7 @@
 <div class="page-header">
   <div>
     <div class="page-header__title">{{ batch.name }}
-      <span class="badge {% if batch.status == 'done' %}badge-green{% elif batch.status == 'error' %}badge-red{% else %}badge-yellow{% endif %}" style="vertical-align:middle">{{ batch.get_status_display }}</span></div>
+      <span class="u-va-middle badge {% if batch.status == 'done' %}badge-green{% elif batch.status == 'error' %}badge-red{% else %}badge-yellow{% endif %}">{{ batch.get_status_display }}</span></div>
     <div class="page-header__sub">{{ batch.file_name }} · wgrano {{ batch.uploaded_at|date:"d.m.Y H:i" }}{% if batch.uploaded_by %} ({{ batch.uploaded_by.get_username }}){% endif %} · czas w pliku: {{ batch.get_tz_display }}</div>
   </div>
   <div class="page-header__actions">
@@ -35,9 +35,9 @@
 
 {% if pending %}
 {# UX-004 / WCAG 2.2.1: bez meta-refresh — fetch statusu co 5 s, komunikat w aria-live, po końcu przycisk „Odśwież” (R4: bez automatycznego przeładowania) #}
-<div class="alert alert-info" id="wt-progress" data-status-url="{% url 'twin:ewm_tasks_status' batch.pk %}"
-     style="margin-bottom:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-  <div style="flex:1 1 320px">
+<div class="u-mb-16 u-d-flex u-gap-12 u-ai-center u-fwrap-wrap alert alert-info" id="wt-progress" data-status-url="{% url 'twin:ewm_tasks_status' batch.pk %}"
+    >
+  <div class="u-flex-1-1-320">
     <div id="wt-progress-live" role="status" aria-live="polite">Import trwa w tle — status sprawdzamy co 5 s bez przeładowania strony.
       Duży plik (kilkaset MB) może się importować kilkanaście minut.</div>
     <div id="wt-progress-meta" class="text-muted text-sm"></div>
@@ -46,9 +46,9 @@
   <button type="button" id="wt-refresh" class="btn btn-primary" hidden>Odśwież</button>
 </div>
 {% elif stale %}
-<div class="alert alert-error" style="margin-bottom:16px">Import nie skończył się (serwer został zrestartowany w trakcie). Usuń ten import i wgraj plik ponownie.</div>
+<div class="u-mb-16 alert alert-error">Import nie skończył się (serwer został zrestartowany w trakcie). Usuń ten import i wgraj plik ponownie.</div>
 {% elif batch.message %}
-<div class="alert {% if batch.status == 'error' %}alert-error{% else %}alert-success{% endif %}" style="margin-bottom:16px">{{ batch.message }}</div>
+<div class="u-mb-16 alert {% if batch.status == 'error' %}alert-error{% else %}alert-success{% endif %}">{{ batch.message }}</div>
 {% endif %}
 
 {% if stats %}
@@ -57,7 +57,7 @@
   <div class="stat-card"><div><div class="stat-value">{{ stats.errors }}</div><div class="stat-label">błędnych wierszy (pominięte)</div></div></div>
   <div class="stat-card"><div><div class="stat-value">{{ stats.unconfirmed }}</div><div class="stat-label">bez potwierdzenia · {{ stats.cancelled }} anulowanych</div></div></div>
   <div class="stat-card"><div><div class="stat-value">{{ stats.resources }}</div><div class="stat-label">zasobów / użytkowników</div></div></div>
-  <div class="stat-card"><div><div class="stat-value" style="font-size:15px">{% if batch.first_confirmed %}{{ batch.first_confirmed|date:"d.m.Y H:i" }}<br>{{ batch.last_confirmed|date:"d.m.Y H:i" }}{% else %}—{% endif %}</div><div class="stat-label">potwierdzone od – do</div></div></div>
+  <div class="stat-card"><div><div class="u-fs-15 stat-value">{% if batch.first_confirmed %}{{ batch.first_confirmed|date:"d.m.Y H:i" }}<br>{{ batch.last_confirmed|date:"d.m.Y H:i" }}{% else %}—{% endif %}</div><div class="stat-label">potwierdzone od – do</div></div></div>
 </div>
 
 <div class="wt-grid">
@@ -72,20 +72,20 @@
     <table class="table"><tbody>
       {% for p in stats.processes %}<tr><td class="font-semibold">{{ p.process }}</td><td>{{ p.label }}</td><td class="text-right">{{ p.count }}</td></tr>{% endfor %}
     </tbody></table>
-    {% if overrides %}<div class="text-muted text-sm" style="margin-top:8px">Nadpisania: {% for code, kind in overrides %}{{ code }} = {{ kind }}{% if not forloop.last %}, {% endif %}{% endfor %}</div>{% endif %}
+    {% if overrides %}<div class="u-mt-8 text-muted text-sm">Nadpisania: {% for code, kind in overrides %}{{ code }} = {{ kind }}{% if not forloop.last %}, {% endif %}{% endfor %}</div>{% endif %}
   </div></div>
 </div>
 {% endif %}
 
 {% if report %}
-<div class="card" style="margin-bottom:16px"><div class="card-body">
-  <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
-    <div class="wt-h" style="margin:0">Lokalizacje z zadań vs model</div>
-    <form method="get" style="margin-left:auto"><select name="model" class="form-control" data-autosubmit aria-label="Model magazynu">
+<div class="u-mb-16 card"><div class="card-body">
+  <div class="u-d-flex u-gap-12 u-ai-center u-fwrap-wrap u-mb-10">
+    <div class="u-m-0 wt-h">Lokalizacje z zadań vs model</div>
+    <form method="get" class="u-ml-auto"><select name="model" class="form-control" data-autosubmit aria-label="Model magazynu">
       {% for m in models %}<option value="{{ m.pk }}" {% if m.pk == report.model.pk %}selected{% endif %}>{{ m.name }}</option>{% endfor %}
     </select></form>
   </div>
-  <p style="margin:0 0 8px">{{ report.locations }} lokalizacji w zadaniach: <b>{{ report.mapped }}</b> w regałach modelu, <b>{{ report.unmapped }}</b> spoza modelu
+  <p class="u-m-0-0-8">{{ report.locations }} lokalizacji w zadaniach: <b>{{ report.mapped }}</b> w regałach modelu, <b>{{ report.unmapped }}</b> spoza modelu
     <span class="text-muted">(doki, bufory, inne strefy). W animacji przyjęcie z takiej lokalizacji startuje z najbliższego doku,
     a wydanie i kompletacja kończą się na doku / stanowisku; przesunięcia i uzupełnienia z lokalizacją spoza modelu są pomijane.</span></p>
   {% if report.examples %}<div class="codes">{{ report.examples|join:" · " }}{% if report.unmapped > report.examples|length %} …{% endif %}</div>{% endif %}
@@ -95,7 +95,7 @@
 {% if stats.error_list %}
 <div class="card"><div class="card-body">
   <div class="wt-h">Błędne wiersze (pierwsze {{ stats.error_list|length }} z {{ stats.errors }})</div>
-  <table class="table"><tbody>{% for e in stats.error_list %}<tr><td class="text-muted" style="width:90px">wiersz {{ e.line }}</td><td>{{ e.error }}</td></tr>{% endfor %}</tbody></table>
+  <table class="table"><tbody>{% for e in stats.error_list %}<tr><td class="u-w-90 text-muted">wiersz {{ e.line }}</td><td>{{ e.error }}</td></tr>{% endfor %}</tbody></table>
 </div></div>
 {% endif %}
 {% endblock %}

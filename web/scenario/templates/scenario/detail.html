@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}{% load static %}
 {% block title %}{{ sc.name }} — Scenariusze — {{ app_name }}{% endblock %}
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .sc-sec { font:600 var(--fs-xs) var(--font-mono); text-transform:uppercase; letter-spacing:.12em; color:var(--primary); margin:0 0 12px; }
   .sc-nav { display:flex; flex-wrap:wrap; gap:6px; margin:0 0 16px; padding:0; list-style:none; }
   .sc-nav a { display:block; padding:6px 12px; border:1px solid var(--border); border-radius:999px; font-size:var(--fs-sm);
@@ -115,10 +115,10 @@
     </tbody>
   </table>
   </div>
-  <p class="text-muted text-sm" style="margin:10px 0 0">Oszacowanie deterministyczne: auta równo w oknach (przyjęcia: okno awizacji; wydania: od początku załadunku do cut-off), dok zajęty przez czas z norm. Mnożnik wzrostu dokłada auta (w górę) i zwiększa zamówienia, paczki i zwroty. Kolejki i losowy rozrzut policzy symulacja dnia.</p>
+  <p class="u-m-10-0-0 text-muted text-sm">Oszacowanie deterministyczne: auta równo w oknach (przyjęcia: okno awizacji; wydania: od początku załadunku do cut-off), dok zajęty przez czas z norm. Mnożnik wzrostu dokłada auta (w górę) i zwiększa zamówienia, paczki i zwroty. Kolejki i losowy rozrzut policzy symulacja dnia.</p>
 </div></section>
 
-<section class="card" style="margin-top:16px" aria-labelledby="sc-staff-h"><div class="card-body">
+<section class="u-mt-16 card" aria-labelledby="sc-staff-h"><div class="card-body">
   <h2 class="sc-sec" id="sc-staff-h">Obsada: zakładana vs potrzebna</h2>
   <div class="sc-scroll">
   <table class="sc-table">
@@ -136,15 +136,15 @@
     </tbody>
   </table>
   </div>
-  <p class="text-muted text-sm" style="margin:10px 0 0">▲ = niedobór (potrzeba więcej osób niż zakładana obsada). Osobogodziny procesu dzielone między jego zmiany proporcjonalnie do czasu pracy bez przerw.</p>
+  <p class="u-m-10-0-0 text-muted text-sm">▲ = niedobór (potrzeba więcej osób niż zakładana obsada). Osobogodziny procesu dzielone między jego zmiany proporcjonalnie do czasu pracy bez przerw.</p>
 </div></section>
 
-<section class="card" style="margin-top:16px" aria-labelledby="sc-sim-h"><div class="card-body">
+<section class="u-mt-16 card" aria-labelledby="sc-sim-h"><div class="card-body">
   <h2 class="sc-sec" id="sc-sim-h">Symulacja dnia na hali</h2>
   {% if job.pending or job.status == "error" %}{% include "core/_job_status.html" with may_compute=is_designer %}{% endif %}
-  <p class="text-muted text-sm" style="margin:0 0 12px">Każde auto, kontener, paleta i paczka ze scenariusza w czasie dnia na wybranym layoucie: kolejki przy dokach, pola odkładcze, ludzie na zmianach, wózki z ładowaniem. Kilkanaście przebiegów z losowym rozrzutem (ziarno {{ sc.seed }} — wynik powtarzalny): średnia i najgorszy przypadek (P95).</p>
+  <p class="u-m-0-0-12 text-muted text-sm">Każde auto, kontener, paleta i paczka ze scenariusza w czasie dnia na wybranym layoucie: kolejki przy dokach, pola odkładcze, ludzie na zmianach, wózki z ładowaniem. Kilkanaście przebiegów z losowym rozrzutem (ziarno {{ sc.seed }} — wynik powtarzalny): średnia i najgorszy przypadek (P95).</p>
   {% if no_models %}
-  <div class="empty-state" style="margin:0 0 12px">
+  <div class="u-m-0-0-12 empty-state">
     <p>Do symulacji potrzebny jest model hali (doki, pola odkładcze, regały).</p>
     <a class="btn btn-primary" href="{% url 'twin:warehouse_model_generator' %}">Zbuduj halę w generatorze</a>
     <a class="btn btn-secondary" href="{% url 'twin:warehouse_model_list' %}">Modele hal</a>
@@ -155,17 +155,17 @@
     {% for f in sim_form %}<label for="{{ f.id_for_label }}">{{ f.label }} {{ f }}</label>{% endfor %}
     <button class="btn btn-primary" type="submit">Uruchom symulację</button>
   </form>
-  <p class="text-sm" id="sc-sim-live" role="status" aria-live="polite" style="margin:6px 0 0"></p>
+  <p class="u-m-6-0-0 text-sm" id="sc-sim-live" role="status" aria-live="polite"></p>
   {% endif %}
   {% for v in sim_runs %}
-  <div style="margin-top:20px">
-    <p class="sc-sub" style="margin-top:0">{{ v.run.get_day_kind_display }} na „{{ v.run.model.name }}” · {{ v.run.runs }} przebiegów · {{ v.run.created_at|date:"d.m.Y H:i" }} · {{ v.run.duration_s|floatformat:"-1" }} s
+  <div class="u-mt-20">
+    <p class="u-mt-0 sc-sub">{{ v.run.get_day_kind_display }} na „{{ v.run.model.name }}” · {{ v.run.runs }} przebiegów · {{ v.run.created_at|date:"d.m.Y H:i" }} · {{ v.run.duration_s|floatformat:"-1" }} s
       · <a class="btn btn-primary btn-sm" href="{% url 'scenario:run_play' v.run.pk %}">Animacja dnia</a>
       · <a href="{% url 'scenario:run_xlsx' v.run.pk %}">wyniki (xlsx)</a>
       · <a href="{% url 'scenario:showcase_list' %}?run={{ v.run.pk }}">prezentacja 3D</a>
       · <a href="{% url 'scenario:compare' %}?ids={{ v.run.pk }}">porównaj</a>
       · <a href="{% url 'scenario:run_events' v.run.pk %}">zdarzenia (JSON)</a></p>
-    {% for w in v.warnings %}<p class="text-sm" style="margin:0 0 6px">⚠ {{ w }}</p>{% endfor %}
+    {% for w in v.warnings %}<p class="u-m-0-0-6 text-sm">⚠ {{ w }}</p>{% endfor %}
     <h3 class="sc-sub">Wąskie gardła {% if v.bottlenecks %}({{ v.bottlenecks|length }}{% if v.errors %}, krytyczne: {{ v.errors }}{% endif %}){% endif %}</h3>
     {% if v.bottlenecks %}
     <ul class="sc-bn">
@@ -177,14 +177,14 @@
       </li>
       {% endfor %}
     </ul>
-    <p class="text-muted text-sm" style="margin:6px 0 0">Podpowiedzi „+N” sprawdzone ponowną symulacją tego samego dnia — decyzja należy do Ciebie.</p>
+    <p class="u-m-6-0-0 text-muted text-sm">Podpowiedzi „+N” sprawdzone ponowną symulacją tego samego dnia — decyzja należy do Ciebie.</p>
     {% else %}
-    <p class="text-sm is-ok" style="margin:0">Bez wąskich gardeł — dzień mieści się w layoucie i obsadzie.</p>
+    <p class="u-m-0 text-sm is-ok">Bez wąskich gardeł — dzień mieści się w layoucie i obsadzie.</p>
     {% endif %}
-    <div class="sc-simgrid" style="margin-top:12px">
+    <div class="u-mt-12 sc-simgrid">
       {% for title, cells in v.groups %}
       <div>
-        <h3 class="sc-sub" style="margin-top:0">{{ title }}</h3>
+        <h3 class="u-mt-0 sc-sub">{{ title }}</h3>
         <table class="sc-table"><caption class="sr-only">{{ title }}: średnia i najgorszy przypadek</caption>
           <thead><tr><th scope="col">Wskaźnik</th><th scope="col">Średnio</th><th scope="col">Najgorzej</th></tr></thead>
           <tbody>{% for c in cells %}<tr><th scope="row">{{ c.label }}{% if c.unit %} [{{ c.unit }}]{% endif %}</th><td>{{ c.mean }}</td><td>{{ c.worst }}</td></tr>{% endfor %}
@@ -208,11 +208,11 @@
         {% for z in v.capacity.zones %}{% if z.need or z.areas %}<tr><th scope="row">Strefa: {{ z.label }}{% if not z.areas %} <span class="text-muted">(brak w layoucie)</span>{% endif %}</th>
           <td>{{ z.positions|floatformat:"0g" }}</td><td class="{% if z.need > z.positions %}is-short{% else %}is-ok{% endif %}">{{ z.need|floatformat:"0g" }}</td></tr>{% endif %}{% endfor %}
       </tbody></table>
-    <p class="text-muted text-sm" style="margin:6px 0 0">Potrzeba = palety na aktualnym stanie × mnożnik wzrostu ({{ sc.growth|floatformat:"-2" }}). Kartonów na paletę z kontenera: {{ v.cpp.value|floatformat:"-1" }} ({{ v.cpp.source }}).</p>
+    <p class="u-m-6-0-0 text-muted text-sm">Potrzeba = palety na aktualnym stanie × mnożnik wzrostu ({{ sc.growth|floatformat:"-2" }}). Kartonów na paletę z kontenera: {{ v.cpp.value|floatformat:"-1" }} ({{ v.cpp.source }}).</p>
     {% endif %}
     {% include "scenario/_costs.html" with c=v.costs %}
-    {% if v.fleet %}<p class="text-muted text-sm" style="margin:4px 0 0">Flota z katalogu: <b>{{ v.fleet.name }}</b> — ruch palety {{ v.fleet.min_per_move|floatformat:"-2" }} min (droga {{ v.fleet.dist_m|floatformat:"-1" }} m w jedną stronę, podniesienie średnio {{ v.fleet.lift_m|floatformat:"-2" }} m), bateria {{ v.fleet.battery_h|floatformat:"-1" }} h, ładowanie {{ v.fleet.charge_h|floatformat:"-1" }} h.</p>{% endif %}
-    {% if v.fleet_groups %}<div class="sc-scroll"><table class="sc-table"><caption class="text-sm" style="text-align:left">Flota mieszana — przebieg reprezentatywny</caption>
+    {% if v.fleet %}<p class="u-m-4-0-0 text-muted text-sm">Flota z katalogu: <b>{{ v.fleet.name }}</b> — ruch palety {{ v.fleet.min_per_move|floatformat:"-2" }} min (droga {{ v.fleet.dist_m|floatformat:"-1" }} m w jedną stronę, podniesienie średnio {{ v.fleet.lift_m|floatformat:"-2" }} m), bateria {{ v.fleet.battery_h|floatformat:"-1" }} h, ładowanie {{ v.fleet.charge_h|floatformat:"-1" }} h.</p>{% endif %}
+    {% if v.fleet_groups %}<div class="sc-scroll"><table class="sc-table"><caption class="u-ta-left text-sm">Flota mieszana — przebieg reprezentatywny</caption>
       <thead><tr><th scope="col">Grupa</th><th scope="col">Obsługuje</th><th scope="col">Sztuk</th><th scope="col">Ruch palety [min]</th><th scope="col">Etap przy przekazaniu [min]</th><th scope="col">Godzin pracy</th><th scope="col">Wykorzystanie</th><th scope="col">Czekanie P95 [min]</th></tr></thead>
       <tbody>{% for g in v.fleet_groups %}<tr><th scope="row">{{ g.name }}</th><td>{{ g.role_label }}</td><td>{{ g.units }}</td><td>{{ g.min_per_move|floatformat:"-2" }}</td><td>{{ g.leg_min|floatformat:"-2" }}</td><td>{{ g.busy_h|floatformat:"-1" }}</td><td class="{% if g.util_pct > 85 %}is-short{% endif %}">{{ g.util_pct }} %</td><td class="{% if g.wait_p95_min > 30 %}is-short{% endif %}">{{ g.wait_p95_min|floatformat:"-1" }}</td></tr>{% endfor %}</tbody>
     </table></div>{% endif %}
@@ -220,21 +220,21 @@
     <div class="sc-fsbar"><button type="button" class="btn btn-ghost btn-sm" aria-pressed="false" data-fs-target="sim-box-{{ v.run.pk }}">Pełny ekran</button></div>
     <div class="sc-chart" id="sim-{{ v.run.pk }}" role="img" aria-label="Oś czasu dnia ({{ v.run.get_day_kind_display|lower }}): auta w kolejce, palety na polach odkładczych, wózki w pracy — wartości w tabeli poniżej"></div>
     </div>
-    <details style="margin-top:8px"><summary class="text-sm">Oś czasu jako tabela (co godzinę)</summary>
+    <details class="u-mt-8"><summary class="text-sm">Oś czasu jako tabela (co godzinę)</summary>
       <div class="sc-scroll"><table class="sc-table"><thead><tr><th scope="col">Godzina</th><th scope="col">Aut w kolejce</th><th scope="col">Palet: pole przyjęć</th><th scope="col">Palet: pole wydań</th><th scope="col">Wózków w pracy</th></tr></thead>
         <tbody>{% for h in v.hourly %}<tr><th scope="row">{{ h.t }}</th><td>{{ h.queue }}</td><td>{{ h.staging_in }}</td><td>{{ h.staging_out }}</td><td>{{ h.fleet }}</td></tr>{% endfor %}</tbody></table></div>
     </details>
   </div>
   {% empty %}
-  {% if not sim_form %}<p class="text-sm" style="margin:0">Symulacji jeszcze nie uruchomiono.</p>{% endif %}
+  {% if not sim_form %}<p class="u-m-0 text-sm">Symulacji jeszcze nie uruchomiono.</p>{% endif %}
   {% endfor %}
-  <p class="text-muted text-sm" style="margin:12px 0 0"><a href="{% url 'scenario:compare' %}">Porównaj wyniki</a> — layouty i scenariusze w jednej tabeli.</p>
+  <p class="u-m-12-0-0 text-muted text-sm"><a href="{% url 'scenario:compare' %}">Porównaj wyniki</a> — layouty i scenariusze w jednej tabeli.</p>
 </div></section>
 {{ sim_charts|json_script:"sc-sim-data" }}
 
 {% if form %}
 {% for d in day_forms %}
-<section class="card" style="margin-top:16px" aria-labelledby="sc-in-{{ d.day.kind }}"{% if forloop.first %} id="sc-in-forms"{% endif %}><div class="card-body">
+<section class="u-mt-16 card" aria-labelledby="sc-in-{{ d.day.kind }}"{% if forloop.first %} id="sc-in-forms"{% endif %}><div class="card-body">
   <h2 class="sc-sec" id="sc-in-{{ d.day.kind }}">Plan przyjęć — {{ d.day.get_kind_display|lower }}</h2>
   <form method="post" action="{% url 'scenario:day_save' sc.pk d.day.kind %}">{% csrf_token %}
     {{ d.inbound.management_form }}
@@ -255,7 +255,7 @@
 {% endfor %}
 
 {% for d in day_forms %}
-<section class="card" style="margin-top:16px" aria-labelledby="sc-out-{{ d.day.kind }}"{% if forloop.first %} id="sc-out-forms"{% endif %}><div class="card-body">
+<section class="u-mt-16 card" aria-labelledby="sc-out-{{ d.day.kind }}"{% if forloop.first %} id="sc-out-forms"{% endif %}><div class="card-body">
   <h2 class="sc-sec" id="sc-out-{{ d.day.kind }}">Wydania, paczki, zwroty — {{ d.day.get_kind_display|lower }}</h2>
   <form method="post" action="{% url 'scenario:outbound_save' sc.pk d.day.kind %}">{% csrf_token %}
     <div class="sc-params">
@@ -279,9 +279,9 @@
 </div></section>
 {% endfor %}
 
-<section class="card" style="margin-top:16px" aria-labelledby="sc-fleet-h"><div class="card-body">
+<section class="u-mt-16 card" aria-labelledby="sc-fleet-h"><div class="card-body">
   <h2 class="sc-sec" id="sc-fleet-h">Flota mieszana</h2>
-  <p class="text-muted text-sm" style="margin:0 0 8px">Grupy sprzętu z katalogu. Reach, czołowy i podobne obsługują regały paletowe, VNA — regały VNA, AGV/AMR i wózki paletowe wożą palety poziomo; przy AGV + VNA paleta do regału VNA jedzie dwoma etapami z przekazaniem u czoła alejki. Pusta lista = jedna flota z pól „Flota: …” w parametrach.</p>
+  <p class="u-m-0-0-8 text-muted text-sm">Grupy sprzętu z katalogu. Reach, czołowy i podobne obsługują regały paletowe, VNA — regały VNA, AGV/AMR i wózki paletowe wożą palety poziomo; przy AGV + VNA paleta do regału VNA jedzie dwoma etapami z przekazaniem u czoła alejki. Pusta lista = jedna flota z pól „Flota: …” w parametrach.</p>
   <form method="post" action="{% url 'scenario:fleet_save' sc.pk %}">{% csrf_token %}
     {{ fleet_fs.management_form }}
     <div class="sc-scroll">
@@ -299,7 +299,7 @@
   </form>
 </div></section>
 
-<section class="card" style="margin-top:16px" aria-labelledby="sc-shift-h"><div class="card-body">
+<section class="u-mt-16 card" aria-labelledby="sc-shift-h"><div class="card-body">
   <h2 class="sc-sec" id="sc-shift-h">Zmiany i zakładana obsada</h2>
   <form method="post" action="{% url 'scenario:shifts_save' sc.pk %}">{% csrf_token %}
     {{ shift_fs.management_form }}
@@ -318,7 +318,7 @@
   </form>
 </div></section>
 
-<section class="card" style="margin-top:16px" aria-labelledby="sc-par-h"><div class="card-body">
+<section class="u-mt-16 card" aria-labelledby="sc-par-h"><div class="card-body">
   <h2 class="sc-sec" id="sc-par-h">Parametry i normy wydajności</h2>
   <form method="post" action="{% url 'scenario:save' sc.pk %}">{% csrf_token %}
     <div class="sc-params">
@@ -329,17 +329,17 @@
   </form>
 </div></section>
 
-<div class="sc-actions" style="margin-top:16px">
+<div class="u-mt-16 sc-actions">
   <form method="post" action="{% url 'scenario:copy' sc.pk %}">{% csrf_token %}<button class="btn btn-ghost" type="submit">Kopiuj scenariusz</button></form>
   <a class="btn btn-ghost btn-sm" href="{% url 'scenario:delete' sc.pk %}">Usuń scenariusz</a>
 </div>
 {% else %}
-<section class="card" style="margin-top:16px" aria-labelledby="sc-plan-h"><div class="card-body">
+<section class="u-mt-16 card" aria-labelledby="sc-plan-h"><div class="card-body">
   <h2 class="sc-sec" id="sc-plan-h">Założenia przyjęć i wydań</h2>
   {% for r in results %}
-  <p class="text-sm" style="margin:0 0 6px"><b>{{ r.day.get_kind_display }} — przyjęcia:</b>
+  <p class="u-m-0-0-6 text-sm"><b>{{ r.day.get_kind_display }} — przyjęcia:</b>
     {% for s in r.day.inbound.all %}{{ s.get_kind_display }} {{ s.arrivals_avg|floatformat:"-1" }}/dzień ({{ s.arrivals_min|floatformat:"-1" }}–{{ s.arrivals_max|floatformat:"-1" }}), {{ s.pallets_avg|floatformat:"-1" }} pal.{% if not forloop.last %} · {% endif %}{% endfor %}</p>
-  <p class="text-sm" style="margin:0 0 10px"><b>{{ r.day.get_kind_display }} — wydania:</b>
+  <p class="u-m-0-0-10 text-sm"><b>{{ r.day.get_kind_display }} — wydania:</b>
     {% for s in r.day.outbound.all %}{{ s.get_kind_display }} {{ s.departures_avg|floatformat:"-1" }}/dzień{% if s.pallets_avg %}, {{ s.pallets_avg|floatformat:"-1" }} pal.{% endif %}{% if not forloop.last %} · {% endif %}{% endfor %}
     · zamówień {{ r.day.orders_avg|floatformat:"0g" }}, paczek {{ r.day.parcels_avg|floatformat:"0g" }}, zwrotów {{ r.day.returns_avg|floatformat:"0g" }}</p>
   {% endfor %}
@@ -375,7 +375,7 @@ document.querySelectorAll('[data-fs-target]').forEach((b) => {
     var chart = echarts.init(box);
     chart.setOption({
       textStyle: {color: fg}, grid: {left: 44, right: 16, top: 34, bottom: 40},
-      tooltip: {trigger: 'axis'}, legend: {textStyle: {color: fg}, top: 0},
+      tooltip: {trigger: 'axis', renderMode: 'richText', valueFormatter: function (v) { return v == null || isNaN(v) ? '–' : Number(v).toLocaleString('pl-PL', {maximumFractionDigits: 1}); }}, legend: {textStyle: {color: fg}, top: 0},
       xAxis: {type: 'category', data: d.t, axisLabel: {color: fg, interval: 7}, axisLine: {lineStyle: {color: line}}},
       yAxis: {type: 'value', axisLabel: {color: fg}, splitLine: {lineStyle: {color: line}}},
       series: d.series.map(function (s) { return {name: s.name, type: 'line', data: s.data, symbol: 'none', step: 'end'}; })

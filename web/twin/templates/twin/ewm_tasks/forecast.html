@@ -3,7 +3,7 @@
 {% block nav_warehouse_map %}topnav__link--active{% endblock %}
 
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .fc-form { display: flex; gap: 12px; align-items: flex-end; }
   .fc-form .form-group { margin: 0; }
   .fc-table td.num, .fc-table th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -41,15 +41,15 @@
 </div></div>
 
 {% if not rows %}
-<div class="alert alert-warning" style="margin-top:16px">Za mało historii — potrzeba co najmniej kilku pełnych tygodni potwierdzonych zadań.</div>
+<div class="u-mt-16 alert alert-warning">Za mało historii — potrzeba co najmniej kilku pełnych tygodni potwierdzonych zadań.</div>
 {% else %}
 {% if total and not total.reliable %}
-<div class="alert alert-warning" style="margin-top:16px">Tylko {{ total.weeks }} pełnych tygodni — trend z tak krótkiej historii jest mało wiarygodny (zalecane ≥ {{ min_weeks }}, a do sezonowości rocznej ≥ 104). Traktuj mnożnik jako orientacyjny.</div>
+<div class="u-mt-16 alert alert-warning">Tylko {{ total.weeks }} pełnych tygodni — trend z tak krótkiej historii jest mało wiarygodny (zalecane ≥ {{ min_weeks }}, a do sezonowości rocznej ≥ 104). Traktuj mnożnik jako orientacyjny.</div>
 {% endif %}
 {% if total %}
-<div class="card" style="margin-top:16px"><div class="card-body">
+<div class="u-mt-16 card"><div class="card-body">
   <div class="section-title">Mnożnik — horyzont {{ years }} l. (wszystkie ruchy)</div>
-  <div style="display:flex;gap:32px;flex-wrap:wrap">
+  <div class="u-d-flex u-gap-32 u-fwrap-wrap">
     <div><div class="fc-big">×{{ total.mult_p50 }}</div><div class="fc-note">P50 (bazowy) · {{ total.growth_p50_pct }} % rocznie</div></div>
     <div><div class="fc-big">×{{ total.mult_p90 }}</div><div class="fc-note">P90 (ostrożny, do wymiarowania) · {{ total.growth_p90_pct }} % rocznie</div></div>
     <div><div class="fc-big">{% if total.mape_pct is None %}—{% else %}{{ total.mape_pct }} %{% endif %}</div><div class="fc-note">Błąd testu wstecznego (MAPE, ostatnie {{ backtest_weeks }} tyg.)</div></div>
@@ -62,7 +62,7 @@
 </div></div>
 {% endif %}
 
-<div class="card" style="margin-top:16px"><div class="card-body">
+<div class="u-mt-16 card"><div class="card-body">
   <div class="section-title">Według strumienia</div>
   <div class="table-wrap"><table class="table fc-table">
     <thead><tr><th>Strumień</th><th class="num">Tygodni</th><th class="num">Wzrost P50 / rok</th><th class="num">Wzrost P90 / rok</th>

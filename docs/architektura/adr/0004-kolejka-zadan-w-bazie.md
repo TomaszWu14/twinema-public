@@ -20,8 +20,9 @@ procesu, więc inny proces gunicorna liczył ten sam dzień od nowa.
 Opcja 1 (decyzja PO z 2026-10-16):
 - model `core.Job`: rodzaj, parametry, stan (w kolejce / w toku / gotowe / błąd), liczba prób, wynik JSON;
 - pobranie zadania to warunkowa zmiana stanu w bazie, więc kilka workerów nie weźmie tego samego zadania;
-- zadanie „w toku” dłużej niż `JOB_STALE_MIN` (domyślnie 60 min) wraca do kolejki, a po 3 próbach kończy się
-  błędem;
+- zadanie „w toku” bez sygnału workera (`heartbeat_at`, co minutę) od `JOB_STALE_MIN` (domyślnie 60 min) wraca
+  do kolejki, a po 3 próbach kończy się błędem; wynik zapisuje tylko worker, który wciąż ma zadanie (przegląd kodu,
+  2026-10-17); zadanie z błędem wraca do kolejki tylko na żądanie Projektanta („Policz ponownie”);
 - `key` (skrót danych i parametrów) sprawia, że ten sam zestaw nie liczy się drugi raz, a wynik odczytuje każda
   rola z dostępem do ekranu (Z-3: zlecić obliczenie może tylko Projektant);
 - worker startuje w tym samym kontenerze co serwer (`RUN_WORKER=true`); można go też uruchomić jako osobną

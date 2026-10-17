@@ -33,12 +33,12 @@
 </div>
 
 {% if proposal.missing_rows %}
-<div class="alert alert-info" style="margin-bottom:16px">
+<div class="u-mb-16 alert alert-info">
   Rzędy bez żadnego kodu w masterze (zostają bez zmian): {{ proposal.missing_rows|join:", " }}
 </div>
 {% endif %}
 
-<div class="card" style="margin-bottom:20px">
+<div class="u-mb-20 card">
   <div class="card-header"><span class="card-header__title">Szablony gniazd</span>
     <span class="text-sm text-muted">wysokości poziomów do poprawy w „Szablony gniazd”, jeśli master ich nie ma</span></div>
   <div class="table-wrap">
@@ -79,7 +79,7 @@
     </table>
   </div>
   {% if is_designer %}
-  <div class="card-footer" style="display:flex;gap:10px;align-items:center">
+  <div class="u-d-flex u-gap-10 u-ai-center card-footer">
     <form method="post" action="{% url 'twin:warehouse_model_detect_save' wm.pk %}">
       {% csrf_token %}
       <button type="submit" class="btn btn-primary">Zapisz</button>

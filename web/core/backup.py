@@ -77,15 +77,19 @@ def archive_media(target_dir):
 
 
 def prune(backup_dir, keep=KEEP):
-    """Zostawia `keep` najnowszych zestawów (nazwy katalogów sortują się chronologicznie)."""
+    """Zostawia `keep` (≥ 1) najnowszych zestawów (nazwy katalogów sortują się chronologicznie)."""
+    if keep < 1:
+        raise BackupError("Liczba zachowanych kopii (--keep) musi być co najmniej 1.")
     sets = sorted(p for p in backup_dir.iterdir() if p.is_dir() and (p / "manifest.json").exists())
-    removed = sets[:-keep] if keep else sets
+    removed = sets[:-keep]
     for p in removed:
         shutil.rmtree(p)
     return [p.name for p in removed]
 
 
 def make_backup(backup_dir=None, now=None, keep=KEEP):
+    if keep < 1:                                     # przed zrzutem — `--keep 0` skasowałby też nową kopię
+        raise BackupError("Liczba zachowanych kopii (--keep) musi być co najmniej 1.")
     backup_dir = Path(backup_dir or settings.BACKUP_DIR or "")
     if not str(backup_dir) or str(backup_dir) == ".":
         raise BackupError("Ustaw BACKUP_DIR — katalog kopii poza wolumenem mediów.")

@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
 {% block title %}{{ m.code }} — Materiały — {{ app_name }}{% endblock %}
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .mf-grid { display:grid; grid-template-columns:minmax(0,3fr) minmax(0,2fr); gap:16px; align-items:start; }
   @media (max-width: 900px) { .mf-grid { grid-template-columns:1fr; } }
   .mf-sec { font:600 var(--fs-xs) var(--font-mono); text-transform:uppercase; letter-spacing:.12em; color:var(--primary); margin:16px 0 10px; }
@@ -68,7 +68,7 @@
       <label class="mf-check" for="{{ f.high_value.id_for_label }}">{{ f.high_value }} {{ f.high_value.label }}</label>
     </div>
     {% endwith %}
-    <div style="margin-top:16px"><button class="btn btn-primary" type="submit">Zapisz materiał</button></div>
+    <div class="u-mt-16"><button class="btn btn-primary" type="submit">Zapisz materiał</button></div>
   </div></form>
 
   <div class="card"><div class="card-body">
@@ -82,10 +82,10 @@
     </dl>
     <h2 class="mf-sec">Spójność danych</h2>
     <div role="status" aria-live="polite">
-    {% if warnings %}<ul class="text-sm" style="margin:0;padding-left:18px">{% for w in warnings %}<li>{{ w }}</li>{% endfor %}</ul>
-    {% else %}<p class="text-sm" style="margin:0">Bez uwag.</p>{% endif %}
+    {% if warnings %}<ul class="u-m-0 u-pl-18 text-sm">{% for w in warnings %}<li>{{ w }}</li>{% endfor %}</ul>
+    {% else %}<p class="u-m-0 text-sm">Bez uwag.</p>{% endif %}
     </div>
-    <p class="text-muted text-sm" style="margin:10px 0 0">Ostrzeżenia nie blokują zapisu. Puste klasy wysokości i wagi aplikacja dobiera z wyliczonej palety.</p>
+    <p class="u-m-10-0-0 text-muted text-sm">Ostrzeżenia nie blokują zapisu. Puste klasy wysokości i wagi aplikacja dobiera z wyliczonej palety.</p>
   </div></div>
 </div>
 {% endblock %}

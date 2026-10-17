@@ -9,25 +9,25 @@
   </div>
 </div>
 
-<div class="stats-grid" style="margin-bottom:24px">
+<div class="u-mb-24 stats-grid">
   <div class="stat-card"><div><div class="stat-value">{{ log.rows_total }}</div><div class="stat-label">wierszy w pliku</div></div></div>
   <div class="stat-card"><div><div class="stat-value">{{ log.rows_ok }}</div><div class="stat-label">zapisanych</div></div></div>
   <div class="stat-card"><div><div class="stat-value">{{ log.rows_rejected }}</div><div class="stat-label">odrzuconych</div></div></div>
 </div>
 
 {% if columns %}
-<div class="card" style="margin-bottom:16px">
+<div class="u-mb-16 card">
   <div class="card-header"><span class="card-header__title">Rozpoznane kolumny</span></div>
   <div class="card-body">
     <div class="table-wrap"><table class="table"><thead><tr><th>Pole</th><th>Kolumna w pliku</th></tr></thead>
       <tbody>{% for field, header in columns %}<tr><td>{{ field }}</td><td>{{ header }}</td></tr>{% endfor %}</tbody></table></div>
-    {% if unmapped %}<p class="text-muted text-sm" style="margin:10px 0 0">Bez kolumny w pliku (wartość domyślna): {{ unmapped|join:", " }}.</p>{% endif %}
+    {% if unmapped %}<p class="u-m-10-0-0 text-muted text-sm">Bez kolumny w pliku (wartość domyślna): {{ unmapped|join:", " }}.</p>{% endif %}
   </div>
 </div>
 {% endif %}
 
 {% if log.rejects %}
-<div class="card" style="margin-bottom:16px">
+<div class="u-mb-16 card">
   <div class="card-header"><span class="card-header__title">Odrzucone wiersze{% if log.rows_rejected > log.rejects|length %} (pierwsze {{ log.rejects|length }} z {{ log.rows_rejected }}){% endif %}</span></div>
   <div class="table-wrap"><table class="table"><thead><tr><th class="num">Wiersz</th><th>Powód</th></tr></thead>
     <tbody>{% for r in log.rejects %}<tr><td class="num">{{ r.row|default:"—" }}</td><td>{{ r.reason }}</td></tr>{% endfor %}</tbody></table></div>

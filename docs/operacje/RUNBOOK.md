@@ -13,16 +13,16 @@ migracje na danych produkcyjnych, odtworzenie) wykonuje się **tylko za zgodą P
 | 4 | Kontrola: `GET /health/` → `{"status": "ok", "db": "ok", "version": "<skrót>"}`. |
 
 Ustawienia platformy (Coolify): typ budowy **Dockerfile**; port aplikacji **8000** tylko w sieci wewnętrznej
-platformy, ruch z internetu wyłącznie przez proxy TLS (adres klienta z nagłówka proxy jest brany pod uwagę tylko z sieci wewnętrznej — US-006); kontrola
+platformy, ruch z internetu wyłącznie przez proxy TLS (adres klienta z nagłówka proxy jest brany pod uwagę tylko z sieci wewnętrznej — US-006; zalecane: `TRUSTED_PROXIES` z siecią Traefika, bo przy porcie opublikowanym wprost (`-p 8000:8000`, bez proxy) każdy klient przychodzi z adresu prywatnego bramki Dockera i mógłby podmienić nagłówek, omijając blokadę logowania); kontrola
 działania: ścieżka `/health/`, okres startowy co najmniej 120 s; trwały wolumen na media i — przy SQLite — na plik bazy.
 
 Zmienne środowiskowe: [.env.example](../../.env.example); walidacja przy starcie w `web/twinema/config.py`.
 Kontener uruchamia obok serwera worker kolejki zadań (`manage.py run_jobs`, ADR-0004); `RUN_WORKER=false`
 wyłącza go, gdy worker działa jako osobna usługa z tym samym obrazem i poleceniem `python manage.py run_jobs`.
-Zadanie „w toku” dłużej niż `JOB_STALE_MIN` wraca do kolejki. Stan zadań: tabela `core_job`.
+Worker co minutę odświeża sygnał zadania, które liczy; zadanie „w toku” bez sygnału od `JOB_STALE_MIN` wraca do kolejki. Zadanie z błędem Projektant ponawia przyciskiem „Policz ponownie”. Stan zadań: tabela `core_job`.
 Kontener przy starcie usuwa też wpisy dziennika operacji starsze niż `AUDIT_RETENTION_DAYS` (US-008) i próby logowania
 starsze niż `LOGIN_ATTEMPT_RETENTION_DAYS` (30 dni, RODO CP-2); dziennik ogląda Administrator pod `/dziennik/`.
-**Demo publiczne (`DEMO_PUBLIC=true`) tylko na osobnej instancji z danymi demo** (R-02). Gdy w bazie są dane spoza demo, kontener zapisuje przy starcie ostrzeżenie w logach, Administrator widzi baner, a wejście gościa jest zablokowane (US-011, R-02).
+**Demo publiczne (`DEMO_PUBLIC=true`) tylko na osobnej instancji z danymi demo** (R-02). Gdy w bazie są dane spoza demo, kontener zapisuje przy starcie ostrzeżenie w logach, Administrator widzi baner, a wejście gościa jest zablokowane (US-011, R-02). Dane demo rozpoznaje rejestr zapisywany przez `seed_demo` (hala, scenariusz, prezentacja, import stanów demo) — **po wdrożeniu na instancji demo uruchom `python manage.py seed_demo`** (przy `DEMO_SEED=true` robi to kontener), inaczej gość nie wejdzie. Zalogowany gość traci sesję, gdy pojawią się dane spoza demo.
 
 ### Wdrożenie zmian z PR #68 — kroki dla PO
 

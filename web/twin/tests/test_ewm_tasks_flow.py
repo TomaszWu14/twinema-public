@@ -247,6 +247,15 @@ class TasksEndpointAndImportTests(TestCase):
         batch.refresh_from_db()
         self.assertEqual((batch.status, batch.row_count, batch.tasks.count()), ("done", 2, 2))
 
+    def test_retry_of_finished_import_keeps_batch_done(self):
+        """Przegląd kodu (D): ponowione zadanie importu, który się już udał (plik usunięty), nie psuje partii."""
+        from twin.ewm_tasks_import import run_import
+        batch = WarehouseTaskBatch.objects.create(name="Gotowa", status="done", row_count=1, message="Zaimportowano 1")
+        batch.tasks.create(task_no="1")
+        run_import(batch.pk, "0" * 32 + ".csv")
+        batch.refresh_from_db()
+        self.assertEqual((batch.status, batch.message, batch.tasks.count()), ("done", "Zaimportowano 1", 1))
+
     def test_stuck_background_import_marked_stale(self):
         self.client.force_login(self.md)
         batch = WarehouseTaskBatch.objects.create(name="Wisi", status="running")
@@ -306,3 +315,21 @@ class OperatorLoginNotStoredTests(TestCase):
         mig.pseudonymize(apps, None)
         mig.pseudonymize(apps, None)                                   # drugi przebieg nic nie zmienia
         self.assertEqual(sorted(batch.tasks.values_list("user", flat=True)), ["", pseudonym("OPER07", operator_key())])
+
+    def test_migration_0009_pseudonymizes_logins_that_only_look_like_pseudonyms(self):
+        """Przegląd kodu (I): login „OP-0001” z systemu magazynowego też dostaje pseudonim; gotowy pseudonim zostaje."""
+        import importlib
+
+        from django.apps import apps
+
+        from twin.ewm_tasks import pseudonym
+        from twin.shared import operator_key
+        mig = importlib.import_module("twin.migrations.0009_pseudonimizacja_loginow_op")
+        done = pseudonym("OPER07", operator_key())
+        batch = WarehouseTaskBatch.objects.create(name="Stara", status="done")
+        WarehouseTask.objects.create(batch=batch, user="OP-0001")
+        WarehouseTask.objects.create(batch=batch, user=done)
+        mig.pseudonymize(apps, None)
+        mig.pseudonymize(apps, None)
+        self.assertEqual(sorted(batch.tasks.values_list("user", flat=True)),
+                         sorted([pseudonym("OP-0001", operator_key()), done]))

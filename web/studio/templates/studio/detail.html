@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
 {% block title %}{{ p.title }} — Studio — {{ app_name }}{% endblock %}
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .st-sec { font:600 var(--fs-xs) var(--font-mono); text-transform:uppercase; letter-spacing:.12em; color:var(--primary); margin:0 0 12px; }
   .st-steps { display:flex; flex-wrap:wrap; gap:6px; list-style:none; padding:0; margin:0 0 20px; counter-reset:step; }
   .st-steps li { counter-increment:step; font-size:var(--fs-sm); padding:6px 12px; border-radius:999px;
@@ -56,14 +56,14 @@
   <div class="st-result__grid">
     <video class="st-film" controls preload="metadata" src="{% url 'studio:film_file' montage.pk %}"></video>
     <div>
-      <p class="text-sm" style="margin:0 0 12px">Gotowy film z napisami w obrazie ({{ film_seconds }} s ujęć + plansze; dźwięk to podkład muzyczny workera albo cisza).</p>
+      <p class="u-m-0-0-12 text-sm">Gotowy film z napisami w obrazie ({{ film_seconds }} s ujęć + plansze; dźwięk to podkład muzyczny workera albo cisza).</p>
       <div class="st-actions">
         <a class="btn btn-primary btn-sm" href="{% url 'studio:film_file' montage.pk %}?pobierz=1">Pobierz MP4</a>
         <a class="btn btn-ghost btn-sm" href="{% url 'studio:deck_pdf' p.pk %}?pobierz=1">Pobierz deck PDF</a>
         <a class="btn btn-ghost btn-sm" href="{% url 'studio:subtitles' p.pk %}">Napisy SRT</a>
         <a class="btn btn-ghost btn-sm" href="{% url 'studio:youtube' p.pk %}">Opis na YouTube</a>
       </div>
-      <p class="text-muted text-sm" style="margin:10px 0 0">YouTube: wgraj MP4 i wklej opis z rozdziałami. Napisy są już
+      <p class="u-m-10-0-0 text-muted text-sm">YouTube: wgraj MP4 i wklej opis z rozdziałami. Napisy są już
         w obrazie; plik SRT możesz dodać jako napisy do tłumaczenia automatycznego (Napisy → Prześlij plik → z czasem).</p>
     </div>
   </div>
@@ -77,7 +77,7 @@
     <form method="post" action="{% url 'studio:shots_save' p.pk %}">{% csrf_token %}
       {{ formset.management_form }}
       {% for f in formset %}
-      <fieldset class="st-shot" style="border-left:0;border-right:0;border-bottom:0;margin:0">
+      <fieldset class="u-border-left-0 u-border-right-0 u-bb-0 u-m-0 st-shot">
         <legend class="sr-only">Ujęcie {{ forloop.counter }}</legend>
         {{ f.id }}
         <label for="{{ f.order.id_for_label }}">Kolejność {{ f.order }}</label>
@@ -87,7 +87,7 @@
         {% if f.instance.pk %}<label class="st-del" for="{{ f.DELETE.id_for_label }}">{{ f.DELETE }} Usuń</label>{% endif %}
       </fieldset>
       {% endfor %}
-      <div class="st-actions" style="margin-top:12px"><button class="btn btn-primary" type="submit">Zapisz teksty</button></div>
+      <div class="u-mt-12 st-actions"><button class="btn btn-primary" type="submit">Zapisz teksty</button></div>
     </form>
     {% else %}
       {% for s in shots %}
@@ -101,7 +101,7 @@
       Długość ujęcia to czas na spokojne przeczytanie napisu; krótkie zdania czyta się najlepiej.</p>
   </div></div>
 
-  <div style="display:grid;gap:16px">
+  <div class="u-d-grid u-gap-16">
     <div class="card"><div class="card-body">
       <h2 class="st-sec">Tekst</h2>
       {% if is_designer %}
@@ -113,31 +113,31 @@
             <button class="btn btn-ghost" type="submit"{% if not ai_enabled %} disabled aria-describedby="st-ai-off"{% endif %}>Szkic z Claude</button>
           </form>
         </div>
-        <p class="text-muted text-sm" style="margin:10px 0 0">Oba szkice zastępują obecne teksty. Zapisz najpierw swoje poprawki.</p>
+        <p class="u-m-10-0-0 text-muted text-sm">Oba szkice zastępują obecne teksty. Zapisz najpierw swoje poprawki.</p>
         {% if ai_enabled %}
-          <p class="text-muted text-sm" style="margin:6px 0 0">Model: <code>{{ claude_model }}</code>, zwykle 15–60 s.</p>
+          <p class="u-m-6-0-0 text-muted text-sm">Model: <code>{{ claude_model }}</code>, zwykle 15–60 s.</p>
         {% else %}
-          <p class="text-sm" id="st-ai-off" style="margin:6px 0 0">Szkic z Claude wyłączony — ustaw <code>ANTHROPIC_API_KEY</code> w zmiennych serwera.</p>
+          <p class="u-m-6-0-0 text-sm" id="st-ai-off">Szkic z Claude wyłączony — ustaw <code>ANTHROPIC_API_KEY</code> w zmiennych serwera.</p>
         {% endif %}
-        <p class="text-sm" id="st-ai-live" role="status" aria-live="polite" style="margin:6px 0 0"></p>
+        <p class="u-m-6-0-0 text-sm" id="st-ai-live" role="status" aria-live="polite"></p>
         {% if ai_job %}{% include "core/_job_status.html" with job=ai_job may_compute=is_designer %}
-        {% if ai_job.status == "done" and ai_job.result.error %}<div class="alert alert-error" role="alert" style="margin-top:12px">{{ ai_job.result.error }}</div>
-        {% elif ai_job.status == "done" %}<p class="text-sm" style="margin:6px 0 0">Ostatni szkic z Claude: {{ ai_job.result.count }} ujęć ({{ ai_job.finished_at|date:"d.m.Y H:i" }}).{% for w in ai_job.result.warnings %} {{ w }}{% endfor %}</p>{% endif %}{% endif %}
+        {% if ai_job.status == "done" and ai_job.result.error %}<div class="u-mt-12 alert alert-error" role="alert">{{ ai_job.result.error }}</div>
+        {% elif ai_job.status == "done" %}<p class="u-m-6-0-0 text-sm">Ostatni szkic z Claude: {{ ai_job.result.count }} ujęć ({{ ai_job.finished_at|date:"d.m.Y H:i" }}).{% for w in ai_job.result.warnings %} {{ w }}{% endfor %}</p>{% endif %}{% endif %}
         {% else %}
-        <p class="text-sm" style="margin:0 0 10px">Tekst zatwierdzony — render i montaż korzystają z tych tekstów.</p>
+        <p class="u-m-0-0-10 text-sm">Tekst zatwierdzony — render i montaż korzystają z tych tekstów.</p>
         <form method="post" action="{% url 'studio:reopen' p.pk %}">{% csrf_token %}<button class="btn btn-ghost" type="submit">Wróć do edycji</button></form>
         {% endif %}
-        <form method="post" action="{% url 'studio:delete' p.pk %}" style="margin-top:16px">{% csrf_token %}
+        <form method="post" action="{% url 'studio:delete' p.pk %}" class="u-mt-16">{% csrf_token %}
           <button class="btn btn-ghost btn-sm" type="submit">Usuń prezentację</button></form>
       {% else %}
-        <p class="text-muted text-sm" style="margin:0">Edycję i akceptację tekstu wykonuje Projektant.</p>
+        <p class="u-m-0 text-muted text-sm">Edycję i akceptację tekstu wykonuje Projektant.</p>
       {% endif %}
     </div></div>
 
     {% if not p.is_draft %}
     <div class="card"><div class="card-body">
       <h2 class="st-sec">Render ujęć</h2>
-      <p class="text-sm" style="margin:0">Klipy: {{ renders_done }} z {{ shots|length }} · kadry do decku: {{ stills_done }} z {{ shots|length }}
+      <p class="u-m-0 text-sm">Klipy: {{ renders_done }} z {{ shots|length }} · kadry do decku: {{ stills_done }} z {{ shots|length }}
         (Full HD, klip = długość ujęcia).</p>
       <ul class="st-renders">
         {% for s in shots %}
@@ -153,44 +153,44 @@
         {% endfor %}
       </ul>
       {% if is_designer %}{% if renders_done < shots|length or stills_done < shots|length %}
-      <form method="post" action="{% url 'studio:render_shots' p.pk %}" style="margin-top:10px">{% csrf_token %}
+      <form method="post" action="{% url 'studio:render_shots' p.pk %}" class="u-mt-10">{% csrf_token %}
         <button class="btn btn-primary" type="submit">Renderuj ujęcia i kadry</button></form>
-      <p class="text-muted text-sm" style="margin:6px 0 0">Jeden klik: klip do filmu i kadr do decku. Ta sama scena, kamera i długość → gotowy render bez kolejki. Renderuje worker z Blenderem{% if not worker_enabled %} — API workera wyłączone (<code>RENDER_WORKER_TOKEN</code>){% endif %}.</p>
+      <p class="u-m-6-0-0 text-muted text-sm">Jeden klik: klip do filmu i kadr do decku. Ta sama scena, kamera i długość → gotowy render bez kolejki. Renderuje worker z Blenderem{% if not worker_enabled %} — API workera wyłączone (<code>RENDER_WORKER_TOKEN</code>){% endif %}.</p>
       {% endif %}{% endif %}
     </div></div>
 
     <div class="card"><div class="card-body">
       <h2 class="st-sec">Montaż</h2>
       {% if montage and montage.status == "done" and montage_current %}
-        <p class="text-sm" style="margin:0"><span class="badge badge-green">Gotowe</span> Film jest na górze strony.</p>
+        <p class="u-m-0 text-sm"><span class="badge badge-green">Gotowe</span> Film jest na górze strony.</p>
       {% elif montage and montage_current and montage.status != "error" %}
-        <p class="text-sm" style="margin:0"><span class="badge badge-yellow">{{ montage.get_status_display }}</span>
+        <p class="u-m-0 text-sm"><span class="badge badge-yellow">{{ montage.get_status_display }}</span>
           {% if montage.status == "running" %}Montuje worker „{{ montage.worker }}”.{% else %}Czeka na worker z ffmpeg.{% endif %}</p>
       {% else %}
         {% if montage.status == "error" and montage_current %}<div class="st-log">{{ montage.log|truncatechars:600 }}</div>{% endif %}
         {% if can_montage and is_designer %}
         <form method="post" action="{% url 'studio:montage_create' p.pk %}">{% csrf_token %}
           <button class="btn btn-primary" type="submit">{% if montage.status == "error" and montage_current %}Zmontuj ponownie{% else %}Zmontuj film{% endif %}</button></form>
-        <p class="text-muted text-sm" style="margin:6px 0 0">Plansza tytułowa → ujęcia z napisami w obrazie → plansza końcowa; muzyka, jeśli worker ma podkład. Montuje worker z ffmpeg.</p>
+        <p class="u-m-6-0-0 text-muted text-sm">Plansza tytułowa → ujęcia z napisami w obrazie → plansza końcowa; muzyka, jeśli worker ma podkład. Montuje worker z ffmpeg.</p>
         {% elif not can_montage %}
-        <p class="text-sm" style="margin:0">Montaż będzie dostępny, gdy wszystkie ujęcia mają gotowy render.</p>
+        <p class="u-m-0 text-sm">Montaż będzie dostępny, gdy wszystkie ujęcia mają gotowy render.</p>
         {% endif %}
       {% endif %}
-      {% if shots %}<div class="st-actions" style="margin-top:10px"><a class="btn btn-ghost btn-sm" href="{% url 'studio:subtitles' p.pk %}">Napisy SRT</a>
+      {% if shots %}<div class="u-mt-10 st-actions"><a class="btn btn-ghost btn-sm" href="{% url 'studio:subtitles' p.pk %}">Napisy SRT</a>
         <a class="btn btn-ghost btn-sm" href="{% url 'studio:youtube' p.pk %}">Opis na YouTube</a></div>{% endif %}
     </div></div>
 
     <div class="card"><div class="card-body">
       <h2 class="st-sec">Deck PDF</h2>
-      <p class="text-sm" style="margin:0">Slajdy 16:9: tytuł, liczby z modelu, ujęcie na slajd (kadr + tekst), zakończenie.
+      <p class="u-m-0 text-sm">Slajdy 16:9: tytuł, liczby z modelu, ujęcie na slajd (kadr + tekst), zakończenie.
         Kadry gotowe: {{ stills_done }} z {{ shots|length }} — brakujące jako miejsce zastępcze.</p>
-      <div class="st-actions" style="margin-top:10px">
+      <div class="u-mt-10 st-actions">
         <a class="btn btn-ghost btn-sm" href="{% url 'studio:deck_pdf' p.pk %}" target="_blank" rel="noopener">Otwórz deck<span class="sr-only"> (nowa karta)</span></a>
         <a class="btn btn-ghost btn-sm" href="{% url 'studio:deck_pdf' p.pk %}?pobierz=1">Pobierz PDF</a>
       </div>
     </div></div>
     {% endif %}
-    <p class="text-muted text-sm" id="st-live" role="status" aria-live="polite" style="margin:0"
+    <p class="u-m-0 text-muted text-sm" id="st-live" role="status" aria-live="polite"
        data-busy="{{ busy|yesno:'1,0' }}" data-status-url="{% url 'studio:status_json' p.pk %}"></p>
     <button type="button" class="btn btn-secondary btn-sm" id="st-refresh" hidden>Odśwież</button>
 
@@ -198,9 +198,9 @@
       <h2 class="st-sec">Fakty z modelu</h2>
       {% if facts %}
       <ul class="st-facts">{% for f in facts %}<li>{{ f }}</li>{% endfor %}</ul>
-      <p class="text-muted text-sm" style="margin:10px 0 0">Tylko te zdania (bez nazwy modelu i danych źródłowych) trafiają do Claude przy szkicu z AI.</p>
+      <p class="u-m-10-0-0 text-muted text-sm">Tylko te zdania (bez nazwy modelu i danych źródłowych) trafiają do Claude przy szkicu z AI.</p>
       {% else %}
-      <p class="text-sm" style="margin:0">Model nie ma regałów — brak wskaźników do opowiedzenia.</p>
+      <p class="u-m-0 text-sm">Model nie ma regałów — brak wskaźników do opowiedzenia.</p>
       {% endif %}
     </div></div>
   </div>

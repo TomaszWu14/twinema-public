@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
 {% block title %}Studio prezentacji — {{ app_name }}{% endblock %}
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .st-sec { font:600 var(--fs-xs) var(--font-mono); text-transform:uppercase; letter-spacing:.12em; color:var(--primary); margin:0 0 12px; }
   .st-new { display:grid; grid-template-columns:minmax(0,2fr) minmax(0,3fr) auto; gap:12px; align-items:end; }
   @media (max-width: 760px) { .st-new { grid-template-columns:1fr; } }
@@ -34,9 +34,9 @@
     <label for="{{ form.title.id_for_label }}">{{ form.title.label }} {{ form.title }}</label>
     <button class="btn btn-primary" type="submit">Utwórz</button>
   </form>
-  <p class="text-muted text-sm" style="margin:8px 0 0">Na start dostajesz szkic tekstów z KPI modelu — poprawisz go albo poprosisz Claude o nowy.</p>
+  <p class="u-m-8-0-0 text-muted text-sm">Na start dostajesz szkic tekstów z KPI modelu — poprawisz go albo poprosisz Claude o nowy.</p>
   {% else %}
-  <p class="text-muted text-sm" style="margin:0">Prezentacje tworzy Projektant — tutaj możesz oglądać gotowe filmy.</p>
+  <p class="u-m-0 text-muted text-sm">Prezentacje tworzy Projektant — tutaj możesz oglądać gotowe filmy.</p>
   {% endif %}
 </div></div>
 
@@ -56,6 +56,6 @@
   {% endfor %}
 </div>
 {% else %}
-<div class="card" style="margin-top:24px"><div class="empty-state">Brak prezentacji. Wybierz model hali i nadaj tytuł filmowi.</div></div>
+<div class="u-mt-24 card"><div class="empty-state">Brak prezentacji. Wybierz model hali i nadaj tytuł filmowi.</div></div>
 {% endif %}
 {% endblock %}

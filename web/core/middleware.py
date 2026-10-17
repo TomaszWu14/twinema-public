@@ -20,10 +20,11 @@ class RequestIDLogFilter(logging.Filter):
 
 # US-005: skrypty tylko z serwera albo z jednorazowym nonce żądania (`csp_nonce` w szablonach) — bez
 # 'unsafe-inline' dla skryptów; obsługa zdarzeń w atrybutach (onclick=) jest zablokowana (core/js/ui.js).
-# Style zostają z 'unsafe-inline' (atrybuty style= w szablonach) — mniejsze ryzyko, dług T-17.
+# R-20: style tak samo — pliki CSS albo <style nonce=…>; atrybuty style= są blokowane (klasy z core/utilities.css,
+# wartości z danych przez data-pct/data-color i ui.js). Zmiany przez el.style z JS (CSSOM) CSP nie blokuje.
 # 'unsafe-eval' nie ma — three.js go nie potrzebuje; dodać świadomie, jeśli wejdzie biblioteka, która tak.
 _CSP = (
-    "default-src 'self'; script-src 'self' 'nonce-{nonce}'; style-src 'self' 'unsafe-inline'; "
+    "default-src 'self'; script-src 'self' 'nonce-{nonce}'; style-src 'self' 'nonce-{nonce}'; "
     "font-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; "
     "frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
 )
@@ -65,10 +66,14 @@ class SecurityHeadersMiddleware:
 
 
 def _is_internal(addr):
+    """Adres zaufanego proxy: z TRUSTED_PROXIES, a gdy lista pusta — dowolny prywatny albo lokalny."""
     try:
         ip = ipaddress.ip_address(addr)
     except ValueError:
         return False
+    nets = getattr(settings, "TRUSTED_PROXIES", [])
+    if nets:
+        return any(ip in ipaddress.ip_network(n, strict=False) for n in nets)
     return ip.is_private or ip.is_loopback
 
 
@@ -113,4 +118,29 @@ class TwoFactorMiddleware:
             target = "core:two_factor_verify" if user_has_device(user, confirmed=True) else "core:two_factor_setup"
             from django.urls import reverse
             return redirect(reverse(target) + "?" + urlencode({"next": request.get_full_path()}))
+        return self.get_response(request)
+
+
+# R-02 (przegląd SEC): ścieżki dostępne dla konta demo także wtedy, gdy na instancji są dane spoza demo
+_DEMO_GUARD_EXEMPT = ("/demo/", "/logout/", "/login/", "/static/", "/health/", "/favicon", "/p/")
+
+
+class DemoGuardMiddleware:
+    """Konto `demo` (wejście gościa) traci sesję, gdy na instancji pojawią się dane spoza demo — sprawdzane przy
+    każdym żądaniu konta demo (kilka zapytań EXISTS), nie tylko przy wejściu: sesja gościa trwa do 8 h."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        from .demo import DEMO_USER, exposure_reasons
+
+        user = getattr(request, "user", None)
+        if (user is not None and user.is_authenticated and user.get_username() == DEMO_USER
+                and not request.path.startswith(_DEMO_GUARD_EXEMPT) and exposure_reasons()):
+            from django.contrib.auth import logout
+            from django.shortcuts import render
+            logout(request)
+            return render(request, "core/403.html", {"reason": "Wejście gościa jest wyłączone: na tej instancji są "
+                                                                "dane spoza demo."}, status=403)
         return self.get_response(request)

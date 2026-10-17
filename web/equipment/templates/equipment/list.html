@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
 {% block title %}Katalog sprzętu — {{ app_name }}{% endblock %}
 {% block extra_head %}
-<style>
+<style nonce="{{ csp_nonce }}">
   .eq-filters { display:flex; flex-wrap:wrap; gap:6px; margin:0 0 16px; }
   .eq-table { width:100%; border-collapse:collapse; font-size:var(--fs-sm); }
   .eq-table th, .eq-table td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--border); }
@@ -16,7 +16,7 @@
     <div class="page-header__sub">Wózki, AGV/AMR, przenośniki: prędkości, podnoszenie, udźwig, wymagana alejka i bateria.
       Parametry zasilają walidację layoutu (alejka, wysokość, udźwig) i symulację dnia (czas ruchu palety, ładowanie).</div>
   </div>
-  {% if is_designer %}<div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn btn-ghost" href="{% url 'equipment:rates' %}">Stawki kosztowe</a>
+  {% if is_designer %}<div class="u-d-flex u-gap-8 u-fwrap-wrap"><a class="btn btn-ghost" href="{% url 'equipment:rates' %}">Stawki kosztowe</a>
     <a class="btn btn-primary" href="{% url 'equipment:create' %}">Dodaj własny model</a></div>{% endif %}
 </div>
 
@@ -28,7 +28,7 @@
 <form class="eq-filters" method="get" aria-label="Filtr producenta">
   {% if kind %}<input type="hidden" name="typ" value="{{ kind }}">{% endif %}
   <label for="eq-maker" class="text-sm">Producent</label>
-  <select id="eq-maker" name="producent" class="form-control" style="max-width:260px" data-autosubmit>
+  <select id="eq-maker" name="producent" class="u-maxw-260 form-control" data-autosubmit>
     <option value="">— wszyscy —</option>
     {% for m in makers %}<option value="{{ m }}"{% if m == maker %} selected{% endif %}>{{ m }}</option>{% endfor %}
   </select>
@@ -36,18 +36,18 @@
 </form>
 {% endif %}
 {% if is_designer %}
-<div class="card" style="margin-bottom:16px"><div class="card-body">
-  <form method="post" action="{% url 'equipment:import' %}" enctype="multipart/form-data" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">{% csrf_token %}
+<div class="u-mb-16 card"><div class="card-body">
+  <form method="post" action="{% url 'equipment:import' %}" enctype="multipart/form-data" class="u-d-flex u-fwrap-wrap u-gap-10 u-ai-center">{% csrf_token %}
     <label for="eq-file" class="text-sm"><b>Import własnych modeli</b> (xlsx/csv, do 5 MB)</label>
-    <input id="eq-file" type="file" name="plik" accept=".xlsx,.csv" required class="form-control" style="max-width:320px">
+    <input id="eq-file" type="file" name="plik" accept=".xlsx,.csv" required class="u-maxw-320 form-control">
     <button class="btn btn-primary btn-sm" type="submit">Importuj</button>
     <a class="btn btn-ghost btn-sm" href="{% url 'equipment:import_template' %}">Pobierz wzór</a>
   </form>
-  <p class="text-muted text-sm" style="margin:8px 0 0">Model o tej samej nazwie zostanie zaktualizowany; brakujące parametry uzupełnia klasa ogólna danego typu (opis w uwagach modelu).</p>
+  <p class="u-m-8-0-0 text-muted text-sm">Model o tej samej nazwie zostanie zaktualizowany; brakujące parametry uzupełnia klasa ogólna danego typu (opis w uwagach modelu).</p>
 </div></div>
 {% endif %}
 
-<div class="card"><div class="card-body" style="overflow-x:auto">
+<div class="card"><div class="u-ox-auto card-body">
   <table class="eq-table">
     <caption class="sr-only">Sprzęt w katalogu</caption>
     <thead><tr><th scope="col">Nazwa</th><th scope="col">Typ</th><th scope="col">Pochodzenie</th>
@@ -65,6 +65,6 @@
     {% endfor %}
     </tbody>
   </table>
-  <p class="text-muted text-sm" style="margin:10px 0 0">Klasy systemowe mają typowe, przybliżone parametry. Konkretny model z karty katalogowej producenta dodaj jako własny („Kopiuj jako własny model” w karcie klasy).</p>
+  <p class="u-m-10-0-0 text-muted text-sm">Klasy systemowe mają typowe, przybliżone parametry. Konkretny model z karty katalogowej producenta dodaj jako własny („Kopiuj jako własny model” w karcie klasy).</p>
 </div></div>
 {% endblock %}
