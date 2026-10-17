@@ -54,16 +54,19 @@
   var n = d.actual.length, h = d.forecast.length;
   var labels = d.labels.concat(Array.from({length: h}, function (_, i) { return '+' + (i + 1) + ' tyg.'; }));
   var pad = function (arr, before) { return Array(before).fill(null).concat(arr); };
+  var num = function (v) { return v == null || isNaN(v) ? '–' : Number(v).toLocaleString('pl-PL', {maximumFractionDigits: 1}); };
+  // seria przedziału rysuje szerokość pasma (stos na dolnej granicy) — w dymku pokazujemy zakres od–do
+  var range = function (v, i) { var k = i - n; return k >= 0 && k < h ? num(d.lower[k]) + '–' + num(d.upper[k]) : num(v); };
   var chart = echarts.init(document.getElementById('ml-chart'));
   chart.setOption({
     textStyle: {color: fg}, grid: {left: 60, right: 20, top: 30, bottom: 50},
-    tooltip: {trigger: 'axis', renderMode: 'richText', valueFormatter: function (v) { return v == null || isNaN(v) ? '–' : Number(v).toLocaleString('pl-PL', {maximumFractionDigits: 1}); }}, legend: {textStyle: {color: fg}, top: 0},
+    tooltip: {trigger: 'axis', renderMode: 'richText', valueFormatter: num}, legend: {textStyle: {color: fg}, top: 0},
     xAxis: {type: 'category', data: labels, axisLabel: {color: fg}, axisLine: {lineStyle: {color: line}}},
     yAxis: {type: 'value', axisLabel: {color: fg}, splitLine: {lineStyle: {color: line}}},
     series: [
       {name: 'Dolna granica', type: 'line', data: pad(d.lower, n), stack: 'band', lineStyle: {opacity: 0}, symbol: 'none', tooltip: {show: false}},
       {name: 'Przedział 80 %', type: 'line', data: pad(d.upper.map(function (u, i) { return u - d.lower[i]; }), n), stack: 'band',
-       lineStyle: {opacity: 0}, symbol: 'none', areaStyle: {color: accent, opacity: 0.18}},
+       lineStyle: {opacity: 0}, symbol: 'none', areaStyle: {color: accent, opacity: 0.18}, tooltip: {valueFormatter: range}},
       {name: 'Historia', type: 'line', data: d.actual, symbol: 'none', lineStyle: {color: fg, width: 2}, itemStyle: {color: fg}},
       {name: 'Dopasowanie', type: 'line', data: d.fitted, symbol: 'none', lineStyle: {type: 'dashed', width: 1}},
       {name: 'Prognoza', type: 'line', data: pad(d.forecast, n), symbol: 'none', lineStyle: {color: accent, width: 2.5}, itemStyle: {color: accent}}

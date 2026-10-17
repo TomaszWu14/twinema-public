@@ -69,6 +69,8 @@ trafiają do sekcji „Unreleased”.
 - `manage.py backup --keep 0` (albo ujemne) kończy się błędem zamiast skasować wszystkie kopie, w tym nową.
 - Dymki wykresów (prognoza ML, symulacja scenariusza, profil zadań) pokazują liczby po polsku z jednym miejscem
   po przecinku zamiast „9.600000000000001”.
+- Prognoza ML: dymek pokazuje przedział 80 % jako zakres „od–do” (np. 37,3–46,9) zamiast szerokości pasma
+  (decyzja PO).
 
 ### Security
 - Migracja `twin 0009`: pseudonimizuje też loginy systemu magazynowego w rodzaju „OP-0001”, które 0008 pomijała
