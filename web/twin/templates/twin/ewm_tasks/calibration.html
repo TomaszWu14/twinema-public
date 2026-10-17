@@ -51,7 +51,7 @@
 {% if wm and not day %}
 <div class="u-mt-16 alert alert-warning">Brak potwierdzonych zadań w tym imporcie — nie ma dnia projektowego.</div>
 {% elif job.pending or job.status == "error" %}
-{% include "core/_job_status.html" %}
+{% include "core/_job_status.html" with retry=True %}
 {% elif wm and not result and not may_compute %}
 <div class="u-mt-16 alert alert-info">Dla tego modelu nie ma jeszcze policzonej kalibracji — poproś Projektanta.</div>
 {% elif result %}

@@ -58,7 +58,21 @@ trafiają do sekcji „Unreleased”.
   `postgresql-client` (US-009). **Do ustawienia:** `BACKUP_DIR` i zadanie zaplanowane w Coolify (RUNBOOK).
 - Procedura czyszczenia historii repozytorium (`docs/operacje/CZYSZCZENIE_HISTORII.md`, R-01) — wykonuje PO.
 
+### Fixed (przegląd kodu po #68, 2026-10-17)
+- Symulacja dnia i kalibracja: zadanie z błędem nie wraca do kolejki przy każdym wejściu na stronę — widać komunikat,
+  a Projektant ponawia obliczenie przyciskiem „Policz ponownie”.
+- Kolejka zadań: worker co minutę odświeża sygnał liczonego zadania (`core.Job.heartbeat_at`, migracja core 0004), więc
+  długie zadanie nie wraca do kolejki i nie liczy się drugi raz równolegle; wynik zapisuje tylko worker, który wciąż ma
+  zadanie. Ponowiony import zadań, który już się udał, nie oznacza partii jako błędnej.
+- Weryfikacja dwuetapowa: adres powrotu z kilkoma parametrami nie gubi ich; po 5 błędnych kodach przy konfiguracji
+  strona pokazuje nowy kod QR zamiast nieważnego starego.
+- `manage.py backup --keep 0` (albo ujemne) kończy się błędem zamiast skasować wszystkie kopie, w tym nową.
+
 ### Security
+- Migracja `twin 0009`: pseudonimizuje też loginy systemu magazynowego w rodzaju „OP-0001”, które 0008 pomijała
+  (RODO, US-012). **Nieodwracalna** — kopia bazy przed wdrożeniem.
+- `TRUSTED_PROXIES`: sieci proxy, od których brany jest adres klienta z `X-Forwarded-For` (blokada logowania, US-006);
+  puste = jak dotąd (sieci prywatne).
 - Weryfikacja dwuetapowa (TOTP, `django-otp`): obowiązkowa dla Administratorów, opcjonalna dla pozostałych; hasła kont
   uprzywilejowanych ≥ 12 znaków; `manage.py two_factor_reset <login>` (US-017). **Uwaga przy wdrożeniu:** Administratorzy
   po pierwszym logowaniu konfigurują aplikację uwierzytelniającą; `DJANGO_SUPERUSER_PASSWORD` musi mieć ≥ 12 znaków.

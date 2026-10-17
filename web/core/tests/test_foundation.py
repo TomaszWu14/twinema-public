@@ -80,3 +80,16 @@ class ClientIpTests(SimpleTestCase):
     def test_without_header_uses_connection_address(self):
         self.assertEqual(self._ip("10.0.1.5"), "10.0.1.5")
         self.assertEqual(self._ip("1.1.1.1", ""), "1.1.1.1")
+
+    def test_trusted_proxies_limit_who_may_set_the_header(self):
+        """Przegląd kodu (B): z TRUSTED_PROXIES nagłówek przyjmujemy tylko od proxy z tej sieci — np. bramka
+        mostu Dockera (172.17.0.1) przy publikowanym porcie nie podmieni adresu klienta."""
+        from django.test import override_settings
+        with override_settings(TRUSTED_PROXIES=["10.0.1.0/24"]):
+            self.assertEqual(self._ip("10.0.1.5", "203.0.113.9"), "203.0.113.9")
+            self.assertEqual(self._ip("172.17.0.1", "203.0.113.9"), "172.17.0.1")
+
+    def test_invalid_trusted_proxies_stop_startup(self):
+        with mock.patch.dict(os.environ, {"TRUSTED_PROXIES": "10.0.1.0/24,nie-siec"}), \
+                self.assertRaisesRegex(ImproperlyConfigured, "TRUSTED_PROXIES"):
+            load_env()

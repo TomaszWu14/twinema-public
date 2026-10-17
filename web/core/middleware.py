@@ -66,10 +66,14 @@ class SecurityHeadersMiddleware:
 
 
 def _is_internal(addr):
+    """Adres zaufanego proxy: z TRUSTED_PROXIES, a gdy lista pusta — dowolny prywatny albo lokalny."""
     try:
         ip = ipaddress.ip_address(addr)
     except ValueError:
         return False
+    nets = getattr(settings, "TRUSTED_PROXIES", [])
+    if nets:
+        return any(ip in ipaddress.ip_network(n, strict=False) for n in nets)
     return ip.is_private or ip.is_loopback
 
 

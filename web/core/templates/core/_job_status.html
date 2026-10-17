@@ -13,5 +13,8 @@
 </div>
 <script src="{% static 'core/js/job_status.js' %}" defer></script>
 {% elif job.status == "error" %}
-<div class="u-mt-16 alert alert-error" role="alert">{{ job.message }}{% if may_compute %} Uruchom obliczenie ponownie.{% endif %}</div>
+<div class="u-mt-16 alert alert-error" role="alert">{{ job.message }}{% if may_compute and not retry %} Uruchom obliczenie ponownie.{% endif %}</div>
+{% if may_compute and retry %}
+<form method="post" class="u-mt-12">{% csrf_token %}<button type="submit" class="btn btn-primary">Policz ponownie</button></form>
+{% endif %}
 {% endif %}

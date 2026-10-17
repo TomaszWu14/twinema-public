@@ -110,3 +110,33 @@ class TwoFactorSetupLimitTests(TestCase):
         self.client.get(reverse("core:two_factor_setup"))
         self.assertNotEqual(self.client.session["two_factor_key"], first)
         self.assertFalse(TOTPDevice.objects.exists())
+
+    def test_sixth_wrong_code_shows_the_new_key_that_works(self):
+        """Przegląd kodu (F): po wyczerpaniu prób strona pokazuje nowy klucz — kod z niego od razu działa."""
+        admin = User.objects.create_user("admin3", password="x")
+        admin.groups.add(Group.objects.get_or_create(name=GROUP_ADMIN)[0])
+        self.client.force_login(admin)
+        self.client.get(reverse("core:two_factor_setup"))
+        for _ in range(6):
+            page = self.client.post(reverse("core:two_factor_setup"), {"token": "000000"})
+        self.assertContains(page, "wygenerowaliśmy nowy klucz")
+        shown = page.context["secret"]
+        device = TOTPDevice(key=self.client.session["two_factor_key"])
+        import base64
+        self.assertEqual(shown, base64.b32encode(device.bin_key).decode().rstrip("="))
+        r = self.client.post(reverse("core:two_factor_setup"), {"token": _code(device)})
+        self.assertEqual(r.status_code, 302)
+        self.assertTrue(TOTPDevice.objects.filter(user=admin).exists())
+
+
+@override_settings(TWO_FACTOR_ADMIN=True)
+class TwoFactorNextUrlTests(TestCase):
+    def test_next_with_query_string_survives_setup_redirect(self):
+        """Przegląd kodu (E): adres powrotu z kilkoma parametrami nie traci ich w drodze przez strony 2FA."""
+        admin = User.objects.create_user("admin4", password="x")
+        admin.groups.add(Group.objects.get_or_create(name=GROUP_ADMIN)[0])
+        TOTPDevice.objects.create(user=admin, name="t", confirmed=True)
+        self.client.force_login(admin)
+        r = self.client.get(reverse("core:two_factor_setup"), {"next": "/scenariusze/?model=3&run=1"})
+        self.assertRedirects(r, reverse("core:two_factor_verify") + "?next=%2Fscenariusze%2F%3Fmodel%3D3%26run%3D1",
+                             fetch_redirect_response=False)

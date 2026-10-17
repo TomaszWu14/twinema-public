@@ -33,6 +33,9 @@ class AppEnv(BaseSettings):
     # ── Sesja / bezpieczeństwo ──────────────────────────────────────────────
     SESSION_COOKIE_AGE: int = 28800
     CSP_REPORT_ONLY: bool = False      # US-005: CSP wymuszana; true = tylko raport (awaryjny powrót)
+    # US-006: sieci proxy, od których przyjmujemy X-Forwarded-For (CIDR po przecinku, np. sieć Traefika w Coolify).
+    # Puste = każda sieć prywatna — bezpieczne tylko, gdy kontener nie publikuje portu wprost (bez proxy).
+    TRUSTED_PROXIES: str = ""
 
     # ── Render (worker Blendera poza serwerem, pobiera zlecenia po HTTPS) ────
     RENDER_WORKER_TOKEN: str = ""      # puste = API workera wyłączone (403)
@@ -80,6 +83,12 @@ class AppEnv(BaseSettings):
             raise ValueError("DEMO_VIDEO_URL musi zaczynać się od https://.")
         if self.LOGIN_ATTEMPT_RETENTION_DAYS < 1:
             raise ValueError("LOGIN_ATTEMPT_RETENTION_DAYS musi wynosić co najmniej 1 dzień.")
+        if self.TRUSTED_PROXIES:
+            import ipaddress
+            try:
+                [ipaddress.ip_network(n.strip()) for n in self.TRUSTED_PROXIES.split(",") if n.strip()]
+            except ValueError as exc:
+                raise ValueError(f"TRUSTED_PROXIES: niepoprawna sieć ({exc}); podaj CIDR, np. 10.0.1.0/24.") from exc
         if self.AUDIT_RETENTION_DAYS < 30:
             raise ValueError("AUDIT_RETENTION_DAYS musi wynosić co najmniej 30 dni.")
         return self

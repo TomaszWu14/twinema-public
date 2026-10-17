@@ -3,6 +3,7 @@
 from urllib.parse import urlencode
 
 from django.core.cache import cache
+from django.shortcuts import redirect
 
 from core import jobs
 from core.models import Job
@@ -71,9 +72,14 @@ def ewm_tasks_simulate(request, pk):
         # US-007: liczy worker kolejki; ten sam (partia, wersja modelu, dzień, parametry) = to samo zadanie i wynik
         key = cache_digest("twin.sim", batch.pk, wm.pk, wm.updated_at.timestamp(), day, prm)
         job = Job.objects.filter(key=key).first()
-        if may_compute and (job is None or job.status == Job.ERROR):
+        # zadanie z błędem wraca do kolejki tylko na żądanie („Policz ponownie”, POST) — inaczej każde wejście
+        # na stronę liczyłoby od nowa obliczenie, które się nie udaje, a komunikat błędu nigdy by się nie pokazał
+        retry = request.method == "POST" and job is not None and job.status == Job.ERROR
+        if may_compute and (job is None or retry):
             job = jobs.enqueue("twin.sim", {"batch": batch.pk, "model": wm.pk, "day": day.isoformat(), "prm": prm},
                                key=key, user=request.user)
+        if retry:
+            return redirect(request.get_full_path())
         if job and job.status == Job.DONE:
             result, n_tasks = job.result["result"], job.result["n_tasks"]
     anim_query = urlencode({"sim": batch.pk, "p": prm["p"], "mult": prm["mult"], **prm["fleet"],

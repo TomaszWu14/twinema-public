@@ -76,7 +76,7 @@
 {% elif not day %}
 <div class="u-mt-16 alert alert-warning">Brak potwierdzonych zadań w tym imporcie — nie ma dnia projektowego.</div>
 {% elif ran and job.pending or ran and job.status == "error" %}
-{% include "core/_job_status.html" %}
+{% include "core/_job_status.html" with retry=True %}
 {% elif ran and not result and not may_compute %}
 <div class="u-mt-16 alert alert-info">Dla tych parametrów nie ma jeszcze policzonego wyniku — poproś Projektanta o uruchomienie symulacji.</div>
 {% elif ran and not result %}

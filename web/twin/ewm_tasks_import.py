@@ -64,6 +64,10 @@ def upload_path(token):
 def run_import(batch_id, token):
     """Import całego pliku do partii. Błąd w trakcie → partia „error”, zapisane wiersze usunięte."""
     batch = WarehouseTaskBatch.objects.get(pk=batch_id)
+    if batch.status == "done":
+        # ponowienie zadania, które już się udało (worker padł po imporcie, przed zapisem stanu zadania):
+        # plik jest już usunięty — nie oznaczaj gotowej partii jako błędnej
+        return batch
     path = upload_path(token)
     if path is None:
         batch.status, batch.message = "error", "Plik importu wygasł albo nie istnieje — wgraj go ponownie."

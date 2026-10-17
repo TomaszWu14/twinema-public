@@ -77,6 +77,14 @@ class BackupTests(SimpleTestCase):
         with override_settings(BACKUP_DIR=str(self.media / "kopie")), self.assertRaises(backup.BackupError):
             backup.make_backup()
 
+    def test_keep_must_be_at_least_one(self):
+        """Przegląd kodu (G): `--keep 0` nie kasuje wszystkich kopii, w tym właśnie utworzonej."""
+        backup.make_backup(now=datetime(2026, 10, 1, 2, 0))
+        for keep in (0, -1):
+            with self.assertRaises(CommandError):
+                call_command("backup", "--keep", str(keep), stdout=StringIO())
+        self.assertEqual([p.name for p in self.dest.iterdir()], ["20261001-020000"])
+
     def test_command_reports_set(self):
         out = StringIO()
         call_command("backup", stdout=out)

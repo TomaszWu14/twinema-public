@@ -133,6 +133,12 @@ def _next_url(request):
     return nxt if ok and nxt.startswith("/") else reverse("core:home")
 
 
+def _with_next(url_name, request):
+    """Adres strony 2FA z zakodowanym `next` — adres powrotu z własnym `?a=1&b=2` nie gubi parametrów."""
+    from urllib.parse import urlencode
+    return reverse(url_name) + "?" + urlencode({"next": _next_url(request)})
+
+
 @login_required
 def two_factor_setup(request):
     """US-017: konfiguracja TOTP — kod QR / klucz dla aplikacji uwierzytelniającej i potwierdzenie pierwszym kodem."""
@@ -146,7 +152,7 @@ def two_factor_setup(request):
         return render(request, "core/403.html", {"reason": "Konto demo nie używa weryfikacji dwuetapowej."},
                       status=403)
     if user_has_device(request.user, confirmed=True) and not request.user.is_verified():
-        return redirect(reverse("core:two_factor_verify") + "?next=" + _next_url(request))
+        return redirect(_with_next("core:two_factor_verify", request))
     # klucz czeka w sesji do potwierdzenia pierwszym kodem — samo otwarcie strony niczego nie zapisuje
     key = request.session.setdefault("two_factor_key", random_hex(20))
     device = TOTPDevice(user=request.user, name="Aplikacja uwierzytelniająca", key=key, confirmed=True)
@@ -161,6 +167,11 @@ def two_factor_setup(request):
                          detail="włączono weryfikację dwuetapową")
             return redirect(_next_url(request))
         error = "Kod się nie zgadza — sprawdź czas w telefonie i wpisz aktualny kod."
+        if "two_factor_key" not in request.session:         # limit prób wyczerpany — pokaż nowy klucz, nie stary
+            key = request.session.setdefault("two_factor_key", random_hex(20))
+            device = TOTPDevice(user=request.user, name="Aplikacja uwierzytelniająca", key=key, confirmed=True)
+            error = ("Za dużo błędnych kodów — wygenerowaliśmy nowy klucz. Usuń poprzedni wpis z aplikacji, "
+                     "zeskanuj nowy kod QR i wpisz kod z niego.")
     secret = device.bin_key
     import base64
     return render(request, "core/two_factor_setup.html", {
@@ -202,7 +213,7 @@ def two_factor_verify(request):
     from django_otp import login as otp_login, match_token, user_has_device
 
     if not user_has_device(request.user, confirmed=True):
-        return redirect(reverse("core:two_factor_setup") + "?next=" + _next_url(request))
+        return redirect(_with_next("core:two_factor_setup", request))
     error = ""
     if request.method == "POST":
         device = match_token(request.user, (request.POST.get("token") or "").replace(" ", ""))

@@ -62,6 +62,8 @@ class Job(models.Model):
                                    related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
     started_at = models.DateTimeField(null=True, blank=True)
+    # sygnał „żyję” workera co HEARTBEAT_S w trakcie obliczenia — do kolejki wraca tylko zadanie bez sygnału
+    heartbeat_at = models.DateTimeField(null=True, blank=True)
     finished_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:

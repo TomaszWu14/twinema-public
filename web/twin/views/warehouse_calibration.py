@@ -2,6 +2,8 @@
 # i pickerów z zadań EWM dnia projektowego vs fizyka symulacji na modelu obecnej hali.
 from urllib.parse import urlencode
 
+from django.shortcuts import redirect
+
 from core import jobs
 from core.models import Job
 from core.roles import GROUP_ADMIN, GROUP_DESIGNER, has_role
@@ -44,9 +46,14 @@ def ewm_tasks_calibration(request, pk):
         # US-007: liczy worker kolejki; wynik dla tej samej partii, wersji modelu i dnia czyta każdy z dostępem
         key = cache_digest("twin.calibration", batch.pk, wm.pk, wm.updated_at.timestamp(), day)
         job = Job.objects.filter(key=key).first()
-        if may_compute and (job is None or job.status == Job.ERROR):
+        # zadanie z błędem wraca do kolejki tylko na żądanie („Policz ponownie”, POST) — inaczej każde wejście
+        # na stronę liczyłoby od nowa obliczenie, które się nie udaje, a komunikat błędu nigdy by się nie pokazał
+        retry = request.method == "POST" and job is not None and job.status == Job.ERROR
+        if may_compute and (job is None or retry):
             job = jobs.enqueue("twin.calibration", {"batch": batch.pk, "model": wm.pk, "day": day.isoformat()},
                                key=key, user=request.user)
+        if retry:
+            return redirect(request.get_full_path())
         if job and job.status == Job.DONE:
             result = job.result["result"]
     k = {g["key"]: g["k"] for g in (result or {}).get("groups", []) if g["k"]}
