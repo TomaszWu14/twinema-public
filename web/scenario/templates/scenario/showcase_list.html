@@ -40,7 +40,7 @@
   {% for p in items %}
   <a class="sh-item" href="{% url 'scenario:showcase' p.pk %}">
     <h3>{{ p.title }}</h3>
-    <div class="sh-meta">„{{ p.model.name }}” · {{ p.slides|length }} slajdów{% if p.run %} · z wynikami symulacji{% endif %}</div>
+    <div class="sh-meta">„{{ p.model.name }}” · {{ p.slides|length }} slajdów{% if p.run %} · z wynikami symulacji{% elif p.run_removed_at %} · <strong>wynik symulacji usunięty</strong>{% endif %}</div>
     <div class="sh-meta">{{ p.updated_at|date:"d.m.Y H:i" }}{% if p.created_by %} · {{ p.created_by }}{% endif %}</div>
   </a>
   {% endfor %}

@@ -8,18 +8,18 @@ długość każdego ujęcia i jego napisy [(start, koniec, tekst)], które worke
   POST /api/studio/montage/<id>/fail/               → error (tekst)
 """
 import hmac
-from datetime import timedelta
 
 from django.conf import settings
 from django.core.files.base import File
 from django.db import transaction
+from django.db.models import F
 from django.http import FileResponse, Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
 
-from render.api import LOG_MAX, SIGNATURES, _forbidden, worker_required
+from render.api import LOG_MAX, SIGNATURES, _forbidden, requeue_stale, worker_required
 
 from .captions import shot_cues
 from .models import RENDER_RESOLUTION, MontageJob
@@ -56,9 +56,7 @@ def manifest(request, job):
 @worker_required
 @require_POST
 def claim(request):
-    limit = timezone.now() - timedelta(minutes=settings.RENDER_STALE_MIN)
-    MontageJob.objects.filter(status="running", claimed_at__lt=limit).update(
-        status="queued", claim_token="", log="Wróciło do kolejki: worker nie odesłał wyniku w czasie.")
+    requeue_stale(MontageJob)                            # US-015: z limitem prób, jak zlecenia renderu
     worker = (request.POST.get("worker") or request.headers.get("User-Agent", ""))[:80]
     for _ in range(5):
         job = MontageJob.objects.filter(status="queued").order_by("created_at", "pk").first()
@@ -67,7 +65,8 @@ def claim(request):
         token = job.new_claim()
         with transaction.atomic():
             won = MontageJob.objects.filter(pk=job.pk, status="queued").update(
-                status="running", claim_token=token, claimed_at=timezone.now(), worker=worker)
+                status="running", claim_token=token, claimed_at=timezone.now(), worker=worker,
+                attempts=F("attempts") + 1)
         if won:
             return JsonResponse(manifest(request, job), json_dumps_params={"ensure_ascii": False})
     return HttpResponse(status=204)

@@ -25,7 +25,7 @@ def warehouse_rack_type_form(request, pk=None):
         name  = request.POST.get("name", "").strip()
         if not code or not name:
             messages.error(request, "Kod i nazwa są wymagane.")
-            return redirect("twin:warehouse_rack_type_list")
+            return _form_again(request, obj)
         kind = request.POST.get("kind", "rack")
         if kind not in dict(WarehouseRackType.KIND):
             kind = "rack"
@@ -56,7 +56,7 @@ def warehouse_rack_type_form(request, pk=None):
             max_volume_m3 = float(request.POST.get("max_volume_m3", 2.5) or 2.5)
         except (ValueError, TypeError) as e:
             messages.error(request, f"Błąd wartości: {e}")
-            return redirect("twin:warehouse_rack_type_list")
+            return _form_again(request, obj)
 
         import re as _re
         raw_color = request.POST.get("color_hex", "").strip()
@@ -81,12 +81,12 @@ def warehouse_rack_type_form(request, pk=None):
                             pass
             except (_json.JSONDecodeError, ValueError):
                 messages.error(request, "Nieprawidłowy format JSON dla kolumn per poziom.")
-                return redirect("twin:warehouse_rack_type_list")
+                return _form_again(request, obj)
 
         if obj:
             if WarehouseRackType.objects.filter(code=code).exclude(pk=obj.pk).exists():
                 messages.error(request, f"Typ o kodzie «{code}» już istnieje.")
-                return redirect("twin:warehouse_rack_type_list")
+                return _form_again(request, obj)
             obj.code          = code
             obj.name          = name
             obj.kind          = kind
@@ -105,7 +105,7 @@ def warehouse_rack_type_form(request, pk=None):
         else:
             if WarehouseRackType.objects.filter(code=code).exists():
                 messages.error(request, f"Typ o kodzie «{code}» już istnieje.")
-                return redirect("twin:warehouse_rack_type_list")
+                return _form_again(request, obj)
             WarehouseRackType.objects.create(
                 code=code, name=name, kind=kind, description=description,
                 width_mm=width_mm, manip_mm=manip_mm, depth_mm=depth_mm,
@@ -127,6 +127,29 @@ def warehouse_rack_type_form(request, pk=None):
         "level_cols_json": level_cols_json,
         "level_weights_json": level_weights_json,
     })
+
+def _form_again(request, obj):
+    """US-021: błąd walidacji → ten sam formularz z wpisanymi wartościami (zamiast powrotu do listy bez danych)."""
+    post = request.POST
+    draft = WarehouseRackType(pk=obj.pk if obj else None, code=post.get("code", "").strip().upper(),
+                              name=post.get("name", "").strip(), kind=post.get("kind", "rack"),
+                              description=(post.get("description") or "").strip()[:200],
+                              color_hex=post.get("color_hex", "").strip())
+    for f in ("width_mm", "manip_mm", "depth_mm", "max_weight_kg", "max_volume_m3"):
+        setattr(draft, f, post.get(f, "").strip())               # surowy tekst — do poprawienia przez użytkownika
+    heights = {str(lv): post[f"level_{lv}_height"].strip() for lv in range(1, 9)
+               if post.get(f"level_{lv}_height", "").strip()}
+    weights = {str(lv): post[f"level_{lv}_weight"].strip() for lv in range(1, 9)
+               if post.get(f"level_{lv}_weight", "").strip()}
+    draft.level_heights, draft.level_weights = heights, weights
+    return render(request, "twin/warehouse_map/rack_type_form.html", {
+        "obj": draft,
+        "level_heights_json": safe_json(heights),
+        "level_cols_json": safe_json(obj.level_cols if obj and obj.level_cols else {}),
+        "level_cols_raw": post.get("level_cols_json", ""),
+        "level_weights_json": safe_json(weights),
+    }, status=400)
+
 
 @_md_role
 @require_POST

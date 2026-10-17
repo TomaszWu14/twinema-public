@@ -14,6 +14,7 @@ from scenario.sim.engine import FleetMix, dest_of, fleet_groups
 from scenario.tests.test_costs import RATES
 from scenario.tests.test_sim import DAY, NORMS, ONE_DOCK, STAFF
 from twin.models import WarehouseModel
+from core.jobs import run_pending
 
 
 def group(role, units=1, move=4.0, leg=2.0, name=None):
@@ -92,6 +93,7 @@ class MixedFleetViewTests(TestCase):
         self.assertEqual(list(self.sc.fleet.values_list("units", flat=True)), [3, 2])
         self.client.post(reverse("scenario:simulate", args=[self.sc.pk]),
                          {"model": self.wm.pk, "day": "typical", "runs": 2})
+        run_pending()                                   # US-007: symulację liczy worker kolejki
         res = ScenarioRun.objects.get().result
         g = {x["role"]: x for x in res["fleet_groups"]}
         self.assertEqual(set(g), {"transport", "vna"})

@@ -12,6 +12,8 @@ from twin.design_sim import simulate
 from twin.models import WarehouseTask, WarehouseTaskBatch
 from twin.tests.test_design_sim import FEATURES as NEW_FEATURES, RACKS as NEW_RACKS, _tasks
 from twin.tests.test_ewm_tasks_flow import T0, _racks
+from core.jobs import run_pending
+from core.models import Job
 
 CODES = ["B0-01-100A", "B0-01-300A", "B0-02-100A", "B0-02-300C"]
 FEATURES = [{"kind": "dock", "label": "Dok", "x": 0, "y": 5, "width": 2, "depth": 2, "angle": 0},
@@ -95,6 +97,8 @@ class CalibrationViewTests(TestCase):
     def test_page_shows_factor_and_links_to_simulation(self):
         url = f"/magazyn/zadania-ewm/{self.batch.pk}/kalibracja/"
         self.assertContains(self.client.get(url), "Policz kalibrację")
+        self.assertContains(self.client.get(url, {"model": self.wm.pk}), "czeka w kolejce")   # US-007
+        run_pending()
         r = self.client.get(url, {"model": self.wm.pk})
         self.assertContains(r, "Współczynniki korekty")
         self.assertContains(r, f"/magazyn/zadania-ewm/{self.batch.pk}/symulacja/?p=95&amp;kt=")
@@ -104,3 +108,27 @@ class CalibrationViewTests(TestCase):
         r = self.client.get(f"/magazyn/zadania-ewm/{self.batch.pk}/symulacja/", {"kt": "1,7", "kp": "2"})
         self.assertContains(r, 'name="kt" value="1.7"')
         self.assertContains(r, 'name="kp" value="2"')
+
+
+class ViewerDoesNotCalibrateTests(CalibrationViewTests):
+    """Z-3 (decyzja PO, R-07): kalibrację liczy tylko Projektant."""
+
+    def test_viewer_gets_no_calibration(self):
+        from unittest.mock import patch
+
+        from django.contrib.auth.models import Group
+
+        from core.roles import GROUP_VIEWER
+        from twin.views import warehouse_calibration as v
+        u = get_user_model().objects.create_user("zarzad", password="x")
+        u.groups.add(Group.objects.get_or_create(name=GROUP_VIEWER)[0])
+        self.client.force_login(u)
+        with patch.object(v, "calibrate", wraps=v.calibrate) as spy:
+            r = self.client.get(f"/magazyn/zadania-ewm/{self.batch.pk}/kalibracja/", {"model": self.wm.pk})
+            run_pending()
+        self.assertEqual(spy.call_count, 0)
+        self.assertFalse(Job.objects.exists())
+        self.assertContains(r, "poproś Projektanta")
+        self.assertIsNone(r.context["result"])
+        self.assertContains(r, "Kalibrację liczy Projektant")
+        self.assertNotContains(r, "Policz kalibrację")

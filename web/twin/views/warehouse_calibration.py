@@ -2,7 +2,11 @@
 # i pickerów z zadań EWM dnia projektowego vs fizyka symulacji na modelu obecnej hali.
 from urllib.parse import urlencode
 
-from twin.shared import _planner, get_object_or_404, hall_feature_dict, render, WarehouseModel
+from core import jobs
+from core.models import Job
+from core.roles import GROUP_ADMIN, GROUP_DESIGNER, has_role
+
+from twin.shared import _planner, cache_digest, get_object_or_404, hall_feature_dict, render, WarehouseModel
 from twin.blender_scene import model_racks
 from twin.blender_stock import SlotLocator, load_master_levels
 from twin.blender_tasks import ROW_FIELDS
@@ -19,6 +23,14 @@ def _day_rows(batch, day):
     return list(qs.order_by("confirmed_at", "id").values_list(*ROW_FIELDS))
 
 
+def compute_calibration(batch, wm, day):
+    """Kalibracja dnia na modelu hali — wywołuje worker kolejki (twin.jobs.calibrate_day)."""
+    rows = _day_rows(batch, day)
+    codes = {c for r in rows for c in (r[4], r[5]) if c}
+    locator = SlotLocator(model_racks(wm), codes, load_master_levels())
+    return calibrate(rows, locator, [hall_feature_dict(f) for f in wm.features.all()])
+
+
 @_planner
 def ewm_tasks_calibration(request, pk):
     batch = get_object_or_404(WarehouseTaskBatch, pk=pk, status="done")
@@ -26,17 +38,22 @@ def ewm_tasks_calibration(request, pk):
     models = list(WarehouseModel.objects.order_by("-created_at")[:50])
     wm = next((m for m in models if str(m.pk) == request.GET.get("model")), None)
     day = design_day(batch, p)
-    result = None
+    result, job = None, None
+    may_compute = has_role(request.user, GROUP_ADMIN, GROUP_DESIGNER)   # Z-3 (decyzja PO): liczy tylko Projektant
     if wm and day:
-        rows = _day_rows(batch, day)
-        codes = {c for r in rows for c in (r[4], r[5]) if c}
-        locator = SlotLocator(model_racks(wm), codes, load_master_levels())
-        result = calibrate(rows, locator, [hall_feature_dict(f) for f in wm.features.all()])
+        # US-007: liczy worker kolejki; wynik dla tej samej partii, wersji modelu i dnia czyta każdy z dostępem
+        key = cache_digest("twin.calibration", batch.pk, wm.pk, wm.updated_at.timestamp(), day)
+        job = Job.objects.filter(key=key).first()
+        if may_compute and (job is None or job.status == Job.ERROR):
+            job = jobs.enqueue("twin.calibration", {"batch": batch.pk, "model": wm.pk, "day": day.isoformat()},
+                               key=key, user=request.user)
+        if job and job.status == Job.DONE:
+            result = job.result["result"]
     k = {g["key"]: g["k"] for g in (result or {}).get("groups", []) if g["k"]}
     sim_query = urlencode({"p": p, "kt": k.get("trucks", 1.0), "kp": k.get("picking", 1.0)})
     kinds = dict(TASK_KINDS)
     return render(request, "twin/ewm_tasks/calibration.html", {
         "batch": batch, "p": p, "percentiles": PERCENTILES, "models": models, "wm": wm, "day": day,
-        "result": result, "sim_query": sim_query, "gap_max_min": GAP_MAX_S // 60, "min_pairs": MIN_PAIRS,
+        "result": result, "may_compute": may_compute, "job": job, "sim_query": sim_query, "gap_max_min": GAP_MAX_S // 60, "min_pairs": MIN_PAIRS,
         "kind_rows": [dict(r, label=kinds.get(r["kind"], r["kind"])) for r in (result or {}).get("kinds", [])],
     })

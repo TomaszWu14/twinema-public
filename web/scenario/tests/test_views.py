@@ -88,6 +88,19 @@ class ScenarioViewTests(TestCase):
         with self.assertRaises(ValidationError):
             bad.full_clean()
 
+    def test_invalid_form_keeps_typed_values_once(self):
+        """US-021: po błędzie walidacji formularz wraca z wpisanymi danymi; po kolejnym wejściu — dane z bazy."""
+        sc = self._create()
+        c = sc.days.get(kind="typical").inbound.get(kind="truck33")
+        others = [self._row(s) for s in sc.days.get(kind="typical").inbound.exclude(pk=c.pk)]
+        r = self._day_post(sc, "typical", [self._row(c, pallets_min=30, pallets_avg=20), *others])
+        fs = next(d["inbound"] for d in r.context["day_forms"] if d["day"].kind == "typical")
+        self.assertTrue(fs.is_bound)
+        self.assertEqual(fs.data["typical-0-pallets_min"], "30")             # wpisana wartość, nie z bazy
+        again = self.client.get(reverse("scenario:detail", args=[sc.pk]))
+        fs = next(d["inbound"] for d in again.context["day_forms"] if d["day"].kind == "typical")
+        self.assertFalse(fs.is_bound)
+
     def test_save_params_and_reject_zero_norm(self):
         sc = self._create()
         data = {"name": sc.name, "description": "", "growth": 1.3, "seed": 7, "shift_h": 8, "work_days": 6,
@@ -98,6 +111,7 @@ class ScenarioViewTests(TestCase):
         self.assertEqual((sc.growth, sc.seed), (1.3, 7))
         r = self.client.post(reverse("scenario:save", args=[sc.pk]), {**data, "cartons_per_pallet": 0}, follow=True)
         self.assertContains(r, "muszą być dodatnie")
+        self.assertEqual(r.context["form"]["cartons_per_pallet"].value(), "0")   # US-021: wpisana wartość zostaje
 
     def test_copy_is_deep_and_independent(self):
         sc = self._create()

@@ -27,9 +27,9 @@
 <nav class="breadcrumb">
   <a href="{% url 'twin:warehouse_model_list' %}">Modele hal</a>
   <span class="breadcrumb__sep">›</span>
-  <a href="{% url 'twin:ewm_tasks_list' %}">Zadania magazynowe EWM</a>
+  {% if is_designer %}<a href="{% url 'twin:ewm_tasks_list' %}">Zadania magazynowe EWM</a>{% else %}<span>Zadania magazynowe EWM</span>{% endif %}
   <span class="breadcrumb__sep">›</span>
-  <a href="{% url 'twin:ewm_tasks_detail' batch.pk %}">{{ batch.name }}</a>
+  {% if is_designer %}<a href="{% url 'twin:ewm_tasks_detail' batch.pk %}">{{ batch.name }}</a>{% else %}<span>{{ batch.name }}</span>{% endif %}
   <span class="breadcrumb__sep">›</span>
   <span>Dzień projektowy</span>
 </nav>
@@ -134,7 +134,7 @@
   Dzień roboczy = ruch ≥ 10 % mediany. Pojemność (miejsca paletowe) wymiaruj na maksymalny stan, nie na percentyl ruchu —
   dziś jedyne źródło to snapshot zajętości; historia stanów przyjdzie z importem stanów.</p>
 
-<script>
+<script nonce="{{ csp_nonce }}">
 (function () {
   const d = {{ chart_json|safe }};
   if (!d || typeof echarts === 'undefined') return;

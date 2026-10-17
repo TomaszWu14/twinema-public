@@ -26,10 +26,15 @@ def navigation(request):
     """Nawigacja w nagłówku z `core.views.MODULES` (te same nazwy co kafle strony głównej) + aktywna pozycja."""
     from django.urls import reverse
 
-    from .views import MODULES, active_module
+    from .views import active_module, visible_modules
     user = getattr(request, "user", None)
     if not user or not user.is_authenticated:
         return {}
     active = active_module(getattr(request, "resolver_match", None))
     return {"nav_modules": [{"name": m["name"], "url": reverse(m["url"]), "active": m["key"] == active}
-                            for m in MODULES]}
+                            for m in visible_modules(user)]}
+
+
+def csp(request):
+    """US-005: nonce CSP dla skryptów w szablonach — `<script nonce="{{ csp_nonce }}">`."""
+    return {"csp_nonce": getattr(request, "csp_nonce", "")}

@@ -103,7 +103,7 @@ python tools/render_worker.py</div>
 <p class="text-muted text-sm" style="margin-top:12px"><span id="rj-live" aria-live="polite"></span> <button type="button" class="btn btn-secondary btn-sm" id="rj-refresh" hidden>Odśwież</button></p>
 {% endblock %}
 {% block extra_scripts %}
-<script>
+<script nonce="{{ csp_nonce }}">
 (function () {
   var list = document.getElementById('rj-list');
   if (!list || list.dataset.active !== '1') return;

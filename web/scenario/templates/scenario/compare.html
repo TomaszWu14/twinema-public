@@ -76,7 +76,7 @@
 <p class="sr-only" id="cmp-fs-live" aria-live="polite"></p>
 {% endblock %}
 {% block extra_scripts %}
-<script type="module">
+<script nonce="{{ csp_nonce }}" type="module">
 import { bindFullscreenButton } from '{% static "twin/js/fullscreen.js" %}';
 const b = document.getElementById('cmp-fs');
 if (b) bindFullscreenButton(b, document.getElementById('cmp-box'), { live: document.getElementById('cmp-fs-live') });

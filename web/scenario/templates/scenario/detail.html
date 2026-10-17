@@ -141,6 +141,7 @@
 
 <section class="card" style="margin-top:16px" aria-labelledby="sc-sim-h"><div class="card-body">
   <h2 class="sc-sec" id="sc-sim-h">Symulacja dnia na hali</h2>
+  {% if job.pending or job.status == "error" %}{% include "core/_job_status.html" with may_compute=is_designer %}{% endif %}
   <p class="text-muted text-sm" style="margin:0 0 12px">Każde auto, kontener, paleta i paczka ze scenariusza w czasie dnia na wybranym layoucie: kolejki przy dokach, pola odkładcze, ludzie na zmianach, wózki z ładowaniem. Kilkanaście przebiegów z losowym rozrzutem (ziarno {{ sc.seed }} — wynik powtarzalny): średnia i najgorszy przypadek (P95).</p>
   {% if no_models %}
   <div class="empty-state" style="margin:0 0 12px">
@@ -330,7 +331,7 @@
 
 <div class="sc-actions" style="margin-top:16px">
   <form method="post" action="{% url 'scenario:copy' sc.pk %}">{% csrf_token %}<button class="btn btn-ghost" type="submit">Kopiuj scenariusz</button></form>
-  <form method="post" action="{% url 'scenario:delete' sc.pk %}">{% csrf_token %}<button class="btn btn-ghost btn-sm" type="submit">Usuń scenariusz</button></form>
+  <a class="btn btn-ghost btn-sm" href="{% url 'scenario:delete' sc.pk %}">Usuń scenariusz</a>
 </div>
 {% else %}
 <section class="card" style="margin-top:16px" aria-labelledby="sc-plan-h"><div class="card-body">
@@ -347,7 +348,7 @@
 {% endblock %}
 {% block extra_scripts %}
 <p class="sr-only" id="sc-fs-live" aria-live="polite"></p>
-<script type="module">
+<script nonce="{{ csp_nonce }}" type="module">
 import { bindFullscreenButton } from '{% static "twin/js/fullscreen.js" %}';
 document.querySelectorAll('[data-fs-target]').forEach((b) => {
   const box = document.getElementById(b.dataset.fsTarget);
@@ -356,7 +357,7 @@ document.querySelectorAll('[data-fs-target]').forEach((b) => {
   }, 60) });
 });
 </script>
-<script>
+<script nonce="{{ csp_nonce }}">
 (function () {
   var form = document.getElementById('sc-simform');
   if (form) form.addEventListener('submit', function () {

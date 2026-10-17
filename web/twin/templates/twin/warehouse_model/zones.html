@@ -34,11 +34,11 @@
     <div class="zn-floor">
       <div class="form-group">
         <label for="zn-w">Szerokość hali [m]</label>
-        <input id="zn-w" type="number" name="floor_w" value="{{ wm.floor_width_m|stringformat:'g' }}" step="0.5" min="1">
+        <input id="zn-w" type="number" name="floor_w" value="{% if floor_w %}{{ floor_w }}{% else %}{{ wm.floor_width_m|stringformat:'g' }}{% endif %}" step="0.5" min="1">
       </div>
       <div class="form-group">
         <label for="zn-d">Głębokość hali [m]</label>
-        <input id="zn-d" type="number" name="floor_d" value="{{ wm.floor_depth_m|stringformat:'g' }}" step="0.5" min="1">
+        <input id="zn-d" type="number" name="floor_d" value="{% if floor_d %}{{ floor_d }}{% else %}{{ wm.floor_depth_m|stringformat:'g' }}{% endif %}" step="0.5" min="1">
       </div>
     </div>
     <div class="table-wrap"><table class="table zn-table">
@@ -46,11 +46,11 @@
         <th>Gniazd w rzędzie</th><th>Poziomów</th><th>Usuń strefę</th></tr></thead>
       <tbody>{% for z in zones %}<tr>
         <td><b>{{ z.zone }}</b></td><td class="num">{{ z.rows }}</td>
-        <td><input type="number" name="dx_{{ z.zone }}" value="0" step="0.1" aria-label="Przesunięcie X strefy {{ z.zone }}"></td>
-        <td><input type="number" name="dy_{{ z.zone }}" value="0" step="0.1" aria-label="Przesunięcie Y strefy {{ z.zone }}"></td>
+        <td><input type="number" name="dx_{{ z.zone }}" value="{{ z.dx|default:0 }}" step="0.1" aria-label="Przesunięcie X strefy {{ z.zone }}"></td>
+        <td><input type="number" name="dy_{{ z.zone }}" value="{{ z.dy|default:0 }}" step="0.1" aria-label="Przesunięcie Y strefy {{ z.zone }}"></td>
         <td><input type="number" name="bays_{{ z.zone }}" value="{{ z.n_bays }}" min="1" max="500" aria-label="Gniazd w rzędzie strefy {{ z.zone }}"></td>
         <td><input type="number" name="levels_{{ z.zone }}" value="{{ z.n_levels }}" min="1" max="30" aria-label="Poziomów strefy {{ z.zone }}"></td>
-        <td><input type="checkbox" name="del_{{ z.zone }}" value="1" aria-label="Usuń strefę {{ z.zone }}"></td>
+        <td><input type="checkbox" name="del_{{ z.zone }}" value="1"{% if z.delete %} checked{% endif %} aria-label="Usuń strefę {{ z.zone }}"></td>
       </tr>{% empty %}<tr><td colspan="7" class="text-muted">Model nie ma regałów.</td></tr>{% endfor %}</tbody>
     </table></div>
     <p class="zn-note">Hala rośnie sama, gdy regały wyjdą poza obrys. Po zapisie sprawdzane są kolizje regałów (ostrzeżenie, nie blokada). Chcesz zachować oryginał? Najpierw „Utwórz przyszły layout (kopia)” w widoku modelu.</p>

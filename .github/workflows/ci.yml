@@ -1,7 +1,7 @@
 name: CI
 
-# Bramka PR → main. `test` = wymagany check w ochronie gałęzi; po zielonym `test`
-# job auto-merge uzbraja natywny auto-merge dla gałęzi claude/** (merge PRZEZ PR).
+# Bramka PR → main. `test` = wymagany check w ochronie gałęzi. Merge wyłącznie po akceptacji PO
+# (R-09, decyzja PO) — automatyczny merge gałęzi claude/** usunięty.
 on:
   pull_request:
     branches: [main]
@@ -29,15 +29,15 @@ jobs:
         options: >-
           --health-cmd "pg_isready -U twinema" --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: '3.13'
           cache: pip
       - run: pip install -r requirements-dev.txt
       - name: Ruff
         run: ruff check .
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '22'
       - name: Testy JS (czyste moduły edytora, sceny i odtwarzaczy)
@@ -52,7 +52,7 @@ jobs:
         run: |
           python manage.py check
           python manage.py makemigrations --check --dry-run
-          python manage.py test -v 1 --noinput --parallel 4
+          python manage.py test -v 1 --noinput --parallel 4 --exclude-tag e2e
       - name: Django deploy check
         working-directory: web
         env:
@@ -62,21 +62,58 @@ jobs:
           DJANGO_SSL_REDIRECT: 'true'
         run: python manage.py check --deploy --fail-level WARNING
 
-  auto-merge:
-    needs: test
-    if: >-
-      github.event_name == 'pull_request'
-      && startsWith(github.head_ref, 'claude/')
-      && github.event.pull_request.draft == false
+  coverage:
+    # Pokrycie: raport całości + próg 80% dla logiki domenowej (Z-28, docs/testy/STRATEGIA_TESTOW.md). SQLite, testy równolegle.
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: write
-      pull-requests: write
+    timeout-minutes: 25
     steps:
-      # AUTOMERGE_PAT (fine-grained: contents+PR write) — bez niego merge GITHUB_TOKENem
-      # nie wyzwala deploy.yml (GitHub tłumi workflowy z takich pushy).
-      - name: Uzbrój auto-merge
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.13'
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - name: Testy pod pomiarem pokrycia
+        working-directory: web
         env:
-          GH_TOKEN: ${{ secrets.AUTOMERGE_PAT || secrets.GITHUB_TOKEN }}
-        run: gh pr merge --auto --merge "${{ github.event.pull_request.number }}" --repo "${{ github.repository }}"
+          DJANGO_SECRET_KEY: ci-test-secret
+          DJANGO_DEBUG: 'true'
+          DJANGO_ALLOWED_HOSTS: '*'
+        run: |
+          coverage run --rcfile=../pyproject.toml manage.py test --noinput -v 0 --parallel 4 --exclude-tag e2e
+          coverage combine --rcfile=../pyproject.toml -q
+          coverage report --rcfile=../pyproject.toml | tee coverage.txt
+      - name: Próg pokrycia logiki domenowej 80% (Z-28, decyzja PO)
+        working-directory: web
+        run: >-
+          coverage report --rcfile=../pyproject.toml --fail-under=80
+          --include='*/scenario/sim/*,*/ml/*,*/twin/layout.py,*/twin/design_*'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: coverage
+          path: web/coverage.txt
+
+  e2e:
+    # Testy w przeglądarce (Playwright + Chromium): kluczowe ścieżki i wymuszona CSP bez naruszeń (US-005).
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.13'
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - name: Chromium dla Playwrighta
+        run: python -m playwright install --with-deps chromium
+      - name: Pliki JS bibliotek (three.js, ECharts) jak w obrazie
+        working-directory: web
+        run: sh scripts/fetch_vendor.sh
+      - name: Testy E2E
+        working-directory: web
+        env:
+          DJANGO_SECRET_KEY: ci-test-secret
+          DJANGO_DEBUG: 'true'
+          DJANGO_ALLOWED_HOSTS: '*'
+        run: python manage.py test --tag e2e --noinput -v 1

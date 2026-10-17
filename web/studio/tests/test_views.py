@@ -9,6 +9,7 @@ from core.roles import GROUP_DESIGNER, GROUP_VIEWER
 from studio.models import Presentation
 from studio.script_ai import ScriptAIError
 from twin.models import WarehouseModel
+from core.jobs import run_pending
 
 
 class StudioViewTests(TestCase):
@@ -100,7 +101,10 @@ class StudioViewTests(TestCase):
         p = self._create()
         with mock.patch("studio.script_ai.draft_script",
                         return_value=([{"preset": "orbita", "text": "Orbita."}], ["Kwestia 2 była pusta."])) as m:
-            r = self.client.post(reverse("studio:shots_ai", args=[p.pk]), follow=True)
+            self.client.post(reverse("studio:shots_ai", args=[p.pk]))
+            self.assertEqual(p.shots.count(), 5)                           # T-1: szkic pisze worker kolejki
+            run_pending()
+        r = self.client.get(reverse("studio:detail", args=[p.pk]))
         facts = m.call_args.args[0]
         self.assertTrue(facts and not any("Hala testowa" in f for f in facts))   # bez nazwy modelu
         self.assertEqual(list(p.shots.values_list("preset", "text")), [("orbita", "Orbita.")])
@@ -110,7 +114,9 @@ class StudioViewTests(TestCase):
     def test_ai_error_keeps_shots(self):
         p = self._create()
         with mock.patch("studio.script_ai.draft_script", side_effect=ScriptAIError("Limit zapytań do Claude")):
-            r = self.client.post(reverse("studio:shots_ai", args=[p.pk]), follow=True)
+            self.client.post(reverse("studio:shots_ai", args=[p.pk]))
+            run_pending()
+        r = self.client.get(reverse("studio:detail", args=[p.pk]))
         self.assertContains(r, "Limit zapytań do Claude")
         self.assertEqual(p.shots.count(), 5)
 

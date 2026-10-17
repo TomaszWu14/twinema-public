@@ -5,3 +5,16 @@ extend-exclude = ["**/migrations/**", "**/vendor/**"]
 
 [tool.ruff.lint]
 select = ["F", "E9", "B"]
+
+[tool.coverage.run]
+# Pomiar pokrycia (CI: job „coverage”, raport bez progu — próg ustala PO, docs/testy/STRATEGIA_TESTOW.md).
+# Uruchamiane z katalogu web/ — ścieżki względem niego.
+source = [".", "../tools"]
+omit = ["*/migrations/*", "*/tests/*", "*/manage.py", "*/twinema/wsgi.py", "*/twinema/asgi.py", "*/tools/blender/*"]
+branch = true
+concurrency = ["multiprocessing"]   # testy Django z --parallel; po teście: coverage combine
+parallel = true
+
+[tool.coverage.report]
+skip_empty = true
+precision = 1

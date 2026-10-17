@@ -1,7 +1,7 @@
 """Import zadań magazynowych EWM do bazy: `ewm_tasks.Scan` (strumień) → bulk_create partiami.
 
 Plik z uploadu czeka w MEDIA_ROOT/ewm_tasks/ między podglądem a importem (duże pliki
-importuje worker Celery, więc plik musi leżeć na wspólnym wolumenie media, nie w /tmp).
+importuje worker kolejki zadań, więc plik musi leżeć na wspólnym wolumenie media, nie w /tmp).
 """
 import logging
 import re
@@ -12,6 +12,7 @@ from pathlib import Path
 from django.conf import settings
 
 from .ewm_tasks import Scan
+from .shared import operator_key
 from .models_tasks import WarehouseTask, WarehouseTaskBatch
 
 log = logging.getLogger(__name__)
@@ -68,9 +69,10 @@ def run_import(batch_id, token):
         batch.status, batch.message = "error", "Plik importu wygasł albo nie istnieje — wgraj go ponownie."
         batch.save(update_fields=["status", "message"])
         return batch
+    batch.tasks.all().delete()             # ponowienie po restarcie workera (US-024): bez wierszy z przerwanej próby
     batch.status = "running"
     batch.save(update_fields=["status"])
-    scan = Scan(path, batch.file_name, batch.tz, batch.kind_map)
+    scan = Scan(path, batch.file_name, batch.tz, batch.kind_map, operator_key())
     try:
         if scan.missing:
             raise ValueError("brak kolumn: " + ", ".join(scan.missing))

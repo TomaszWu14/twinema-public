@@ -28,7 +28,7 @@
   <div class="page-header__actions">
     {% if batch.status == 'done' %}<a href="{% url 'twin:ewm_tasks_profile' batch.pk %}" class="btn btn-secondary">Dzień projektowy</a>{% endif %}
     {% if report %}<a href="{% url 'twin:warehouse_model_view' report.model.pk %}?wt={{ batch.pk }}#flow-player" class="btn btn-primary">Animacja w modelu</a>{% endif %}
-    <form method="post" action="{% url 'twin:ewm_tasks_delete' batch.pk %}" onsubmit="return confirm('Usunąć import i wszystkie jego zadania?')">
+    <form method="post" action="{% url 'twin:ewm_tasks_delete' batch.pk %}" data-confirm="Usunąć import i wszystkie jego zadania?">
       {% csrf_token %}<button type="submit" class="btn btn-danger">Usuń</button></form>
   </div>
 </div>
@@ -81,7 +81,7 @@
 <div class="card" style="margin-bottom:16px"><div class="card-body">
   <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
     <div class="wt-h" style="margin:0">Lokalizacje z zadań vs model</div>
-    <form method="get" style="margin-left:auto"><select name="model" class="form-control" onchange="this.form.submit()" aria-label="Model magazynu">
+    <form method="get" style="margin-left:auto"><select name="model" class="form-control" data-autosubmit aria-label="Model magazynu">
       {% for m in models %}<option value="{{ m.pk }}" {% if m.pk == report.model.pk %}selected{% endif %}>{{ m.name }}</option>{% endfor %}
     </select></form>
   </div>
@@ -102,7 +102,7 @@
 
 {% block extra_scripts %}
 {% if pending %}
-<script>
+<script nonce="{{ csp_nonce }}">
 (function () {
   var box = document.getElementById('wt-progress'); if (!box || !window.fetch) return;
   var URL = box.getAttribute('data-status-url'), EVERY_MS = 5000, MAX_FAILS = 5;

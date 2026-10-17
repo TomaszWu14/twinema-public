@@ -2,7 +2,8 @@
 set -e
 cd /app/web
 
-# Wolumen media (rendery, audio) Docker tworzy jako root — oddaj go użytkownikowi app.
+# Obraz startuje jako app (USER w Dockerfile). Gałąź root zostaje dla uruchomienia z `--user root`
+# (np. jednorazowa naprawa uprawnień starego wolumenu): oddaje wolumeny app i schodzi do app przez gosu.
 mkdir -p /app/web/media
 if [ "$(id -u)" = "0" ]; then
     chown -R app:app /app/web/media 2>/dev/null || true
@@ -17,12 +18,27 @@ $RUN python manage.py migrate --noinput
 $RUN python manage.py create_roles
 # Konto administratora z env (DJANGO_SUPERUSER_USERNAME/EMAIL/PASSWORD) — tylko przy pierwszym starcie.
 if [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; then
-    $RUN python manage.py createsuperuser --noinput 2>/dev/null || echo "Superuser już istnieje."
+    if [ "${#DJANGO_SUPERUSER_PASSWORD}" -lt 12 ]; then
+        echo "UWAGA: DJANGO_SUPERUSER_PASSWORD krótsze niż 12 znaków — konto administratora nie zostanie utworzone (US-017)."
+    else
+        $RUN python manage.py createsuperuser --noinput 2>/dev/null || echo "Superuser już istnieje."
+    fi
 fi
 # Publiczne demo: hala, scenariusz, stany i konto `demo` (Podgląd) — idempotentnie.
 if [ "$DEMO_SEED" = "1" ] || [ "$DEMO_SEED" = "true" ]; then
     $RUN python manage.py seed_demo
 fi
+
+# Demo publiczne na instancji z danymi spoza demo = ich ujawnienie (R-02) — ostrzeżenie w logach.
+$RUN python manage.py demo_exposure_check || true
+# Dziennik operacji: usuń wpisy starsze niż AUDIT_RETENTION_DAYS (US-008).
+$RUN python manage.py audit_prune || true
+# Worker kolejki zadań (symulacje, kalibracje, duże importy — US-007, US-024, ADR-0004) obok serwera.
+# RUN_WORKER=false, gdy worker działa jako osobna usługa (`python manage.py run_jobs`). Pętla podnosi go po awarii.
+case "${RUN_WORKER:-true}" in
+    false|0|no) echo "Worker kolejki: wyłączony (RUN_WORKER=${RUN_WORKER})." ;;
+    *) ( while true; do $RUN python manage.py run_jobs; echo "Worker kolejki zakończył pracę — restart za 5 s."; sleep 5; done ) & ;;
+esac
 
 exec $RUN gunicorn twinema.wsgi:application \
     --bind 0.0.0.0:8000 \

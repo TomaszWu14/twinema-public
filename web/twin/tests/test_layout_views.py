@@ -167,7 +167,7 @@ class LayoutEditorPageTests(TestCase):
         sonda WebGL, link do animacji przepływów; przycisk kopii „przyszłego layoutu” w widoku i na liście."""
         self.client.force_login(self.designer)
         r = self.client.get(reverse("twin:warehouse_layout_editor", args=[self.wm.pk]))
-        self.assertContains(r, '<script type="importmap">')
+        self.assertContains(r, 'type="importmap">')
         self.assertContains(r, "/static/twin/vendor/three.module.js")
         self.assertNotContains(r, "cdn.")
         for marker in ('id="le-3d-canvas"', 'data-le-mode="split"', 'id="le-3d-sel"', "__tw3dNoWebGL",

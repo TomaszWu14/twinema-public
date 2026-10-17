@@ -236,7 +236,7 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
+<script nonce="{{ csp_nonce }}">
   // ⇔/⇕ ustawiają kąt wprost, ⟳ dokłada +90° i zawija do zakresu -180..180 (input ma
   // min=-180 max=180 — bez zawijania przeglądarka odrzuciłaby 270°). Zapis idzie
   // istniejącym POST-em formularza, bez osobnego endpointu.

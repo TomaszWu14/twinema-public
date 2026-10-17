@@ -67,7 +67,14 @@ def warehouse_model_zones(request, pk):
         kept = [r for r in racks if r["zone"] not in deleted]
         if any(r["x"] < 0 or r["y"] < 0 for r in kept):
             messages.error(request, "Przesunięcie wypycha regały poza halę (ujemne X/Y) — nic nie zapisano.")
-            return redirect("twin:warehouse_model_zones", pk=wm.pk)
+            # US-021: formularz wraca z wpisanymi wartościami, żeby poprawić przesunięcie zamiast wpisywać wszystko
+            typed = [{**z, "dx": P.get(f"dx_{z['zone']}", "0"), "dy": P.get(f"dy_{z['zone']}", "0"),
+                      "n_bays": P.get(f"bays_{z['zone']}", z["n_bays"]),
+                      "n_levels": P.get(f"levels_{z['zone']}", z["n_levels"]),
+                      "delete": bool(P.get(f"del_{z['zone']}"))} for z in zones]
+            return render(request, "twin/warehouse_model/zones.html", {
+                "wm": wm, "zones": typed, "floor_w": P.get("floor_w", ""), "floor_d": P.get("floor_d", "")},
+                status=400)
         width, depth = fit_floor(kept, _num(P.get("floor_w"), float, 1, 5000) or wm.floor_width_m,
                                  _num(P.get("floor_d"), float, 1, 5000) or wm.floor_depth_m)
         by_pk = {r["id"]: r for r in kept}

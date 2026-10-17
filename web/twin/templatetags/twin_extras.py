@@ -17,7 +17,8 @@ def icon(name, size=16, label="", cls=""):
     if size not in ICON_SIZES:
         raise TemplateSyntaxError(f"icon: rozmiar {size} spoza {ICON_SIZES}")
     href = f"{static('twin/icons/lucide.svg')}#{name}"
-    a11y = format_html('role="img" aria-label="{}"', label) if label else mark_safe('aria-hidden="true"')
+    # B308: mark_safe tylko na stałym atrybucie, bez danych wejściowych
+    a11y = format_html('role="img" aria-label="{}"', label) if label else mark_safe('aria-hidden="true"')  # nosec B308
     return format_html(
         '<svg class="icon icon--{} {}" width="{}" height="{}" fill="none" stroke="currentColor" '
         'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false" {}>'

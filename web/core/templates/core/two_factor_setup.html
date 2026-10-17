@@ -1,0 +1,33 @@
+{% extends "core/base.html" %}
+{% block title %}Weryfikacja dwuetapowa · {{ app_name }}{% endblock %}
+{% block main %}
+<div class="wrap tf-wrap">
+  <div class="eyebrow">Bezpieczeństwo konta</div>
+  <h1 class="hero-title">Weryfikacja dwuetapowa</h1>
+  {% if already %}
+  <p class="lead">Weryfikacja dwuetapowa jest włączona. Nowa konfiguracja zastąpi obecną aplikację dopiero po potwierdzeniu kodu.</p>
+  {% else %}
+  <p class="lead">Konto Administratora wymaga kodu z aplikacji uwierzytelniającej (np. Google Authenticator, Microsoft
+    Authenticator, Aegis) przy każdym logowaniu.</p>
+  {% endif %}
+  <ol class="tf-steps">
+    <li>Zeskanuj kod QR w aplikacji albo wpisz klucz ręcznie.</li>
+    <li>Wpisz 6-cyfrowy kod, który pokaże aplikacja.</li>
+  </ol>
+  <div class="tf-grid">
+    <img class="tf-qr" src="{{ qr }}" alt="Kod QR do konfiguracji aplikacji uwierzytelniającej" width="220" height="220">
+    <div>
+      <p class="text-sm">Klucz do wpisania ręcznie:</p>
+      <p><code class="tf-secret">{{ secret }}</code></p>
+      <form method="post">{% csrf_token %}
+        {% if error %}<div class="alert alert-error" role="alert">{{ error }}</div>{% endif %}
+        <label for="id_token">Kod z aplikacji</label>
+        <input class="form-control" type="text" name="token" id="id_token" inputmode="numeric"
+               autocomplete="one-time-code" pattern="[0-9 ]{6,8}" maxlength="8" required>
+        <input type="hidden" name="next" value="{{ next }}">
+        <button class="btn btn-primary tf-submit" type="submit">Włącz weryfikację</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

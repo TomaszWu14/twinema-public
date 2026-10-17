@@ -32,7 +32,7 @@ class AppEnv(BaseSettings):
 
     # ── Sesja / bezpieczeństwo ──────────────────────────────────────────────
     SESSION_COOKIE_AGE: int = 28800
-    CSP_REPORT_ONLY: bool = True
+    CSP_REPORT_ONLY: bool = False      # US-005: CSP wymuszana; true = tylko raport (awaryjny powrót)
 
     # ── Render (worker Blendera poza serwerem, pobiera zlecenia po HTTPS) ────
     RENDER_WORKER_TOKEN: str = ""      # puste = API workera wyłączone (403)
@@ -48,6 +48,19 @@ class AppEnv(BaseSettings):
     DEMO_SEED: bool = False            # True = docker-entrypoint.sh odpala seed_demo przy każdym starcie
     DEMO_PUBLIC: bool = False          # True = /demo/ wpuszcza bez hasła jako `demo` (Podgląd, tylko odczyt)
     DEMO_VIDEO_URL: str = ""           # adres filmu (np. YouTube) na stronie /demo/; puste = bez przycisku
+
+    # ── Dziennik operacji wrażliwych (US-008) ──────────────────────────────
+    # ── Drugi składnik logowania (US-017) ──────────────────────────────────────
+    TWO_FACTOR_ADMIN: bool = True      # TOTP obowiązkowy dla Administratorów (Z-37); false tylko awaryjnie
+
+    # ── Kopie zapasowe (US-009) ────────────────────────────────────────────────
+    BACKUP_DIR: str = ""              # katalog kopii poza wolumenem mediów; puste = `manage.py backup` odmawia
+
+    # ── Kolejka zadań w bazie (US-007, ADR-0004) ──────────────────────────────
+    JOB_STALE_MIN: int = 60            # zadanie „w toku” dłużej = worker padł → wraca do kolejki
+    RUN_WORKER: bool = True            # True = docker-entrypoint.sh uruchamia worker obok serwera
+    AUDIT_RETENTION_DAYS: int = 365    # wpisy starsze usuwa `audit_prune` (przy starcie kontenera)
+    LOGIN_ATTEMPT_RETENTION_DAYS: int = 30  # próby logowania (django-axes) — RODO CP-2, decyzja PO
 
     # ── Obserwowalność ──────────────────────────────────────────────────────
     SENTRY_DSN: str = ""
@@ -65,6 +78,10 @@ class AppEnv(BaseSettings):
             raise ValueError("DEMO_PASSWORD musi mieć co najmniej 8 znaków.")
         if self.DEMO_VIDEO_URL and not self.DEMO_VIDEO_URL.startswith("https://"):
             raise ValueError("DEMO_VIDEO_URL musi zaczynać się od https://.")
+        if self.LOGIN_ATTEMPT_RETENTION_DAYS < 1:
+            raise ValueError("LOGIN_ATTEMPT_RETENTION_DAYS musi wynosić co najmniej 1 dzień.")
+        if self.AUDIT_RETENTION_DAYS < 30:
+            raise ValueError("AUDIT_RETENTION_DAYS musi wynosić co najmniej 30 dni.")
         return self
 
 

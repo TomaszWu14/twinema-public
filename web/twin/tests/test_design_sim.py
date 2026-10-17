@@ -10,6 +10,8 @@ from django.test import SimpleTestCase, TestCase
 from twin.design_generator import generate
 from twin.design_sim import HORIZON_S, Layout, _manh, load_day_tasks, scale_tasks, simulate
 from twin.models_tasks import WarehouseTask, WarehouseTaskBatch
+from core.jobs import run_pending
+from core.models import Job
 
 GEN = generate(pallet_positions=6000, carton_locations=3000)
 RACKS = [{"id": i, "zone": r["zone"], "rack_id": r["rack_id"], "x": r["x_m"], "y": r["y_m"], "angle": 0,
@@ -113,7 +115,13 @@ class SimulationViewTests(TestCase):
         r = self.client.get(url)
         self.assertContains(r, "Symuluj dzień")
         self.assertNotContains(r, "Sugerowane szt.")
-        r = self.client.get(url, {"run": 1, "model": self.wm.pk, "mult": "1,0", "agv": 2, "kombi": 2, "ept": 2})
+        q = {"run": 1, "model": self.wm.pk, "mult": "1,0", "agv": 2, "kombi": 2, "ept": 2}
+        r = self.client.get(url, q)                               # US-007: zadanie trafia do kolejki
+        self.assertContains(r, "czeka w kolejce")
+        self.assertContains(r, "core/js/job_status.js")
+        self.assertNotContains(r, "Sugerowane szt.")
+        self.assertEqual(run_pending(), 1)
+        r = self.client.get(url, q)
         self.assertContains(r, "Sugerowane szt.")
         self.assertContains(r, "Przyjęcie / odłożenie")
 
@@ -129,11 +137,49 @@ class SimulationViewTests(TestCase):
         url = f"/magazyn/zadania-ewm/{self.batch.pk}/symulacja/"
         q = {"run": 1, "model": self.wm.pk, "agv": 2, "kombi": 2, "ept": 2}
         with patch.object(v, "run_simulation", wraps=v.run_simulation) as sim:
+            self.client.get(url, q)
+            run_pending()
             for _ in range(2):
                 self.assertContains(self.client.get(url, q), "Sugerowane szt.")
+            run_pending()
             self.assertEqual(sim.call_count, 1)
             f = self.wm.features.first()
             f.label = "Zmieniony"
             f.save()                                              # sygnał podbija wersję modelu
             self.client.get(url, q)
+            run_pending()
             self.assertEqual(sim.call_count, 2)
+
+
+class ViewerDoesNotComputeTests(SimulationViewTests):
+    """Z-3 (decyzja PO, R-07): rola Podgląd nie uruchamia symulacji — widzi tylko wynik policzony wcześniej."""
+
+    def _viewer(self):
+        from django.contrib.auth.models import Group
+
+        from core.roles import GROUP_VIEWER
+        u = get_user_model().objects.create_user("zarzad", password="x")
+        u.groups.add(Group.objects.get_or_create(name=GROUP_VIEWER)[0])
+        self.client.force_login(u)
+
+    def test_viewer_run_does_not_simulate(self):
+        from unittest.mock import patch
+
+        from twin.views import warehouse_design_sim as v
+        self._viewer()
+        url = f"/magazyn/zadania-ewm/{self.batch.pk}/symulacja/"
+        with patch.object(v, "run_simulation", wraps=v.run_simulation) as spy:
+            r = self.client.get(url, {"run": 1, "model": self.wm.pk, "agv": 2, "kombi": 2, "ept": 2})
+            run_pending()
+        self.assertEqual(spy.call_count, 0)
+        self.assertFalse(Job.objects.exists())
+        self.assertContains(r, "poproś Projektanta")
+        self.assertNotContains(r, "Sugerowane szt.")
+
+    def test_viewer_sees_result_computed_by_designer(self):
+        url = f"/magazyn/zadania-ewm/{self.batch.pk}/symulacja/"
+        q = {"run": 1, "model": self.wm.pk, "agv": 2, "kombi": 2, "ept": 2}
+        self.client.get(url, q)                                                 # superuser zleca obliczenie
+        run_pending()
+        self._viewer()
+        self.assertContains(self.client.get(url, q), "Sugerowane szt.")

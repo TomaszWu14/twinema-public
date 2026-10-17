@@ -143,13 +143,20 @@ def parse_file(name, data):
 
 def import_rows(rows, user):
     """Zapis: własny model po nazwie (tworzy albo aktualizuje), braki z klasy ogólnej typu.
-    Klas systemowych nie rusza. → (utworzone, zaktualizowane, pominięte [(nazwa, powód)])."""
+    Klas systemowych nie rusza; cudzego modelu (inny autor albo brak autora) nie aktualizuje — chyba że
+    importuje administrator. → (utworzone, zaktualizowane, pominięte [(nazwa, powód)])."""
+    from core.roles import GROUP_ADMIN, has_role
+
     from .models import Equipment
     created = updated = 0
     skipped = []
+    admin = has_role(user, GROUP_ADMIN)
     for r in rows:
         if Equipment.objects.filter(name=r["name"], is_system=True).exists():
             skipped.append((r["name"], "nazwa klasy systemowej — zmień nazwę"))
+            continue
+        if not admin and Equipment.objects.filter(name=r["name"], is_system=False).exclude(created_by=user).exists():
+            skipped.append((r["name"], "model innego użytkownika — zmień nazwę"))
             continue
         base = Equipment.objects.filter(is_system=True, kind=r["kind"]).order_by("capacity_kg").first()
         filled = [f for f in FILLED_FROM_CLASS if r.get(f) is None and base and getattr(base, f) is not None]

@@ -4,7 +4,7 @@
 <div class="wrap">
   <div class="eyebrow">403</div>
   <h1 class="hero-title">Brak dostępu</h1>
-  <p class="lead">Ta część wymaga innej roli. Poproś administratora o dostęp.</p>
+  <p class="lead">{% if reason %}{{ reason }}{% else %}Ta część wymaga innej roli. Poproś administratora o dostęp.{% endif %}</p>
   <a class="btn btn-primary" href="{% url 'core:home' %}">Wróć na start</a>
 </div>
 {% endblock %}

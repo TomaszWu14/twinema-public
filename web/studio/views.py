@@ -26,6 +26,9 @@ from .captions import build_srt, offsets, shot_cues
 from .deck import build_deck
 from .models import RENDER_RESOLUTION, MontageJob, Presentation, Shot
 from .script import TARGET_WORDS, kpi_facts, template_script
+from core import audit
+from core.models import AuditEvent
+from core import jobs as job_queue
 
 
 def model_kpi(wm):
@@ -108,6 +111,7 @@ def presentation_detail(request, pk):
         or bool(montage and montage.status in ("queued", "running")),
         "worker_enabled": bool(settings.RENDER_WORKER_TOKEN),
         "words": n_words, "target_words": TARGET_WORDS,
+        "ai_job": job_queue.latest("studio.ai_draft", presentation=p.pk),
         "steps": Presentation.STATUS_CHOICES,
         "step_index": [k for k, _ in Presentation.STATUS_CHOICES].index(p.status),
     })
@@ -147,18 +151,16 @@ def shots_ai(request, pk):
     p = get_object_or_404(Presentation, pk=pk)
     if not _draft_or_back(request, p):
         return redirect("studio:detail", pk=pk)
-    try:
-        shots, warnings = script_ai.draft_script(kpi_facts(model_kpi(p.model)))
-    except script_ai.ScriptAIError as exc:
-        messages.error(request, str(exc))
+    if not script_ai.enabled():
+        messages.error(request, "Szkic z Claude wyłączony — ustaw ANTHROPIC_API_KEY w zmiennych serwera.")
         return redirect("studio:detail", pk=pk)
-    if not shots:
-        messages.error(request, "Szkic z AI nie zawierał żadnego poprawnego tekstu — obecne teksty bez zmian.")
+    pending = job_queue.latest("studio.ai_draft", presentation=p.pk)
+    if pending and pending.pending:
+        messages.warning(request, "Szkic z AI już się pisze — poczekaj na wynik.")
         return redirect("studio:detail", pk=pk)
-    _replace_shots(p, shots)
-    messages.success(request, f"Claude napisał szkic: {len(shots)} ujęć. Przeczytaj, popraw i zatwierdź.")
-    for w in warnings:
-        messages.warning(request, w)
+    # T-1: Claude odpowiada do 90 s (+ jedno ponowienie) — szkic pisze worker kolejki, nie żądanie
+    job_queue.enqueue("studio.ai_draft", {"presentation": p.pk}, user=request.user)
+    messages.success(request, "Claude pisze szkic w tle — teksty ujęć pojawią się na tej stronie.")
     return redirect("studio:detail", pk=pk)
 
 
@@ -203,6 +205,7 @@ def reopen(request, pk):
 def presentation_delete(request, pk):
     p = get_object_or_404(Presentation, pk=pk)
     title = p.title
+    audit.record(request, AuditEvent.DELETE, p, object_type="prezentacja filmowa", label=title)
     p.delete()
     messages.success(request, f"Usunięto prezentację „{title}”.")
     return redirect("studio:list")

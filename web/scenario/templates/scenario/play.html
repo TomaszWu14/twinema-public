@@ -122,8 +122,8 @@
 
 {% block extra_scripts %}
 {% if has_events %}
-<script type="importmap">{"imports":{"three":"/static/twin/vendor/three.module.js","three/addons/":"/static/twin/vendor/addons/"}}</script>
-<script type="module">
+<script nonce="{{ csp_nonce }}" type="importmap">{"imports":{"three":"/static/twin/vendor/three.module.js","three/addons/":"/static/twin/vendor/addons/"}}</script>
+<script nonce="{{ csp_nonce }}" type="module">
 import { createViewer } from '{% static "twin/js/scene-builder.js" %}';
 import { bindFullscreenButton } from '{% static "twin/js/fullscreen.js" %}';
 import { createDayPlayer } from '{% static "twin/js/day-player.js" %}';

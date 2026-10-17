@@ -10,6 +10,7 @@ from scenario.models import Scenario, ScenarioRun
 from scenario.services import fleet_from_catalog
 from scenario.sim.engine import Fleet
 from twin.models import WarehouseModel
+from core.jobs import run_pending
 
 
 class FleetChargingTests(TestCase):
@@ -48,6 +49,7 @@ class FleetCatalogTests(TestCase):
         Scenario.objects.filter(pk=self.sc.pk).update(fleet_equipment=self.reach, fleet_units=4)
         self.client.post(reverse("scenario:simulate", args=[self.sc.pk]),
                          {"model": self.wm.pk, "day": "typical", "runs": 2})
+        run_pending()                                   # US-007: symulację liczy worker kolejki
         res = ScenarioRun.objects.get().result
         self.assertEqual(res["fleet"]["name"], "Reach truck 1,6 t / 10 m")
         agg = res["agg"]

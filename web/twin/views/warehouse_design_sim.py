@@ -4,6 +4,10 @@ from urllib.parse import urlencode
 
 from django.core.cache import cache
 
+from core import jobs
+from core.models import Job
+from core.roles import GROUP_ADMIN, GROUP_DESIGNER, has_role
+
 from twin.shared import _planner, cache_digest, get_object_or_404, hall_feature_dict, render, WarehouseModel
 from twin.blender_scene import model_racks
 from twin.design_day import PERCENTILES, build_profile, load_inputs
@@ -61,14 +65,17 @@ def ewm_tasks_simulate(request, pk):
     models = list(WarehouseModel.objects.order_by("-created_at")[:50])
     wm = next((m for m in models if str(m.pk) == g.get("model")), models[0] if models else None)
     day = design_day(batch, prm["p"])
-    result, n_tasks = (None, 0)
+    result, n_tasks, job = None, 0, None
+    may_compute = has_role(request.user, GROUP_ADMIN, GROUP_DESIGNER)   # Z-3 (decyzja PO): liczy tylko Projektant
     if day and wm and "run" in g:
-        # ten sam (partia, wersja modelu, dzień, parametry) = ten sam wynik — odświeżenie strony nie liczy dnia od nowa
-        key = "sim:" + cache_digest(batch.pk, wm.pk, wm.updated_at.timestamp(), day, prm)
-        result, n_tasks = cache.get(key) or (None, None)
-        if n_tasks is None:
-            result, n_tasks = run_simulation(batch, wm, day, prm)
-            cache.set(key, (result, n_tasks), CACHE_TTL)
+        # US-007: liczy worker kolejki; ten sam (partia, wersja modelu, dzień, parametry) = to samo zadanie i wynik
+        key = cache_digest("twin.sim", batch.pk, wm.pk, wm.updated_at.timestamp(), day, prm)
+        job = Job.objects.filter(key=key).first()
+        if may_compute and (job is None or job.status == Job.ERROR):
+            job = jobs.enqueue("twin.sim", {"batch": batch.pk, "model": wm.pk, "day": day.isoformat(), "prm": prm},
+                               key=key, user=request.user)
+        if job and job.status == Job.DONE:
+            result, n_tasks = job.result["result"], job.result["n_tasks"]
     anim_query = urlencode({"sim": batch.pk, "p": prm["p"], "mult": prm["mult"], **prm["fleet"],
                             "kt": prm["calib"]["trucks"], "kp": prm["calib"]["picking"]})
     return render(request, "twin/ewm_tasks/simulate.html", {
@@ -76,5 +83,5 @@ def ewm_tasks_simulate(request, pk):
         "fleet_rows": [(k, label, prm["fleet"][k]) for k, label in FLEET_KINDS],
         "models": models, "wm": wm, "day": day, "ran": "run" in g, "result": result, "n_tasks": n_tasks,
         "wait_rows": [(dict(TASK_KINDS).get(k, k), w) for k, w in (result or {}).get("waits", {}).items()],
-        "anim_query": anim_query, "calib": prm["calib"],
+        "anim_query": anim_query, "calib": prm["calib"], "may_compute": may_compute, "job": job,
     })

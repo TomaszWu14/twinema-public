@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "axes",
+    "django_otp",
+    "django_otp.plugins.otp_totp",
     "core",
     "masterdata",
     "equipment",
@@ -59,6 +61,8 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django_otp.middleware.OTPMiddleware",
+    "core.middleware.TwoFactorMiddleware",
     "axes.middleware.AxesMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -80,6 +84,7 @@ TEMPLATES = [
                 "core.context_processors.branding",
                 "core.context_processors.user_roles",
                 "core.context_processors.navigation",
+                "core.context_processors.csp",
             ],
         },
     },
@@ -149,6 +154,7 @@ LOGOUT_REDIRECT_URL = "/login/"
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
      "OPTIONS": {"min_length": 10}},
+    {"NAME": "core.validators.PrivilegedPasswordLengthValidator"},     # US-017: ≥ 12 dla kont uprzywilejowanych
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -165,6 +171,14 @@ ANTHROPIC_API_KEY = env.ANTHROPIC_API_KEY
 DEMO_PASSWORD = env.DEMO_PASSWORD
 DEMO_PUBLIC = env.DEMO_PUBLIC
 DEMO_VIDEO_URL = env.DEMO_VIDEO_URL
+AUDIT_RETENTION_DAYS = env.AUDIT_RETENTION_DAYS
+LOGIN_ATTEMPT_RETENTION_DAYS = env.LOGIN_ATTEMPT_RETENTION_DAYS
+JOB_STALE_MIN = env.JOB_STALE_MIN
+BACKUP_DIR = env.BACKUP_DIR
+# US-017 (decyzja PO Z-37): TOTP obowiązkowy dla Administratorów; testy wyłączają go runnerem (core.testing)
+TWO_FACTOR_ADMIN = env.TWO_FACTOR_ADMIN
+OTP_TOTP_ISSUER = APP_NAME
+TEST_RUNNER = "core.testing.TestRunner"
 CLAUDE_MODEL = env.CLAUDE_MODEL
 DATA_UPLOAD_MAX_MEMORY_SIZE = 30 * 1024 * 1024     # formularze/importy; pliki renderów idą strumieniem
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024

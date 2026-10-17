@@ -1,6 +1,12 @@
 {% extends "core/base.html" %}
 {% block main %}
 <div class="wrap">
+  {% if demo_exposure %}
+  <div class="alert alert-warning" role="alert">
+    <strong>Demo publiczne jest włączone</strong>, a w systemie są dane spoza demo ({{ demo_exposure|join:", " }}).
+    Wejście gościa jest wyłączone. Uruchom demo na osobnej instancji albo wyłącz je (DEMO_PUBLIC=false).
+  </div>
+  {% endif %}
   <div class="eyebrow">Cyfrowy bliźniak magazynu</div>
   <h1 class="hero-title">Projektuj halę, symuluj przepływ, pokaż to jak film.</h1>
   <p class="lead">Od danych i układu regałów, przez symulację dnia pracy i koszty, do animacji 3D

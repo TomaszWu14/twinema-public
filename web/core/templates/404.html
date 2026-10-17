@@ -1,0 +1,12 @@
+{% extends "core/base.html" %}
+{% block title %}Nie znaleziono · {{ app_name }}{% endblock %}
+{% block main %}
+<div class="wrap">
+  <div class="eyebrow">404</div>
+  <h1 class="hero-title">Nie znaleziono strony</h1>
+  <p class="lead">Ta strona nie istnieje albo została usunięta. Jeśli otwierasz link do prezentacji,
+    mógł wygasnąć albo zostać wyłączony — poproś autora o nowy link.</p>
+  {% if user.is_authenticated %}<a class="btn btn-primary" href="{% url 'core:home' %}">Wróć na start</a>
+  {% else %}<a class="btn btn-primary" href="{% url 'core:login' %}">Przejdź do logowania</a>{% endif %}
+</div>
+{% endblock %}

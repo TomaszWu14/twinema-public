@@ -13,6 +13,7 @@ from types import SimpleNamespace
 from django.conf import settings
 from django.core.files.base import File
 from django.db import transaction
+from django.db.models import F
 from django.http import HttpResponse, JsonResponse, QueryDict
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -51,10 +52,19 @@ def _claimed_job(request, pk):
     return job
 
 
-def requeue_stale():
-    """Zlecenia „w toku” dłużej niż RENDER_STALE_MIN (worker padł) wracają do kolejki."""
+MAX_ATTEMPTS = 3          # US-015: tyle przejęć bez wyniku, potem błąd zamiast krążenia w kolejce bez końca
+GAVE_UP = (f"Przerwano po {MAX_ATTEMPTS} próbach — stanowisko nie odesłało poprawnego wyniku "
+           "(sprawdź log stanowiska, limit rozmiaru pliku i dostępność Blendera/ffmpeg).")
+
+
+def requeue_stale(model=RenderJob):
+    """Zlecenia „w toku” dłużej niż RENDER_STALE_MIN (worker padł albo serwer odrzucił wynik) wracają do kolejki;
+    po MAX_ATTEMPTS przejęciach kończą się błędem. → liczba zleceń zwróconych do kolejki."""
     limit = timezone.now() - timedelta(minutes=settings.RENDER_STALE_MIN)
-    return RenderJob.objects.filter(status="running", claimed_at__lt=limit).update(
+    stale = model.objects.filter(status="running", claimed_at__lt=limit)
+    stale.filter(attempts__gte=MAX_ATTEMPTS).update(status="error", claim_token="", finished_at=timezone.now(),
+                                                    log=GAVE_UP)
+    return stale.filter(attempts__lt=MAX_ATTEMPTS).update(
         status="queued", claim_token="", log="Wróciło do kolejki: worker nie odesłał wyniku w czasie.")
 
 
@@ -70,7 +80,8 @@ def claim(request):
         token = job.new_claim()
         with transaction.atomic():
             won = RenderJob.objects.filter(pk=job.pk, status="queued").update(
-                status="running", claim_token=token, claimed_at=timezone.now(), worker=worker)
+                status="running", claim_token=token, claimed_at=timezone.now(), worker=worker,
+                attempts=F("attempts") + 1)
         if won:
             return JsonResponse({
                 "id": job.pk, "claim": token, "title": str(job), "preset": job.preset, "kind": job.kind,

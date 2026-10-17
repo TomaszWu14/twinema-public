@@ -99,3 +99,95 @@ class CatalogViewTests(TestCase):
     def test_hub_links_catalog(self):
         self.client.force_login(self.users["zarzad"])
         self.assertContains(self.client.get(reverse("core:home")), reverse("equipment:list"))
+
+
+class OwnModelAuthorizationTests(TestCase):
+    """US-001 (SEC): własny model sprzętu zmienia i usuwa tylko jego autor albo administrator."""
+
+    def setUp(self):
+        self.users = {}
+        for name, group in (("adm", GROUP_ADMIN), ("autor", GROUP_DESIGNER), ("inny", GROUP_DESIGNER),
+                            ("zarzad", GROUP_VIEWER)):
+            u = User.objects.create_user(name, password="x")
+            u.groups.add(Group.objects.get_or_create(name=group)[0])
+            self.users[name] = u
+        self.own = Equipment.objects.create(kind="reach", name="Mój reach", capacity_kg=1500, speed_loaded_kmh=10,
+                                            speed_empty_kmh=11, created_by=self.users["autor"])
+        self.orphan = Equipment.objects.create(kind="reach", name="Bez autora", capacity_kg=1500,
+                                               speed_loaded_kmh=10, speed_empty_kmh=11)
+
+    def _status(self, who, route, eq, method="get"):
+        self.client.force_login(self.users[who])
+        return getattr(self.client, method)(reverse(route, args=[eq.pk])).status_code
+
+    def test_other_designer_and_viewer_get_403(self):
+        for who in ("inny", "zarzad"):
+            self.assertEqual(self._status(who, "equipment:edit", self.own), 403, who)
+            self.assertEqual(self._status(who, "equipment:delete", self.own, "post"), 403, who)
+        self.assertTrue(Equipment.objects.filter(pk=self.own.pk).exists())
+
+    def test_model_without_author_only_admin(self):
+        self.assertEqual(self._status("autor", "equipment:edit", self.orphan), 403)
+        self.assertEqual(self._status("autor", "equipment:delete", self.orphan, "post"), 403)
+        self.assertEqual(self._status("adm", "equipment:edit", self.orphan), 200)
+
+    def test_detail_hides_actions_for_other_designer(self):
+        self.client.force_login(self.users["inny"])
+        page = self.client.get(reverse("equipment:detail", args=[self.own.pk]))
+        self.assertNotContains(page, reverse("equipment:edit", args=[self.own.pk]))
+        self.assertNotContains(page, reverse("equipment:delete", args=[self.own.pk]))
+        self.assertContains(page, "Kopiuj jako własny model")             # kopia nadal dozwolona
+
+    def test_author_and_admin_can_delete(self):
+        self.assertEqual(self._status("autor", "equipment:edit", self.own), 200)
+        self.assertEqual(self._status("autor", "equipment:delete", self.own, "post"), 302)
+        self.assertEqual(self._status("adm", "equipment:delete", self.orphan, "post"), 302)
+        self.assertFalse(Equipment.objects.filter(is_system=False).exists())
+
+    def test_delete_message_reports_removed_fleet_groups(self):
+        """US-002: komunikat po usunięciu mówi prawdę o usuniętych grupach floty mieszanej."""
+        from scenario.models import Scenario, ScenarioFleet
+        sc = Scenario.objects.create(name="S")
+        ScenarioFleet.objects.create(scenario=sc, equipment=self.own, units=2)
+        self.client.force_login(self.users["autor"])
+        r = self.client.post(reverse("equipment:delete", args=[self.own.pk]), follow=True)
+        self.assertContains(r, "Usunięto też grupy floty mieszanej z tym sprzętem: 1.")
+        self.assertFalse(ScenarioFleet.objects.filter(scenario=sc).exists())
+
+
+class OwnModelUniqueNameTests(TestCase):
+    """US-022: nazwa własnego modelu jest unikalna — import po nazwie zawsze trafia w jeden model."""
+
+    def setUp(self):
+        self.proj = User.objects.create_user("proj", password="x")
+        self.proj.groups.add(Group.objects.get_or_create(name=GROUP_DESIGNER)[0])
+        self.client.force_login(self.proj)
+        self.reach = Equipment.objects.get(name="Reach truck 1,6 t / 10 m")
+
+    def _data(self, eq, **over):
+        data = {f: getattr(eq, f) for f in ("kind", "speed_loaded_kmh", "speed_empty_kmh", "capacity_kg")}
+        return {**data, "lift_curve": "[]", **over}
+
+    def test_copying_twice_gives_distinct_names(self):
+        for _ in range(3):
+            self.client.post(reverse("equipment:copy", args=[self.reach.pk]))
+        names = sorted(Equipment.objects.filter(is_system=False).values_list("name", flat=True))
+        self.assertEqual(names, ["Reach truck 1,6 t / 10 m (kopia)", "Reach truck 1,6 t / 10 m (kopia) 2",
+                                 "Reach truck 1,6 t / 10 m (kopia) 3"])
+
+    def test_form_rejects_taken_name_ignoring_case(self):
+        self.client.post(reverse("equipment:copy", args=[self.reach.pk]))
+        self.client.post(reverse("equipment:copy", args=[self.reach.pk]))
+        first, second = Equipment.objects.filter(is_system=False).order_by("pk")
+        r = self.client.post(reverse("equipment:edit", args=[second.pk]), self._data(second, name=first.name.upper()))
+        self.assertContains(r, "Model o tej nazwie już jest w katalogu")
+        r = self.client.post(reverse("equipment:edit", args=[second.pk]), self._data(second, name=self.reach.name))
+        self.assertContains(r, "Model o tej nazwie już jest w katalogu")             # nazwa klasy systemowej
+        r = self.client.post(reverse("equipment:edit", args=[second.pk]), self._data(second, name=second.name))
+        self.assertEqual(r.status_code, 302)                                         # własna nazwa bez zmian
+
+    def test_database_rejects_duplicate_own_name(self):
+        from django.db import IntegrityError, transaction
+        Equipment.objects.create(kind="reach", name="Mój", capacity_kg=1, speed_loaded_kmh=1, speed_empty_kmh=1)
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Equipment.objects.create(kind="reach", name="Mój", capacity_kg=1, speed_loaded_kmh=1, speed_empty_kmh=1)

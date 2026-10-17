@@ -11,6 +11,13 @@ from masterdata.models import ImportLog, Material, StockItem
 from twin.blender_scene import build_scene_for_model
 from twin.design_day import load_groups
 from twin.models import WarehouseLocationMasterBatch, WarehouseModel
+from core.jobs import run_pending
+from django.test import override_settings
+import tempfile
+from pathlib import Path
+
+
+TMP_MEDIA = tempfile.mkdtemp(prefix="twinema-md-")
 
 
 def _csv(text):
@@ -106,19 +113,28 @@ class DaneViewTests(TestCase):
         self.assertEqual(self._upload("materials", "m.csv", _csv("Kod\nA\n")).status_code, 403)
         self.assertFalse(Material.objects.exists())
 
-    def test_designer_upload_redirects_to_report_with_rejects(self):
+    @override_settings(MEDIA_ROOT=TMP_MEDIA)
+    def test_designer_upload_runs_in_queue_and_links_report_with_rejects(self):
         self.client.force_login(self.designer)
         r = self._upload("materials", "m.csv", _csv("Kod;Nazwa\nA1;Śruba\n;bez kodu\n"))
+        self.assertRedirects(r, reverse("masterdata:home"), fetch_redirect_response=False)
+        self.assertFalse(ImportLog.objects.exists())                    # T-1: import liczy worker kolejki
+        run_pending()
         log = ImportLog.objects.get()
-        self.assertRedirects(r, reverse("masterdata:log_detail", args=[log.pk]))
-        r = self.client.get(r["Location"])
+        home = self.client.get(reverse("masterdata:home"))
+        self.assertContains(home, "zapisano 1 z 2 wierszy")
+        self.assertContains(home, reverse("masterdata:log_detail", args=[log.pk]))
+        self.assertEqual(list(Path(TMP_MEDIA, "masterdata_uploads").iterdir()), [])   # plik usunięty po imporcie
+        r = self.client.get(reverse("masterdata:log_detail", args=[log.pk]))
         self.assertContains(r, "brak: kod materiału")
         self.assertContains(r, "Rozpoznane kolumny")
 
+    @override_settings(MEDIA_ROOT=TMP_MEDIA)
     def test_bad_file_shows_message_not_500(self):
         self.client.force_login(self.designer)
         r = self._upload("stock", "s.csv", _csv("Materiał\nM1\n"))
         self.assertRedirects(r, reverse("masterdata:home"), fetch_redirect_response=False)
+        run_pending()
         self.assertContains(self.client.get(reverse("masterdata:home")), "Brak wymaganych kolumn")
 
     def test_template_download_and_materials_search(self):

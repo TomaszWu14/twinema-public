@@ -1,0 +1,23 @@
+{% load static %}<!doctype html>
+<html lang="pl" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Błąd serwera · TWINEMA</title>
+  <link rel="stylesheet" href="{% static 'core/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'core/components.css' %}">
+  <link rel="stylesheet" href="{% static 'core/app.css' %}">
+</head>
+<body>
+  {# Strona błędu renderuje się bez kontekstu żądania — bez nawigacji i danych użytkownika. #}
+  <main class="page" id="content">
+    <div class="wrap">
+      <div class="eyebrow">500</div>
+      <h1 class="hero-title">Coś poszło nie tak</h1>
+      <p class="lead">Serwer nie mógł obsłużyć żądania. Spróbuj ponownie za chwilę; jeśli błąd się powtarza,
+        zgłoś go administratorowi i podaj godzinę wystąpienia.</p>
+      <a class="btn btn-primary" href="/">Wróć na start</a>
+    </div>
+  </main>
+</body>
+</html>

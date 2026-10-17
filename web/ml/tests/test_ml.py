@@ -11,6 +11,7 @@ from core.roles import GROUP_DESIGNER, GROUP_VIEWER
 from ml import forecast, segmentation
 from ml.models import ModelRun
 from twin.models import WarehouseTask, WarehouseTaskBatch
+from core.jobs import run_pending
 
 
 class ForecastTests(SimpleTestCase):
@@ -89,8 +90,11 @@ class MlRunTests(TestCase):
         self.assertEqual(self.client.post(reverse("ml:run", args=["forecast"]), {"batch": self.batch.pk}).status_code, 403)
         self.client.force_login(self.designer)
         r = self.client.post(reverse("ml:run", args=["forecast"]), {"batch": self.batch.pk, "stream": "total", "years": 3})
+        self.assertRedirects(r, reverse("ml:home"))                      # T-1: model liczy worker kolejki
+        self.assertFalse(ModelRun.objects.exists())
+        run_pending()
         run = ModelRun.objects.get()
-        self.assertRedirects(r, reverse("ml:detail", args=[run.pk]))
+        self.assertContains(self.client.get(reverse("ml:home")), reverse("ml:detail", args=[run.pk]))
         self.assertEqual((run.kind, run.version, run.params), ("forecast", forecast.VERSION, {"stream": "total", "years": 3}))
         self.assertTrue(run.result["ok"])
         self.assertIn("baseline_mape", run.metrics)
@@ -101,6 +105,7 @@ class MlRunTests(TestCase):
     def test_segmentation_run_and_csv(self):
         self.client.force_login(self.designer)
         self.client.post(reverse("ml:run", args=["segmentation"]), {"batch": self.batch.pk, "k": 3})
+        run_pending()
         run = ModelRun.objects.get(kind="segmentation")
         self.assertTrue(run.result["ok"], run.result)
         self.assertEqual(len(run.result["segments"]), 3)

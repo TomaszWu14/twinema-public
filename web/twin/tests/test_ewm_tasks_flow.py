@@ -20,6 +20,8 @@ from twin.blender_stock import SlotLocator
 from twin.blender_tasks import resolve_moves
 from twin.models import WarehouseTask, WarehouseTaskBatch
 from twin.tests.test_ewm_tasks_refresh import META_REFRESH
+from core.jobs import run_pending
+from core.models import Job
 
 T0 = datetime(2026, 3, 2, 6, 0, tzinfo=dt_tz.utc)
 TMP_MEDIA = tempfile.mkdtemp(prefix="wt-media-")
@@ -30,7 +32,7 @@ def _racks():
              "depth": 1.1, "level_h": 1.5, "n_bays": 4, "n_levels": 3} for i, y in ((1, 3.0), (2, 8.0))]
 
 
-def _row(minutes, kind, src, dst, resource="WOZEK01", user="JKOWAL"):
+def _row(minutes, kind, src, dst, resource="WOZEK01", user="OPER01"):
     return (T0 + timedelta(minutes=minutes), resource, user, kind, src, dst, "M1")
 
 
@@ -59,7 +61,7 @@ class ResolveMovesTests(SimpleTestCase):
 
     def test_agent_is_resource_or_user(self):
         rows = [_row(0, "putaway", "", "B0-01-100A", resource=""), _row(1, "putaway", "", "B0-01-100A")]
-        self.assertEqual([m[1] for m in resolve_moves(rows, self.loc, T0)[0]], ["JKOWAL", "WOZEK01"])
+        self.assertEqual([m[1] for m in resolve_moves(rows, self.loc, T0)[0]], ["OPER01", "WOZEK01"])
 
 
 class SceneFromTasksTests(SimpleTestCase):
@@ -118,7 +120,7 @@ class TasksEndpointAndImportTests(TestCase):
                 (20, "move", "B0-01-100A", "XX-99", "WOZEK01"), (50, "putaway", "GR-ZONE", "B0-02-100A", ""),
                 (150, "putaway", "GR-ZONE", "B0-01-200A", "WOZEK03")]):
             WarehouseTask.objects.create(batch=cls.batch, task_no=str(n), kind=kind, src_location=src, dst_location=dst,
-                                         resource=res, user="JKOWAL", confirmed_at=T0 + timedelta(minutes=m))
+                                         resource=res, user="OPER01", confirmed_at=T0 + timedelta(minutes=m))
 
     @classmethod
     def tearDownClass(cls):
@@ -144,7 +146,7 @@ class TasksEndpointAndImportTests(TestCase):
         self.client.force_login(self.md)
         sc = self._flow(wt=str(self.batch.pk), pallets="0").json()
         self.assertEqual({a["label"] for a in sc["agents"] if a["kind"] == "forklift"},
-                         {"WOZEK01", "WOZEK02", "JKOWAL"})
+                         {"WOZEK01", "WOZEK02", "OPER01"})
 
     def test_window_param_hours_and_scale(self):
         self.client.force_login(self.md)
@@ -216,23 +218,34 @@ class TasksEndpointAndImportTests(TestCase):
         again = self.client.post(reverse("twin:ewm_tasks_import"), {"token": ctx["token"]})
         self.assertRedirects(again, reverse("twin:ewm_tasks_list"), fetch_redirect_response=False)
 
-    def test_large_file_imports_in_background_thread(self):
-        """Duży plik → import w wątku w tle (bez blokowania żądania), partia kończy się „done”."""
-        class InlineThread:                                 # wątek „od razu” — deterministyczny test
-            def __init__(self, target, args, daemon):
-                self.target, self.args = target, args
-
-            def start(self):
-                with mock.patch("twin.views.warehouse_tasks.connection"):
-                    self.target(*self.args)
-
+    def test_large_file_imports_through_job_queue(self):
+        """US-024: duży plik → zadanie w kolejce w bazie (żądanie nie czeka), worker kończy partię „done”."""
         self.client.force_login(self.md)
         token = self._preview().context["token"]
-        with mock.patch("twin.views.warehouse_tasks.SYNC_MAX_BYTES", 0),                 mock.patch("twin.views.warehouse_tasks.threading.Thread", InlineThread):
+        with mock.patch("twin.views.warehouse_tasks.SYNC_MAX_BYTES", 0):
             r = self.client.post(reverse("twin:ewm_tasks_import"), {"token": token, "file_name": "wt.csv"})
         batch = WarehouseTaskBatch.objects.latest("pk")
         self.assertRedirects(r, reverse("twin:ewm_tasks_detail", args=[batch.pk]))
+        self.assertNotEqual(batch.status, "done")
+        self.assertEqual(Job.objects.get().kind, "twin.ewm_import")
+        run_pending()
+        batch.refresh_from_db()
         self.assertEqual((batch.status, batch.row_count), ("done", 2))
+
+    def test_import_interrupted_by_restart_is_retried_without_duplicates(self):
+        """US-024: worker padł w trakcie importu → zadanie wraca do kolejki, ponowienie nie dubluje wierszy."""
+        self.client.force_login(self.md)
+        token = self._preview().context["token"]
+        with mock.patch("twin.views.warehouse_tasks.SYNC_MAX_BYTES", 0):
+            self.client.post(reverse("twin:ewm_tasks_import"), {"token": token, "file_name": "wt.csv"})
+        batch = WarehouseTaskBatch.objects.latest("pk")
+        job = Job.objects.get()
+        batch.tasks.create(task_no="przerwany")                  # wiersz z przerwanej próby
+        Job.objects.filter(pk=job.pk).update(status=Job.RUNNING, attempts=1,
+                                             started_at=timezone.now() - timedelta(hours=2))
+        run_pending()
+        batch.refresh_from_db()
+        self.assertEqual((batch.status, batch.row_count, batch.tasks.count()), ("done", 2, 2))
 
     def test_stuck_background_import_marked_stale(self):
         self.client.force_login(self.md)
@@ -254,3 +267,42 @@ class TasksEndpointAndImportTests(TestCase):
         self.client.force_login(self.md)
         self.client.post(reverse("twin:ewm_tasks_delete", args=[self.batch.pk]))
         self.assertFalse(WarehouseTask.objects.exists())
+
+
+class OperatorLoginNotStoredTests(TestCase):
+    """US-012 (RODO, R-06): import z kolumną użytkownika zapisuje w bazie pseudonim, nie login operatora."""
+
+    def test_import_stores_pseudonym(self):
+        from django.contrib.auth.models import Group
+
+        from core.roles import GROUP_DESIGNER
+        from twin.ewm_tasks import pseudonym
+        from twin.shared import operator_key
+        u = get_user_model().objects.create_user("md2", password="x")
+        u.groups.add(Group.objects.get_or_create(name=GROUP_DESIGNER)[0])
+        self.client.force_login(u)
+        csv = ("Zadanie magazynowe;Rodzaj procesu magazynowego;Źródłowe miejsce składowania;"
+               "Docelowe miejsce składowania;Data potwierdzenia;Czas potwierdzenia;Użytkownik\n"
+               "1;1010;GR-ZONE;B0-01-100A;02.03.2026;06:10:00;OPER01\n")
+        f = SimpleUploadedFile("wt.csv", csv.encode("utf-8"), content_type="text/csv")
+        preview = self.client.post(reverse("twin:ewm_tasks_preview"), {"file": f, "tz": "UTC"})
+        self.assertNotContains(preview, "OPER01")                                 # podgląd też bez loginu
+        self.client.post(reverse("twin:ewm_tasks_import"), {"token": preview.context["token"], "file_name": "wt.csv",
+                                                            "tz": "UTC", "name": "Pseudonimy"})
+        users = list(WarehouseTask.objects.filter(batch__name="Pseudonimy").values_list("user", flat=True))
+        self.assertEqual(users, [pseudonym("OPER01", operator_key())])
+
+    def test_migration_pseudonymizes_existing_tasks(self):
+        import importlib
+
+        from django.apps import apps
+
+        from twin.ewm_tasks import pseudonym
+        from twin.shared import operator_key
+        mig = importlib.import_module("twin.migrations.0008_pseudonimizacja_operatorow")
+        batch = WarehouseTaskBatch.objects.create(name="Stara", status="done")
+        WarehouseTask.objects.create(batch=batch, user="OPER07")
+        WarehouseTask.objects.create(batch=batch, user="")
+        mig.pseudonymize(apps, None)
+        mig.pseudonymize(apps, None)                                   # drugi przebieg nic nie zmienia
+        self.assertEqual(sorted(batch.tasks.values_list("user", flat=True)), ["", pseudonym("OPER07", operator_key())])

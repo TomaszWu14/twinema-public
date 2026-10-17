@@ -15,7 +15,7 @@
 
 {% block content %}
 <nav class="breadcrumb">
-  <a href="{% url 'twin:ewm_tasks_list' %}">Zadania magazynowe EWM</a>
+  {% if is_designer %}<a href="{% url 'twin:ewm_tasks_list' %}">Zadania magazynowe EWM</a>{% else %}<span>Zadania magazynowe EWM</span>{% endif %}
   <span class="breadcrumb__sep">›</span>
   <a href="{% url 'twin:ewm_tasks_profile' batch.pk %}?p={{ p }}">Dzień projektowy</a>
   <span class="breadcrumb__sep">›</span>
@@ -42,13 +42,18 @@
       <label for="cal-p">Dzień</label>
       <select id="cal-p" name="p">{% for q in percentiles %}<option value="{{ q }}" {% if q == p %}selected{% endif %}>P{{ q }}</option>{% endfor %}</select>
     </div>
-    <button type="submit" class="btn btn-primary">Policz kalibrację</button>
+    {% if may_compute %}<button type="submit" class="btn btn-primary">Policz kalibrację</button>{% endif %}
   </form>
+  {% if not may_compute %}<p class="text-muted text-sm" style="margin-top:8px">Kalibrację liczy Projektant — rola Podgląd nie uruchamia obliczeń.</p>{% endif %}
   <p class="cal-note" style="margin-top:12px">Cykl = odstęp między kolejnymi potwierdzeniami tego samego zasobu EWM (wózek; dla kompletacji — picker). Ten sam ruch liczony fizyką symulacji: droga wzdłuż alejek ÷ prędkość z katalogu, podnoszenie, chwyt. Odstępy &gt; {{ gap_max_min }} min to przerwy — pomijane; krótsze postoje zostają, więc współczynnik to ostrożne (górne) oszacowanie.</p>
 </div></div>
 
 {% if wm and not day %}
 <div class="alert alert-warning" style="margin-top:16px">Brak potwierdzonych zadań w tym imporcie — nie ma dnia projektowego.</div>
+{% elif job.pending or job.status == "error" %}
+{% include "core/_job_status.html" %}
+{% elif wm and not result and not may_compute %}
+<div class="alert alert-info" style="margin-top:16px">Dla tego modelu nie ma jeszcze policzonej kalibracji — poproś Projektanta.</div>
 {% elif result %}
 <div class="card" style="margin-top:16px"><div class="card-body">
   <div class="section-title">Współczynniki korekty</div>

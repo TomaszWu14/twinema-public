@@ -8,7 +8,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 
-from core.roles import GROUP_DESIGNER, GROUP_VIEWER
+from core.roles import GROUP_ADMIN, GROUP_DESIGNER, GROUP_VIEWER
 from equipment import importers
 from equipment.catalog import apply_attachments, capacity_at
 from equipment.models import Equipment
@@ -110,3 +110,25 @@ class ImportViewTests(TestCase):
         self.assertEqual(self.client.get(reverse("equipment:import_template")).status_code, 403)
         f = SimpleUploadedFile("k.xlsx", _xlsx([["Typ", "Nazwa"]]))
         self.assertEqual(self.client.post(reverse("equipment:import"), {"plik": f}).status_code, 403)
+
+    def test_import_does_not_overwrite_other_users_model(self):
+        """US-001: import po nazwie nie aktualizuje cudzego modelu ani modelu bez autora; administrator — tak."""
+        other = User.objects.create_user("proj2", password="x")
+        other.groups.add(Group.objects.get(name=GROUP_DESIGNER))
+        theirs = Equipment.objects.create(kind="reach", name="Cudzy reach", capacity_kg=1200, speed_loaded_kmh=10,
+                                          speed_empty_kmh=11, created_by=other)
+        orphan = Equipment.objects.create(kind="reach", name="Bez autora", capacity_kg=1100, speed_loaded_kmh=10,
+                                          speed_empty_kmh=11)
+        head = ["Typ", "Nazwa", "Udźwig [kg]"]
+        resp = self._post([head, ["reach", "Cudzy reach", 9999], ["reach", "Bez autora", 9999]])
+        self.assertContains(resp, "0 nowych, 0 zaktualizowanych")
+        self.assertContains(resp, "model innego użytkownika", count=2)
+        theirs.refresh_from_db()
+        orphan.refresh_from_db()
+        self.assertEqual((theirs.capacity_kg, orphan.capacity_kg), (1200, 1100))
+        admin = User.objects.create_user("adm", password="x")
+        admin.groups.add(Group.objects.get_or_create(name=GROUP_ADMIN)[0])
+        self.client.force_login(admin)
+        self._post([head, ["reach", "Cudzy reach", 1300]])
+        theirs.refresh_from_db()
+        self.assertEqual(theirs.capacity_kg, 1300)

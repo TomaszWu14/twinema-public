@@ -15,7 +15,7 @@
 
 {% block content %}
 <nav class="breadcrumb">
-  <a href="{% url 'twin:ewm_tasks_list' %}">Zadania magazynowe EWM</a>
+  {% if is_designer %}<a href="{% url 'twin:ewm_tasks_list' %}">Zadania magazynowe EWM</a>{% else %}<span>Zadania magazynowe EWM</span>{% endif %}
   <span class="breadcrumb__sep">›</span>
   <a href="{% url 'twin:ewm_tasks_profile' batch.pk %}">Dzień projektowy</a>
   <span class="breadcrumb__sep">›</span>

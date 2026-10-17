@@ -6,6 +6,8 @@ magazynowego na rodzaj ruchu. Plik czytany strumieniowo (openpyxl read_only / cs
 zapis partiami robi `ewm_tasks_import`.
 """
 import csv
+import hashlib
+import hmac
 import re
 import unicodedata
 from collections import Counter
@@ -268,7 +270,17 @@ def is_cancelled(status):
     return s == "a" or s.startswith(("anul", "cancel"))
 
 
-def parse_row(cells, cols, tz="Europe/Warsaw", overrides=None):
+def pseudonym(login, key=b""):
+    """US-012 (RODO, R-06): login operatora z systemu magazynowego → stały pseudonim „OP-…”.
+    Ten sam login daje ten sam pseudonim (grupowanie zasobów, kalibracja działają), ale bez klucza
+    nie da się go odwrócić słownikiem loginów. Pusty login zostaje pusty."""
+    if not login:
+        return ""
+    digest = hmac.new(key, login.strip().upper().encode(), hashlib.sha256).hexdigest()
+    return "OP-" + digest[:10].upper()
+
+
+def parse_row(cells, cols, tz="Europe/Warsaw", overrides=None, pseudonym_key=b""):
     """Wiersz → dict pól `WarehouseTask` (+ `cancelled`); None = pusty wiersz;
     ValueError z opisem po polsku = wiersz błędny."""
     if not any(c not in (None, "") and str(c).strip() for c in cells):
@@ -296,7 +308,7 @@ def parse_row(cells, cols, tz="Europe/Warsaw", overrides=None):
         "document": _text(raw("document"), 35),
         "created_at": parse_stamp(raw("created_date"), raw("created_time"), tz),
         "confirmed_at": parse_stamp(raw("confirmed_date"), raw("confirmed_time"), tz),
-        "user": _text(raw("user"), 40), "resource": _text(raw("resource"), 40), "queue": queue,
+        "user": pseudonym(_text(raw("user"), 40), pseudonym_key), "resource": _text(raw("resource"), 40), "queue": queue,
         "cancelled": is_cancelled(_text(raw("status"), 20)),
     }
 
@@ -343,8 +355,8 @@ class Scan:
     """Przebieg po pliku: nagłówek → mapowanie kolumn → wiersze sparsowane albo błędy,
     z licznikami do podglądu i raportu importu."""
 
-    def __init__(self, path, filename=None, tz="Europe/Warsaw", overrides=None):
-        self.tz, self.overrides = tz, overrides or {}
+    def __init__(self, path, filename=None, tz="Europe/Warsaw", overrides=None, pseudonym_key=b""):
+        self.tz, self.overrides, self.pseudonym_key = tz, overrides or {}, pseudonym_key
         self._rows = iter_table(path, filename)
         self.headers, self.line = [], 0
         for cells in self._rows:                           # nagłówek = 1. wiersz z ≥ 2 wartościami
@@ -365,7 +377,7 @@ class Scan:
         for cells in self._rows:
             self.line += 1
             try:
-                row = parse_row(cells, self.cols, self.tz, self.overrides)
+                row = parse_row(cells, self.cols, self.tz, self.overrides, self.pseudonym_key)
             except ValueError as exc:
                 self.rows += 1
                 self.error_count += 1

@@ -24,7 +24,7 @@ umieść WEWNĄTRZ elementu z position:relative (wrap canvasu). Moduł 3D:
 .tw3d-status__msg{max-width:440px;line-height:1.5}
 @keyframes tw3dspin{to{transform:rotate(360deg)}}
 </style>
-<script>
+<script nonce="{{ csp_nonce }}">
 (function(){
   var box = document.getElementById('{{ status_id }}');
   // Sonda WebGL — moduł sprawdza to zanim spróbuje utworzyć WebGLRenderer.

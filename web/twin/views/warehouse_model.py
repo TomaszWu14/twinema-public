@@ -15,6 +15,8 @@ from twin.ewm_service import active_master
 from twin.model_geometry import floor_size, is_geometry_csv, parse_geometry_csv
 from twin.models import BayTemplate, WarehouseTaskBatch
 from twin.signals import touch_model
+from core import audit
+from core.models import AuditEvent
 
 
 @_planner
@@ -351,10 +353,14 @@ def _features_data(wm):
 def warehouse_model_delete(request, pk):
     wm = get_object_or_404(WarehouseModel, pk=pk)
     if request.method == "POST":
+        audit.record(request, AuditEvent.DELETE, wm, object_type="hala")
         wm.delete()
         messages.success(request, "Model magazynu usunięty.")
         return redirect("twin:warehouse_model_list")
-    return render(request, "twin/warehouse_model/confirm_delete.html", {"object": wm})
+    from core.deletion import confirm, hall_effects
+    removed, detached = hall_effects(wm)
+    return confirm(request, title="Usuń model magazynu", name=wm.name, removed=removed, detached=detached,
+                   cancel_url=reverse("twin:warehouse_model_view", args=[wm.pk]), confirm_label="Tak, usuń model")
 
 __all__ = [
     'warehouse_model_list',

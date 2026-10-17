@@ -1,0 +1,29 @@
+# Założenia do potwierdzenia
+
+**[BA]** · Gdy PO nie odpowiada, BA przyjmuje bezpieczne, minimalne założenie i zapisuje je tutaj.
+Założenia biznesowe Z-1…Z-19 (stan obecny, wolumeny, metoda symulacji, retencja itd.) są w
+[00-przeglad.md](../00-przeglad.md#założenia-wymagające-potwierdzenia). Poniżej założenia przyjęte przy
+wprowadzaniu procesu zespołu i audycie. Materiały z okresu budowy (burza mózgów): [docs/ZALOZENIA.md](../ZALOZENIA.md).
+
+| Nr | Kwestia | Przyjęte założenie (bezpieczne, minimalne) | Status |
+|---|---|---|---|
+| Z-20 | Język commitów | po angielsku, Conventional Commits — jak dotychczasowa historia; dokumentacja po polsku | do potwierdzenia |
+| Z-21 | Gałęzie | zalecane `feature/<id>-<nazwa>`; sesja asystenta AI pracuje na jednej wyznaczonej gałęzi `claude/…`, więc kilka historyjek trafia do jednego PR z osobnymi commitami | do potwierdzenia |
+| Z-22 | Kanał zgłaszania podatności | prywatne zgłoszenie w GitHubie (Private Vulnerability Reporting) — PO musi je włączyć w ustawieniach repozytorium | do potwierdzenia |
+| Z-23 | Numer pierwszego wydania | bez numeru do decyzji PO; proponowane `0.9.0` dla stanu po audycie, `1.0.0` po zamknięciu ryzyk wysokich | do potwierdzenia |
+| Z-24 | Podstawa przetwarzania loginów operatorów (historia zadań) | do czasu decyzji: dane traktowane jak dane osobowe; rekomendacja: pseudonimizacja przy imporcie (US-012) | **decyzja PO (2026-10-16):** pseudonimizacja przy imporcie |
+| Z-25 | Poziom ASVS | poziom 1 z wybranymi wymaganiami poziomu 2 dla danych poufnych | do potwierdzenia |
+| Z-26 | Własność obiektów | hale, scenariusze i prezentacje są wspólne dla wszystkich Projektantów (jeden zespół); wyjątek: własne modele sprzętu — autor albo Administrator (US-001, ADR-0003) | do potwierdzenia |
+| Z-27 | Mierniki sukcesu | propozycja M-1…M-5 w [WIZJA](WIZJA.md), bez wartości docelowych | do decyzji |
+| Z-28 | Próg pokrycia testami | raport bez progu; domyślnie proponowane 80% dla logiki domenowej (`scenario/sim`, `ml`, `twin/layout`, `twin/design_*`) | **decyzja PO (2026-10-16):** próg 80% dla logiki domenowej, blokujący w CI |
+| Z-29 | Akceptacja ryzyk niskich R-12, R-13, R-15 | proponowana akceptacja do 2027-01-31 — **nieważna bez potwierdzenia PO** | **decyzja PO (2026-10-16):** zaakceptowane do 2027-01-31 |
+| Z-30 | Auto-merge gałęzi `claude/**` | PR pozostaje szkicem do akceptacji PO, więc auto-merge się nie uzbraja; docelowo wymagane zatwierdzenie w ochronie gałęzi (US-013) | **decyzja PO (2026-10-16):** auto-merge usunięty; merge tylko przez PO |
+| Z-31 | Model użytkownika usuniętego autora | model sprzętu bez autora może zmieniać tylko Administrator | przyjęte w US-001 |
+| Z-32 | Historia repozytorium (R-01) | — | **decyzja PO (2026-10-16):** przepisać historię; zalecana opcja A (nowe repozytorium z jedną migawką) — [procedura](../operacje/CZYSZCZENIE_HISTORII.md), wykonuje PO |
+| Z-33 | Dziennik operacji (US-008): zakres i retencja | zapisywane: usunięcia hal, scenariuszy, prezentacji, własnego sprzętu i importów zadań; importy danych podstawowych, zadań i sprzętu; tworzenie i wyłączanie linków publicznych; login i adres IP aktora; przechowywanie 365 dni; poza zakresem: import układu hali i wariantu (tworzą nowy obiekt projektowy) | **decyzja PO (2026-10-16):** potwierdzone — 365 dni |
+| Z-34 | Style wstawione w szablony (T-17, R-20) | przenosić stopniowo przy zmianach ekranów; test blokuje nowe | **decyzja PO (2026-10-16):** ryzyko zaakceptowane do 2027-01-31 |
+| Z-35 | Demo publiczne a dane rzeczywiste (R-02) | demo na osobnej instancji; przy danych spoza demo wejście gościa wyłączone | **decyzja PO (2026-10-16)** |
+| Z-36 | Kopie zapasowe (R-10, US-009) | RPO 24 h, RTO 4 h: codzienna kopia bazy i mediów, retencja 14 dni, próba odtworzenia co miesiąc | **decyzja PO (2026-10-16)** |
+| Z-37 | Drugi składnik logowania (R-11, US-017) | TOTP obowiązkowy dla Administratorów, opcjonalny dla pozostałych; hasła ≥ 12 znaków dla kont uprzywilejowanych | **decyzja PO (2026-10-16)** |
+| Z-38 | Retencja prób logowania (RODO CP-2, NFR-014) | 30 dni, automatyczne czyszczenie | **decyzja PO (2026-10-16)** |
+| Z-39 | Ślad symulacji do animacji 3D (T-1) | zostaje w trakcie żądania (tylko Projektant, sekundy) | **decyzja PO (2026-10-16):** dług niski, bez zmian |

@@ -170,7 +170,8 @@ def load_variant(path):
         raise ValueError("To nie jest plik wariantu twinema.design-variant.")
     scene = {"floor": data["floor"], "features": data.get("features", []), "racks": [],
              "model": data.get("base_model") or {}}
-    tmp = os.path.join(bpy.app.tempdir or "/tmp", "twinema_variant_scene.json")
+    # B108: dodatek Blendera na komputerze użytkownika; plik bez sekretów, nadpisywany przy każdym imporcie
+    tmp = os.path.join(bpy.app.tempdir or "/tmp", "twinema_variant_scene.json")  # nosec B108
     with open(tmp, "w", encoding="utf-8") as fh:
         json.dump(scene, fh, ensure_ascii=False)
     start(tmp, with_racks=False)

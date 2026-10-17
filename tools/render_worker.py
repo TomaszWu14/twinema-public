@@ -20,6 +20,7 @@ import sys
 import tempfile
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 import uuid
 
@@ -28,6 +29,18 @@ sys.path.insert(0, HERE)
 import twinema_montage as montage  # noqa: E402  (obok skryptu, uruchamianego jako plik)
 RENDER_SCRIPT = os.path.join(HERE, "blender", "twinema_render.py")
 TIMEOUT_S = 60 * 60                     # twardy limit jednego renderu
+LOOPBACK = {"localhost", "127.0.0.1", "::1"}
+
+
+def check_url(url):
+    """Token workera idzie w nagłówku każdego żądania — poza własnym komputerem tylko po HTTPS.
+    Zwraca komunikat błędu albo None."""
+    u = urllib.parse.urlparse(url)
+    if u.scheme not in ("http", "https") or not u.hostname:
+        return f"Nieprawidłowy adres serwera: {url!r} (oczekiwano https://…)."
+    if u.scheme == "http" and u.hostname not in LOOPBACK:
+        return f"Adres {url!r} bez HTTPS — token workera poszedłby otwartym tekstem. Użyj https://."
+    return None
 
 
 def find_blender(explicit=""):
@@ -48,9 +61,12 @@ class Api:
         self.base, self.token, self.name = base.rstrip("/"), token, name
 
     def _req(self, url, data=None, headers=None, method=None):
+        if err := check_url(url):           # także adresy plików podane przez serwer w opisie zlecenia
+            raise urllib.error.URLError(err)
         h = {"X-Worker-Token": self.token, "User-Agent": f"twinema-worker/{self.name}", **(headers or {})}
         req = urllib.request.Request(url, data=data, headers=h, method=method or ("POST" if data is not None else "GET"))
-        with urllib.request.urlopen(req, timeout=300) as resp:
+        # B310: schemat ograniczony do http(s) przez check_url powyżej
+        with urllib.request.urlopen(req, timeout=300) as resp:  # nosec B310
             return resp.status, resp.read()
 
     def claim(self, path="/api/render/claim/"):
@@ -151,6 +167,8 @@ def main():
     a = p.parse_args()
     if len(a.token) < 32:
         sys.exit("Brak tokenu: ustaw TWINEMA_WORKER_TOKEN (ten sam co RENDER_WORKER_TOKEN na serwerze).")
+    if err := check_url(a.url):
+        sys.exit(err)
     blender = find_blender(a.blender)
     ffmpeg, font, music = montage.find_ffmpeg(a.ffmpeg), montage.find_font(a.font), montage.find_music(a.music)
     api = Api(a.url, a.token, platform.node()[:40] or "worker")

@@ -95,7 +95,8 @@ def _sim_scene(request, wm):
     # cały dzień liczony raz na (partia, model, parametry) — zmiana godziny tylko wycina fragment śladu
     key = "sim-trace:" + cache_digest(batch.pk, wm.pk, wm.updated_at.timestamp(), day, prm)
     cached = cache.get(key) if day else None
-    if day and cached is None:
+    # Z-3 (decyzja PO): cały dzień liczy tylko Projektant; Podgląd i gość widzą ślad policzony wcześniej
+    if day and cached is None and has_role(request.user, GROUP_ADMIN, GROUP_DESIGNER):
         trace = []
         cached = (trace, run_simulation(batch, wm, day, prm, trace=trace)[0] is not None)
         cache.set(key, cached, SIM_TRACE_TTL)

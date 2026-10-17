@@ -92,6 +92,20 @@ class WorkerApiTests(TestCase):
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.json()["id"], self.job.pk)
 
+    def test_job_gives_up_after_max_attempts(self):
+        """US-015: zlecenie, które ciągle wraca bez wyniku (np. serwer odrzuca plik), po 3 próbach kończy się błędem."""
+        from render.api import MAX_ATTEMPTS
+        for attempt in range(1, MAX_ATTEMPTS + 1):
+            r = self._claim()
+            self.assertEqual((r.status_code, r.json()["id"]), (200, self.job.pk), attempt)
+            self.job.refresh_from_db()
+            self.assertEqual(self.job.attempts, attempt)
+            RenderJob.objects.filter(pk=self.job.pk).update(claimed_at=timezone.now() - timedelta(hours=5))
+        self.assertEqual(self._claim().status_code, 204)               # nie wraca do kolejki
+        self.job.refresh_from_db()
+        self.assertEqual(self.job.status, "error")
+        self.assertIn("Przerwano po 3 próbach", self.job.log)
+
     def test_csrf_exempt_for_worker_only(self):
         from django.test import Client
         c = Client(enforce_csrf_checks=True)

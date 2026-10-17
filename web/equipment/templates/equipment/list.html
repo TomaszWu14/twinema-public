@@ -28,7 +28,7 @@
 <form class="eq-filters" method="get" aria-label="Filtr producenta">
   {% if kind %}<input type="hidden" name="typ" value="{{ kind }}">{% endif %}
   <label for="eq-maker" class="text-sm">Producent</label>
-  <select id="eq-maker" name="producent" class="form-control" style="max-width:260px" onchange="this.form.submit()">
+  <select id="eq-maker" name="producent" class="form-control" style="max-width:260px" data-autosubmit>
     <option value="">— wszyscy —</option>
     {% for m in makers %}<option value="{{ m }}"{% if m == maker %} selected{% endif %}>{{ m }}</option>{% endfor %}
   </select>

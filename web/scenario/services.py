@@ -48,8 +48,7 @@ def simulate(day, wm, *, runs=12, user=None):
     run = ScenarioRun.objects.create(
         scenario=sc, day_kind=day.kind, model=wm, runs=runs, seed=sc.seed,
         duration_s=round(time.perf_counter() - t0, 2), events=(ev := res.pop("events")), has_events=bool(ev), result=res, created_by=user)
-    old = ScenarioRun.objects.filter(scenario=sc).values_list("pk", flat=True)[KEEP_RUNS:]
-    ScenarioRun.objects.filter(pk__in=list(old)).delete()
+    prune_runs(sc)
     return run
 
 
@@ -184,3 +183,10 @@ def run_costs(run, rates=None, memo=None):
         rates, {"positions": positions, "docks": kinds.count("dock"), "stations": kinds.count("station"),
                 "area_m2": wm.floor_width_m * wm.floor_depth_m},
         fleet, _memo(memo, ("shift_h", sc.pk), lambda: sum(_shift_hours(s) for s in sc.shift_dicts())), days)
+
+
+def prune_runs(sc):
+    """Zostawia KEEP_RUNS ostatnich przebiegów scenariusza. US-025: wynik przypięty do prezentacji 3D
+    nie wypada z limitu — pokaz nie traci danych."""
+    old = ScenarioRun.objects.filter(scenario=sc, showcases__isnull=True).values_list("pk", flat=True)[KEEP_RUNS:]
+    ScenarioRun.objects.filter(pk__in=list(old)).delete()
