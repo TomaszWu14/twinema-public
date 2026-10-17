@@ -144,7 +144,7 @@
   const S1 = '#2563eb', S2 = '#ea580c';          // paleta zwalidowana (jasny i ciemny motyw)
   const axis = { axisLine: { lineStyle: { color: grid } }, axisLabel: { color: ink }, splitLine: { lineStyle: { color: grid } } };
   const base = { animation: false, grid: { left: 44, right: 16, top: 28, bottom: 36 },
-                 textStyle: { color: ink }, tooltip: { trigger: 'axis', renderMode: 'richText' } };
+                 textStyle: { color: ink }, tooltip: { trigger: 'axis', renderMode: 'richText', valueFormatter: function (v) { return v == null || isNaN(v) ? '–' : Number(v).toLocaleString('pl-PL', {maximumFractionDigits: 1}); } } };
 
   const daily = echarts.init(document.getElementById('dd-daily'));
   daily.setOption({ ...base,

@@ -67,6 +67,8 @@ trafiają do sekcji „Unreleased”.
 - Weryfikacja dwuetapowa: adres powrotu z kilkoma parametrami nie gubi ich; po 5 błędnych kodach przy konfiguracji
   strona pokazuje nowy kod QR zamiast nieważnego starego.
 - `manage.py backup --keep 0` (albo ujemne) kończy się błędem zamiast skasować wszystkie kopie, w tym nową.
+- Dymki wykresów (prognoza ML, symulacja scenariusza, profil zadań) pokazują liczby po polsku z jednym miejscem
+  po przecinku zamiast „9.600000000000001”.
 
 ### Security
 - Migracja `twin 0009`: pseudonimizuje też loginy systemu magazynowego w rodzaju „OP-0001”, które 0008 pomijała

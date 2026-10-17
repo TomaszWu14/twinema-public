@@ -57,7 +57,7 @@
   var chart = echarts.init(document.getElementById('ml-chart'));
   chart.setOption({
     textStyle: {color: fg}, grid: {left: 60, right: 20, top: 30, bottom: 50},
-    tooltip: {trigger: 'axis', renderMode: 'richText'}, legend: {textStyle: {color: fg}, top: 0},
+    tooltip: {trigger: 'axis', renderMode: 'richText', valueFormatter: function (v) { return v == null || isNaN(v) ? '–' : Number(v).toLocaleString('pl-PL', {maximumFractionDigits: 1}); }}, legend: {textStyle: {color: fg}, top: 0},
     xAxis: {type: 'category', data: labels, axisLabel: {color: fg}, axisLine: {lineStyle: {color: line}}},
     yAxis: {type: 'value', axisLabel: {color: fg}, splitLine: {lineStyle: {color: line}}},
     series: [
