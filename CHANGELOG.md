@@ -74,6 +74,10 @@ trafiają do sekcji „Unreleased”.
   (decyzja PO).
 
 ### Security
+- Wspólna podstawa bezpieczeństwa: gitleaks w CI jako binarka przypięta wersją i sha256 (zamiast akcji pobierającej
+  najnowszą wersję), `.gitleaksignore` dla hasła testowego; pip-audit także dla `requirements-dev.txt`;
+  `permissions: contents: read` w workflow CI i Deploy; Dependabot grupuje aktualizacje minor + patch;
+  `Cache-Control: no-store` dla odpowiedzi JSON i szersza Permissions-Policy (camera, usb) z testem nagłówków.
 - Anonimizacja bieżących plików przed czyszczeniem historii (R-01, decyzja PO): bez nazwy konta i domeny autora,
   nazwy projektu źródłowego, nazw jego modułów w komentarzach i ścieżki do wewnętrznego planu; przykładowy kod strefy
   w testach i generatorach zastąpiony neutralnym. Zostaje autor w `LICENSE` (wymóg licencji); A-6 do potwierdzenia.

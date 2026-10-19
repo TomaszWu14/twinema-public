@@ -4,6 +4,7 @@
 
 Podatności **nie zgłaszaj w publicznym issue**. Użyj prywatnego zgłoszenia w GitHubie:
 zakładka **Security → Report a vulnerability** w tym repozytorium (GitHub Private Vulnerability Reporting).
+Formularz: <https://github.com/TomaszWu14/twinema-public/security/advisories/new>.
 Kontakt alternatywny: ustala Product Owner ([Z-22](docs/analiza/ZALOZENIA.md)).
 
 W zgłoszeniu podaj: wersję lub commit, opis problemu, kroki odtworzenia i możliwy wpływ. Nie dołączaj danych
@@ -25,7 +26,8 @@ Wspierana jest wyłącznie najnowsza wersja z gałęzi `main` (jedno wdrożenie,
 ## Jak dbamy o bezpieczeństwo
 
 - Każdy PR przechodzi przegląd [SEC] według checklisty w [szablonie PR](.github/pull_request_template.md)
-  i kontrole automatyczne: gitleaks, pip-audit, bandit, semgrep i trivy (wszystkie blokujące) —
+  i kontrole automatyczne: gitleaks, pip-audit, bandit, semgrep i trivy (wszystkie blokujące) oraz test
+  nagłówków bezpieczeństwa —
   [CONTRIBUTING.md](CONTRIBUTING.md#narzędzia-i-uruchomienie-lokalne).
 - Dokumenty: [klasyfikacja danych](docs/bezpieczenstwo/KLASYFIKACJA_DANYCH.md),
   [threat model](docs/bezpieczenstwo/THREAT_MODEL.md), [rejestr ryzyk](docs/bezpieczenstwo/RYZYKA.md),
