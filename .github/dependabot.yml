@@ -1,12 +1,16 @@
 # Aktualizacje zależności (SCA). PR-y Dependabota przechodzą ten sam proces co inne zmiany (CONTRIBUTING.md).
 # Cooldown 7 dni: nowe wydanie czeka tydzień, zanim powstanie PR — przejęte wydania zwykle
 # wycofuje się w ciągu kilku dni (semgrep: dependabot-missing-cooldown, US-014).
+# Grupy: aktualizacje minor + patch jednego ekosystemu w jednym PR; major — osobne PR-y.
 version: 2
 updates:
   - package-ecosystem: pip
     directory: "/"
     schedule:
       interval: weekly
+    groups:
+      pip-minor-patch:
+        update-types: ["minor", "patch"]
     cooldown:
       default-days: 7
     open-pull-requests-limit: 5
@@ -15,6 +19,9 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
+    groups:
+      github-actions-minor-patch:
+        update-types: ["minor", "patch"]
     cooldown:
       default-days: 7
     labels: ["dependencies"]
@@ -22,6 +29,9 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
+    groups:
+      docker-minor-patch:
+        update-types: ["minor", "patch"]
     cooldown:
       default-days: 7
     labels: ["dependencies"]

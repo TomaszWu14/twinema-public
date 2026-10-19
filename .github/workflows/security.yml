@@ -1,7 +1,7 @@
 name: Security
 
 # Bramka bezpieczeństwa PR → main (ADR-0002, docs/architektura/adr/0002-narzedzia-jakosci-i-bezpieczenstwa.md).
-#   blokują: gitleaks (sekrety), pip-audit (podatne zależności), bandit (SAST, waga ≥ średnia),
+#   blokują: gitleaks (sekrety), pip-audit (podatne zależności runtime i dev), bandit (SAST, waga ≥ średnia),
 #            semgrep (OWASP, Django), trivy (Dockerfile; obraz: wysokie i krytyczne z poprawką).
 #   Triaż i wyjątki (decyzje PO): docs/bezpieczenstwo/TRIAZ_SKANOW.md (US-014).
 on:
@@ -16,17 +16,32 @@ permissions:
 
 jobs:
   gitleaks:
+    # Binarka gitleaks przypięta wersją i sumą sha256 (akcja pobierała najnowszą wersję bez weryfikacji).
+    # Fałszywe alarmy: .gitleaksignore (fingerprint + powód).
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: read
+    timeout-minutes: 10
+    env:
+      GITLEAKS_VERSION: 8.30.1
+      GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.9
+      - name: Instalacja gitleaks (przypięta wersja + sha256)
+        working-directory: ${{ runner.temp }}
+        run: |
+          curl -sSfL -o gitleaks.tgz \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  gitleaks.tgz" | sha256sum -c -
+          tar -xzf gitleaks.tgz gitleaks
+      - name: Sekrety w historii (PR — jego commity; cron/ręcznie — cała historia)
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          args=(git --redact --no-banner)
+          if [ -n "$BASE" ]; then args+=(--log-opts="$BASE..$HEAD"); fi
+          "$RUNNER_TEMP/gitleaks" "${args[@]}" .
 
   pip-audit:
     runs-on: ubuntu-latest
@@ -39,6 +54,8 @@ jobs:
       - run: pip install pip-audit==2.9.0
       - name: Zależności runtime bez znanych podatności
         run: pip-audit -r requirements.txt --desc
+      - name: Zależności deweloperskie i CI bez znanych podatności
+        run: pip-audit -r requirements-dev.txt --desc
 
   bandit:
     runs-on: ubuntu-latest

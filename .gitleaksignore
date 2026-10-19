@@ -1,0 +1,2 @@
+# Fałszywy alarm gitleaks: hasło testowe tworzonego w teście konta (TwoFactorTests.setUp), nie sekret
+web/core/tests/test_two_factor.py:generic-api-key:24

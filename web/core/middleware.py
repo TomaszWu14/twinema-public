@@ -28,7 +28,8 @@ _CSP = (
     "font-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; "
     "frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
 )
-_PERMISSIONS_POLICY = "geolocation=(), microphone=(), payment=()"
+# Wyłączone funkcje przeglądarki, których aplikacja nie używa (fullscreen zostaje — fullscreen.js).
+_PERMISSIONS_POLICY = "camera=(), geolocation=(), microphone=(), payment=(), usb=()"
 
 
 class RequestIDMiddleware:
@@ -50,7 +51,9 @@ class RequestIDMiddleware:
 
 
 class SecurityHeadersMiddleware:
-    """Permissions-Policy + Content-Security-Policy (domyślnie report-only)."""
+    """Permissions-Policy + Content-Security-Policy (CSP_REPORT_ONLY=true → tylko raport) + `no-store` dla JSON.
+    Pozostałe nagłówki (nosniff, Referrer-Policy, COOP, HSTS, X-Frame-Options) ustawia Django: SecurityMiddleware
+    i XFrameOptionsMiddleware (twinema/settings.py)."""
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -62,6 +65,8 @@ class SecurityHeadersMiddleware:
         header = ("Content-Security-Policy-Report-Only" if getattr(settings, "CSP_REPORT_ONLY", False)
                   else "Content-Security-Policy")
         response.setdefault(header, _CSP.format(nonce=request.csp_nonce))
+        if response.get("Content-Type", "").startswith("application/json"):
+            response.setdefault("Cache-Control", "no-store")   # odpowiedzi API z danymi — bez zapisu w cache
         return response
 
 

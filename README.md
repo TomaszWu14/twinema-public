@@ -85,6 +85,15 @@ zmiany: [CHANGELOG.md](CHANGELOG.md); stan wyjściowy: [audyt](docs/AUDYT.md).
 | [DEV] Architektura | [C4: kontekst i kontenery](docs/architektura/ARCHITEKTURA.md) · [model danych](docs/architektura/MODEL_DANYCH.md) · [API](docs/architektura/API.md) · [ADR](docs/architektura/adr/) · [strategia testów](docs/testy/STRATEGIA_TESTOW.md) · [runbook](docs/operacje/RUNBOOK.md) · [czyszczenie historii](docs/operacje/CZYSZCZENIE_HISTORII.md) |
 | [SEC] Bezpieczeństwo | [klasyfikacja danych](docs/bezpieczenstwo/KLASYFIKACJA_DANYCH.md) · [threat model STRIDE](docs/bezpieczenstwo/THREAT_MODEL.md) · [rejestr ryzyk](docs/bezpieczenstwo/RYZYKA.md) · [RODO](docs/bezpieczenstwo/RODO.md) · [checklista ASVS](docs/bezpieczenstwo/CHECKLISTA_ASVS.md) |
 
+### Bezpieczeństwo w CI
+
+Każdy PR do `main` przechodzi blokujące kontrole (workflow [Security](.github/workflows/security.yml)): gitleaks
+(sekrety; binarka przypięta wersją i sha256, wyjątki w `.gitleaksignore`), pip-audit (`requirements.txt`
+i `requirements-dev.txt`), bandit (waga i pewność ≥ średnia), semgrep (`p/owasp-top-ten`, `p/django`) i trivy
+(Dockerfile; obraz — wysokie i krytyczne z poprawką). Dependabot aktualizuje pip, GitHub Actions i obrazy Docker.
+Nagłówki bezpieczeństwa (CSP z nonce, Permissions-Policy, nosniff, X-Frame-Options, Referrer-Policy, COOP,
+`no-store` dla JSON) pilnują testy `core/tests/test_csp.py` i `core/tests/test_security_headers.py`.
+
 ## Jak uruchomić
 
 Wymagania: Python 3.11+ (produkcja: 3.13), Git (z Git Bash na Windows). Przetestowane od zera na Windows 11
