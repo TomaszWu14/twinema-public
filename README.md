@@ -4,11 +4,10 @@
 
 *Warehouse design tool: lay out a distribution centre, simulate a peak day on that layout and present the result to the board in 3D. UI and docs in Polish.*
 
-![demo](docs/screenshots/demo.gif) <!-- DO UZUPEŁNIENIA: nagrać GIF 15–20 s (animacja dnia, ekran 603) -->
+![Animacja dnia szczytowego: auta w kolejce do doków, liczniki palet i paczek, wąskie gardła](docs/screenshots/demo.gif)
 
-📹 [Prezentacja działania — 2 min](<DO UZUPEŁNIENIA: link YouTube>)
-
-🔗 **Demo:** \<adres instancji demo — podaje właściciel projektu\> — konto `demo` (rola Podgląd, tylko odczyt), hasło: \<DO UZUPEŁNIENIA\>. Dane w demo są syntetyczne.
+🔗 **Demo:** [twinema.twapp.pl](https://twinema.twapp.pl) — bez hasła: „Obejrzyj prezentację 3D” albo „Wejdź do systemu”
+(konto `demo`, rola Podgląd, tylko odczyt). Dane w demo są syntetyczne.
 
 ## Problem → rozwiązanie
 
@@ -180,7 +179,7 @@ odczyt), a `DEMO_VIDEO_URL` dodaje tam przycisk filmu.
 | Anthropic Claude (opcjonalnie) | szkic tekstów filmu | na zewnątrz idą tylko zagregowane liczby ([D13](docs/05-decyzje-i-ograniczenia.md#d13-do-ai-tylko-zagregowane-liczby-tekst-zatwierdza-człowiek)) |
 | openpyxl + defusedxml | import i eksport xlsx | odczyt XLSX bez podatności XXE |
 | django-axes, gitleaks, ruff | bezpieczeństwo i jakość | blokada zgadywania haseł, skan sekretów przed commitem, lint w CI |
-| Docker + Coolify | wdrożenie demo | \<DO UZUPEŁNIENIA: dlaczego Coolify\> |
+| Docker + Coolify | wdrożenie demo | własny serwer zamiast płatnej chmury: wdrożenie z repozytorium, HTTPS i healthcheck bez ręcznej konfiguracji; ten sam sposób co pozostałe moje dema |
 
 ## Zakres i ograniczenia
 
@@ -194,7 +193,8 @@ odczyt), a `DEMO_VIDEO_URL` dodaje tam przycisk filmu.
 ## Kontekst projektu
 
 Projekt portfolio inspirowany pracą przy magazynie; wszystkie dane, nazwy i scenariusze w repozytorium są
-syntetyczne. \<DO UZUPEŁNIENIA: czas realizacji, Twoja rola, sposób pracy — w tym udział narzędzi AI\>
+syntetyczne. Projekt własny, nie był wdrożony w firmie. Analizę procesu, model danych, wymagania i decyzje
+przygotowałem sam; kod pisałem z asystentem AI (Claude Code), a każdą zmianę sprawdzały testy w CI.
 
 ## Licencja
 
