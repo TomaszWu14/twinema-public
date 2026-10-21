@@ -12,4 +12,4 @@ openpyxl==3.1.5         # import zadań/lokalizacji z XLSX, eksport raportów
 defusedxml==0.7.1       # openpyxl parsuje XLSX przez defusedxml (bez XXE / „billion laughs”) — wykrywa sam
 anthropic==1.11.0       # Studio: szkic scenariusza (gdy ANTHROPIC_API_KEY)
 fpdf2==2.8.9            # Studio: deck PDF (font DejaVu w studio/fonts)
-pillow==12.3.0          # edytor layoutu: walidacja i wymiary podkładu PNG/JPG (też zależność fpdf2)
+pillow==13.0.0          # edytor layoutu: walidacja i wymiary podkładu PNG/JPG (też zależność fpdf2)

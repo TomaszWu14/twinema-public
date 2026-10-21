@@ -74,6 +74,8 @@ trafiają do sekcji „Unreleased”.
   (decyzja PO).
 
 ### Security
+- Pillow 12.3.0 → 13.0.0: 8 podatności (m.in. TIFF, GIF, PPM, EPS, PDF append; GHSA-pchr-8j38-3x4p,
+  GHSA-462x-pgg6-55fp) zgłoszonych przez pip-audit 2026-10-21.
 - Wspólna podstawa bezpieczeństwa: gitleaks w CI jako binarka przypięta wersją i sha256 (zamiast akcji pobierającej
   najnowszą wersję), `.gitleaksignore` dla hasła testowego; pip-audit także dla `requirements-dev.txt`;
   `permissions: contents: read` w workflow CI i Deploy; Dependabot grupuje aktualizacje minor + patch;
