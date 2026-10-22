@@ -10,6 +10,6 @@ segno==1.6.6              # US-017: kod QR do konfiguracji aplikacji uwierzyteln
 sentry-sdk[django]==2.72.0  # opcjonalnie, gdy SENTRY_DSN
 openpyxl==3.1.5         # import zadań/lokalizacji z XLSX, eksport raportów
 defusedxml==0.7.1       # openpyxl parsuje XLSX przez defusedxml (bez XXE / „billion laughs”) — wykrywa sam
-anthropic==1.14.0       # Studio: szkic scenariusza (gdy ANTHROPIC_API_KEY)
+anthropic==1.15.0       # Studio: szkic scenariusza (gdy ANTHROPIC_API_KEY)
 fpdf2==2.8.9            # Studio: deck PDF (font DejaVu w studio/fonts)
 pillow==13.0.0          # edytor layoutu: walidacja i wymiary podkładu PNG/JPG (też zależność fpdf2)
