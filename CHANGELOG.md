@@ -21,6 +21,8 @@ trafiają do sekcji „Unreleased”.
 - Dokumenty bezpieczeństwa (`docs/bezpieczenstwo/`): klasyfikacja danych, threat model STRIDE 0.1, rejestr
   ryzyk, RODO, checklista ASVS poziom 1.
 - Strategia testów (`docs/testy/`) i runbook operacyjny (`docs/operacje/`).
+- CI: monitor publicznego demo co 6 h (`demo-monitor.yml`) — strona główna, logowanie i `/health/`;
+  awaria otwiera issue z etykietą `demo`, powrót do normy je zamyka.
 - CI: pip-audit i bandit jako kontrole blokujące, semgrep i trivy jako raport, raport pokrycia testami;
   Dependabot dla pip, GitHub Actions i obrazów Docker.
 - `tblib` w zależnościach deweloperskich — testy równoległe pokazują pełny traceback błędu.
