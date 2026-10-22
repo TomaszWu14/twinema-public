@@ -2,7 +2,7 @@
 
 **Projektant magazynu sprawdza, czy nowa hala obsłuży dzień szczytowy — zanim powstanie — i pokazuje to zarządowi w 3D zamiast w arkuszu.**
 
-*Warehouse design tool: lay out a distribution centre, simulate a peak day on that layout and present the result to the board in 3D. UI and docs in Polish.*
+*Warehouse design tool: lay out a distribution centre, simulate a peak day on that layout and present the result to the board in 3D. UI and docs in Polish — **[English README](README.en.md)**.*
 
 ![Animacja dnia szczytowego: auta w kolejce do doków, liczniki palet i paczek, wąskie gardła](docs/screenshots/demo.gif)
 
