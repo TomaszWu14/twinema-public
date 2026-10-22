@@ -120,8 +120,9 @@ jobs:
       - name: Obraz — podatności wysokie i krytyczne z dostępną poprawką (blokuje)
         run: >-
           set -o pipefail;
-          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock "$TRIVY" image
-          --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --format table twinema:scan
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD:/src" "$TRIVY" image
+          --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --format table
+          --secret-config /src/trivy-secret.yaml twinema:scan
           | tee trivy-image.txt
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
