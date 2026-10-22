@@ -141,10 +141,13 @@ Otwórz http://127.0.0.1:8090/ i zaloguj się kontem administratora albo `demo` 
 <details>
 <summary>Testy, historia zadań, render, wdrożenie</summary>
 
-**Testy** — 676 testów (logika symulacji, ML i geometrii bez bazy) + lint:
+**Testy** — ok. 800 testów Python (logika symulacji, ML i geometrii bez bazy, widoki, role, E2E w Playwright),
+81 testów JS + lint:
 
 ```bash
-cd web && python manage.py check && python manage.py test && ruff check ..
+cd web && python manage.py check && python manage.py test --exclude-tag e2e && ruff check ..
+node --test twin/tests/js/*.test.mjs                 # testy JS (Node 22)
+python -m playwright install chromium && python manage.py test --tag e2e   # E2E w przeglądarce
 ```
 
 **Historia zadań magazynowych (dla modułów Projektowanie i Prognozy):** wygeneruj syntetyczny eksport
@@ -171,7 +174,7 @@ odczyt), a `DEMO_VIDEO_URL` dodaje tam przycisk filmu.
 | Element | Rola | Dlaczego |
 |---|---|---|
 | Python 3.13, Django 5.2 LTS | aplikacja, ORM, panel administracyjny, role | wydanie LTS — wsparcie bezpieczeństwa do 2028; jeden monolit, jedno wdrożenie |
-| Czysty Python w logice | symulacja zdarzeniowa, ML, geometria, walidacja układu | testowalne bez bazy i bez Django — 676 testów w CI ([D11](docs/05-decyzje-i-ograniczenia.md#d11-logika-obliczeniowa-bez-django)) |
+| Czysty Python w logice | symulacja zdarzeniowa, ML, geometria, walidacja układu | testowalne bez bazy i bez Django; w CI łącznie ok. 800 testów Python i 81 testów JS ([D11](docs/05-decyzje-i-ograniczenia.md#d11-logika-obliczeniowa-bez-django)) |
 | pydantic-settings | konfiguracja ze zmiennych środowiskowych | błąd konfiguracji zatrzymuje start zamiast działać na złych ustawieniach |
 | PostgreSQL 17 (lokalnie SQLite) | baza | puste `DATABASE_URL` = SQLite, więc start lokalny i CI bez serwera bazy |
 | three.js, ECharts | scena 3D, edytor, animacja dnia, wykresy | pobierane przy budowie z sumą SHA-256 — bez zależności od CDN w działaniu ([D12](docs/05-decyzje-i-ograniczenia.md#d12-biblioteki-js-w-repozytorium-nie-z-cdn)) |
