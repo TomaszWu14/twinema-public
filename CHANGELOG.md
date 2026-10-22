@@ -31,6 +31,8 @@ trafiają do sekcji „Unreleased”.
 - Rola Podgląd nie widzi w menu, kaflach i na ekranach przycisków prowadzących do stron bez dostępu (US-019).
 - Komunikat po usunięciu sprzętu podaje, ile grup floty mieszanej usunięto razem z nim (US-002).
 - ADR przeniesione do `docs/architektura/adr/`.
+- Dependabot nie proponuje nowej wersji głównej Django — projekt zostaje na 5.2 LTS; poprawki 5.2.x
+  przychodzą dalej w grupie minor/patch.
 - Własne strony „nie znaleziono” i „błąd serwera” z drogą powrotu (US-020).
 - Formularze scenariusza po błędzie walidacji zachowują wpisane wartości (US-021).
 - Zlecenia renderu i montażu po 3 nieudanych próbach kończą się błędem zamiast wracać do kolejki bez końca (US-015).
