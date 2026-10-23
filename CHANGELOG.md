@@ -8,6 +8,9 @@ trafiają do sekcji „Unreleased”.
 
 ## [Unreleased]
 
+### Changed
+- Adres kontaktowy w klauzuli RODO bramki demo zapisany jako „tomasz.wierzbowski [at] op.pl” (ochrona przed botami zbierającymi adresy).
+
 ### Added
 - Aktywność gościa demo (RODO CP-7): przy wpisie `DemoVisitor` liczba obejrzanych ekranów, ostatnia aktywność i sekcje (pierwszy segment ścieżki, max 20); w panelu admina kolumny „Ekrany”, „Czas” (ok. N min), „Najczęściej”. Ciasteczko bramki niesie id wpisu (podpisane). Push „Gość ogląda demo” po `NTFY_ENGAGED_VIEWS` ekranach (domyślnie 10). Push pilny dla firm z listy `NTFY_WATCH_COMPANIES`. Klauzula RODO informuje o zapisie obejrzanych ekranów.
 - Powiadomienie push (ntfy) o każdym nowym odwiedzającym demo: po zapisie w bramce wysyłka w tle na `NTFY_URL` (opcjonalnie `NTFY_TOKEN`), limit 5 s, błąd nie blokuje wejścia; bez `NTFY_URL` wyłączone. Klauzula RODO przy formularzu informuje o powiadomieniu.

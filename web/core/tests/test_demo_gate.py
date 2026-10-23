@@ -29,6 +29,8 @@ class VisitorGateTests(TestCase):
         r = self.client.get(reverse("core:demo"))
         self.assertContains(r, "przedstaw się, proszę.")
         self.assertContains(r, "art. 6 ust. 1 lit. f RODO")
+        self.assertContains(r, "tomasz.wierzbowski [at] op.pl")
+        self.assertNotContains(r, "tomasz.wierzbowski@op.pl")
 
     def test_without_data_refused(self):
         self._refused(self.client.post(self.url))
