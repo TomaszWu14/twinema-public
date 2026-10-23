@@ -76,3 +76,34 @@ class RackTypeFormKeepsValuesTests(TestCase):
     def test_bad_columns_json_is_shown_back(self):
         r = self._post(reverse("twin:warehouse_rack_type_new"), code="Z", level_cols_json="{zły json")
         self.assertContains(r, "{zły json", status_code=400)
+
+
+class RackTypeNonFiniteInputTests(TestCase):
+    """„inf”/„nan” w formularzu nie wolno zapisać ani przewrócić widoku (500)."""
+
+    def setUp(self):
+        get_user_model().objects.create_superuser(username="b", password="x")
+        self.client.post("/login/", {"username": "b", "password": "x"})
+        self.url = reverse("twin:warehouse_rack_type_new")
+
+    def _post(self, **over):
+        data = {"code": "N", "name": "Typ N", "width_mm": "800", "manip_mm": "900", "depth_mm": "1100",
+                "max_weight_kg": "1200", "max_volume_m3": "2.5", "color_hex": "#f59e0b",
+                "level_cols_json": "{}"}
+        data.update(over)
+        return self.client.post(self.url, data)
+
+    def test_inf_level_weight_is_ignored_not_500(self):
+        r = self._post(level_1_weight="inf")
+        self.assertIn(r.status_code, (200, 302))
+        self.assertEqual(m.WarehouseRackType.objects.get(code="N").level_weights, {})
+
+    def test_huge_level_cols_json_is_ignored_not_500(self):
+        r = self._post(level_cols_json='{"1": 1e999}')
+        self.assertIn(r.status_code, (200, 302))
+
+    def test_nan_or_inf_capacity_is_rejected(self):
+        for field, val in (("max_weight_kg", "nan"), ("max_weight_kg", "inf"), ("max_volume_m3", "inf")):
+            r = self._post(**{field: val})
+            self.assertEqual(r.status_code, 400, (field, val))
+            self.assertFalse(m.WarehouseRackType.objects.filter(code="N").exists(), (field, val))

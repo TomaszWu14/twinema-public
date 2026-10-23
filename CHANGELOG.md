@@ -59,6 +59,7 @@ trafiają do sekcji „Unreleased”.
 - Procedura czyszczenia historii repozytorium (`docs/operacje/CZYSZCZENIE_HISTORII.md`, R-01) — wykonuje PO.
 
 ### Fixed (audyt bezpieczeństwa, 2026-10-23)
+- Edytor typów regałów: `inf`/`nan` w nośności, objętości i `level_cols_json` zwracały 500 albo zapisywały nieskończoną wartość — teraz błąd walidacji / pominięcie.
 - Model magazynu: `nan`/`inf` w „Wklej adresy” i edycji współrzędnych nie trafiają już do geometrii regałów.
 
 ### Fixed (przegląd kodu po #68, 2026-10-17)
