@@ -1,5 +1,7 @@
 # Auto-split from the former monolithic views.py. Feature views live in
 # sibling modules; shared imports/constants/helpers stay in core.py.
+import math
+
 from twin.shared import (
     _md_role, _planner, get_object_or_404, messages, redirect, render,
     require_POST, WarehouseRackType, safe_json,
@@ -45,7 +47,7 @@ def warehouse_rack_type_form(request, pk=None):
             if raw_w:
                 try:
                     level_weights[str(lv)] = max(0, int(float(raw_w)))
-                except (ValueError, TypeError):
+                except (ValueError, TypeError, OverflowError):   # „inf” → OverflowError, nie 500
                     pass
 
         try:
@@ -54,7 +56,9 @@ def warehouse_rack_type_form(request, pk=None):
             depth_mm      = max(100, int(request.POST.get("depth_mm", 1100) or 1100))
             max_weight_kg = float(request.POST.get("max_weight_kg", 1200) or 1200)
             max_volume_m3 = float(request.POST.get("max_volume_m3", 2.5) or 2.5)
-        except (ValueError, TypeError) as e:
+            if not (math.isfinite(max_weight_kg) and math.isfinite(max_volume_m3)):
+                raise ValueError("wartość musi być liczbą skończoną")      # „nan”/„inf” psują JSON widoku 3D
+        except (ValueError, TypeError, OverflowError) as e:
             messages.error(request, f"Błąd wartości: {e}")
             return _form_again(request, obj)
 
@@ -77,7 +81,7 @@ def warehouse_rack_type_form(request, pk=None):
                         try:
                             nc = max(1, min(3, int(v)))
                             level_cols[str(k)] = nc
-                        except (ValueError, TypeError):
+                        except (ValueError, TypeError, OverflowError):   # 1e999 → inf
                             pass
             except (_json.JSONDecodeError, ValueError):
                 messages.error(request, "Nieprawidłowy format JSON dla kolumn per poziom.")
