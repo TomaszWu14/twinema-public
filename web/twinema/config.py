@@ -52,6 +52,8 @@ class AppEnv(BaseSettings):
     DEMO_PUBLIC: bool = False          # True = /demo/ wpuszcza bez hasła jako `demo` (Podgląd, tylko odczyt)
     DEMO_VISITOR_GATE: bool | None = None   # None = jak DEMO_PUBLIC: wejście do demo wymaga przedstawienia się (RODO CP-7)
     DEMO_VIDEO_URL: str = ""           # adres filmu (np. YouTube) na stronie /demo/; puste = bez przycisku
+    NTFY_URL: str = ""                 # pełny adres tematu ntfy (push o nowym odwiedzającym); puste = wyłączone
+    NTFY_TOKEN: str = ""               # opcjonalny token ntfy → nagłówek Authorization: Bearer
 
     # ── Dziennik operacji wrażliwych (US-008) ──────────────────────────────
     # ── Drugi składnik logowania (US-017) ──────────────────────────────────────
@@ -82,6 +84,8 @@ class AppEnv(BaseSettings):
             raise ValueError("DEMO_PASSWORD musi mieć co najmniej 8 znaków.")
         if self.DEMO_VIDEO_URL and not self.DEMO_VIDEO_URL.startswith("https://"):
             raise ValueError("DEMO_VIDEO_URL musi zaczynać się od https://.")
+        if self.NTFY_URL and not self.NTFY_URL.startswith(("https://", "http://")):
+            raise ValueError("NTFY_URL musi zaczynać się od https:// (albo http:// dla serwera w sieci lokalnej).")
         if self.LOGIN_ATTEMPT_RETENTION_DAYS < 1:
             raise ValueError("LOGIN_ATTEMPT_RETENTION_DAYS musi wynosić co najmniej 1 dzień.")
         if self.TRUSTED_PROXIES:
