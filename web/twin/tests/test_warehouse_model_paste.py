@@ -93,3 +93,27 @@ class WarehouseModelPasteTests(TestCase):
     def test_skipped_count_reported(self):
         r = self._post("Z1-01-300A\nsmieci\njeszcze smieci")
         self.assertContains(r, "Pominięto 2")
+
+
+class NonFiniteCoordsTests(TestCase):
+    """„nan”/„inf” w polach pozycji nie mogą trafić do geometrii modelu."""
+
+    def setUp(self):
+        get_user_model().objects.create_superuser(username="b", password="x")
+        self.client.post("/login/", {"username": "b", "password": "x"})
+        self.wm = WarehouseModel.objects.create(name="M", floor_width_m=50, floor_depth_m=30)
+
+    def test_paste_non_finite_start_falls_back_to_zero(self):
+        self.client.post(reverse("twin:warehouse_model_paste", args=[self.wm.pk]),
+                         {"codes": "Z1-01-300A", "orientation": "horizontal",
+                          "start_x": "nan", "start_y": "inf"})
+        r = WarehouseModelRack.objects.get(model=self.wm, zone="Z1", rack_id="01")
+        self.assertEqual((r.x_m, r.y_m), (0.0, 0.0))
+
+    def test_coords_non_finite_rack_is_skipped(self):
+        rack = WarehouseModelRack.objects.create(model=self.wm, zone="Z1", rack_id="01", x_m=3, y_m=4)
+        self.client.post(reverse("twin:warehouse_model_coords", args=[self.wm.pk]),
+                         {f"rack_{rack.pk}_x_m": "nan", f"rack_{rack.pk}_y_m": "1",
+                          f"rack_{rack.pk}_angle_deg": "0"})
+        rack.refresh_from_db()
+        self.assertEqual((rack.x_m, rack.y_m), (3, 4))

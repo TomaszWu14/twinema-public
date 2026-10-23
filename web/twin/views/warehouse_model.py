@@ -1,5 +1,7 @@
 # Auto-split from the former monolithic views.py. Feature views live in
 # sibling modules; shared imports/constants/helpers stay in core.py.
+import math
+
 from twin.shared import (
     _md_role, _parse_location_code, _planner, cache_digest, Count, get_object_or_404,
     HALL_FEATURE_COLORS, hall_feature_dict, hall_feature_kinds, messages, model_columns,
@@ -136,9 +138,10 @@ def warehouse_model_paste(request, pk):
 
     def _f(name):
         try:
-            return float(request.POST.get(name) or 0)
+            v = float(request.POST.get(name) or 0)
         except (TypeError, ValueError):
             return 0.0
+        return v if math.isfinite(v) else 0.0          # „nan”/„inf” rozjechałyby geometrię modelu
     start_x, start_y = _f("start_x"), _f("start_y")
     ctx.update({"codes": codes_text, "orientation": orientation, "start_x": start_x,
                 "start_y": start_y, "keep_existing": keep_existing})
@@ -206,6 +209,8 @@ def warehouse_model_coords(request, pk):
                 rack.x_m = float(request.POST.get(prefix + "x_m") or 0)
                 rack.y_m = float(request.POST.get(prefix + "y_m") or 0)
                 rack.angle_deg = float(request.POST.get(prefix + "angle_deg") or 0)
+                if not all(math.isfinite(v) for v in (rack.x_m, rack.y_m, rack.angle_deg)):
+                    continue                           # „nan”/„inf” → pomiń regał jak przy błędnej liczbie
                 # max(1, ...) — jawne "0"/wartość ujemna daje zdegenerowaną geometrię (NaN/znika
                 # w renderze three.js). `or default` chroni tylko puste. Jak w warehouse_rack_generator.
                 rack.bay_width_cm = max(1, int(request.POST.get(prefix + "bay_width_cm") or 100))
