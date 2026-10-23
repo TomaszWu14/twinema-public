@@ -58,6 +58,9 @@ trafiają do sekcji „Unreleased”.
   `postgresql-client` (US-009). **Do ustawienia:** `BACKUP_DIR` i zadanie zaplanowane w Coolify (RUNBOOK).
 - Procedura czyszczenia historii repozytorium (`docs/operacje/CZYSZCZENIE_HISTORII.md`, R-01) — wykonuje PO.
 
+### Fixed (audyt bezpieczeństwa, 2026-10-23)
+- Model magazynu: `nan`/`inf` w „Wklej adresy” i edycji współrzędnych nie trafiają już do geometrii regałów.
+
 ### Fixed (przegląd kodu po #68, 2026-10-17)
 - Import CSV danych podstawowych bez rozpoznanego separatora nie zmienia już globalnego `csv.excel` całego procesu.
 - Symulacja dnia i kalibracja: zadanie z błędem nie wraca do kolejki przy każdym wejściu na stronę — widać komunikat,
