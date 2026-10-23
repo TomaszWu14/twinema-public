@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
-from . import audit
+from . import audit, demo_gate
 from .demo import DEMO_USER, demo_showcase, exposure_reasons
 from .models import AuditEvent, Job
 from .roles import GROUP_ADMIN, GROUP_DESIGNER, GROUP_VIEWER, admin_only, any_role, has_role
@@ -72,12 +72,14 @@ def _home(request):
     return render(request, "core/home.html", {"modules": modules, "demo_exposure": exposure})
 
 
-def demo(request):
+def demo(request, errors=None, values=None, status=200):
     """Strona wejściowa publicznego demo (bez logowania): pokaz 3D, wejście gościa, film."""
     sc = demo_showcase()
     resp = render(request, "core/demo.html", {
         "showcase_url": reverse("scenario:public", args=[sc.share_token]) if sc else "",
-        "guest": settings.DEMO_PUBLIC and not exposure_reasons(), "video_url": settings.DEMO_VIDEO_URL})
+        "guest": settings.DEMO_PUBLIC and not exposure_reasons(), "video_url": settings.DEMO_VIDEO_URL,
+        "gate": demo_gate.gate_active() and not demo_gate.introduced(request),
+        "errors": errors or {}, "values": values or {}}, status=status)
     resp["Referrer-Policy"] = "same-origin"       # adres pokazu niesie token — poza domenę go nie wysyłamy;
     # no-referrer odpada: przeglądarka wysłałaby wtedy Origin: null i CSRF odrzuciłby „Wejdź do systemu”
     return resp
@@ -92,13 +94,27 @@ def demo_enter(request):
     if exposure_reasons():          # R-02 (decyzja PO): demo tylko na instancji z samymi danymi demo
         return render(request, "core/403.html", {"reason": "Wejście gościa jest wyłączone: na tej instancji są "
                                                            "dane spoza demo."}, status=403)
+    new_visitor = None
+    if not request.user.is_authenticated and demo_gate.gate_active() and not demo_gate.introduced(request):
+        data, errors, bot = demo_gate.validate(request.POST)
+        if bot:
+            return demo(request, errors={"form": "Nie udało się wysłać formularza."}, status=400)
+        if errors:
+            return demo(request, errors=errors, status=400,
+                        values={k: request.POST.get(k, "")[:100] for k in ("first_name", "last_name", "company")})
+        new_visitor = data
     if not request.user.is_authenticated:
         user = User.objects.filter(username=DEMO_USER, is_active=True, is_staff=False, is_superuser=False,
                                    groups__name=GROUP_VIEWER).first()
         if user is None or user.groups.exclude(name=GROUP_VIEWER).exists():
             raise Http404
+        if new_visitor:
+            demo_gate.register(new_visitor)
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
-    return redirect("core:home")
+    resp = redirect("core:home")
+    if new_visitor:
+        demo_gate.set_cookie(resp)
+    return resp
 
 
 AUDIT_PAGE = 200

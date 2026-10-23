@@ -91,3 +91,12 @@ a.hub-tile:hover { border-color: var(--primary); }
   color: color-mix(in srgb, var(--c) 55%, var(--gray-900));
   border: 1px solid color-mix(in srgb, var(--c) 27%, transparent);
 }
+.visitor-gate { max-width: 640px; margin: 0 0 var(--sp-6); padding: var(--sp-5); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); }
+.visitor-gate h2 { margin-top: 0; }
+.visitor-gate label { display: block; font-size: var(--fs-sm); color: var(--fg-muted); margin: 12px 0 6px; }
+.visitor-gate__fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0 var(--sp-3); }
+.visitor-gate__check { display: flex !important; gap: var(--sp-2); align-items: flex-start; color: var(--fg) !important; }
+.visitor-gate .btn { margin-top: var(--sp-4); }
+.visitor-gate__trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+.visitor-gate__rodo { margin: var(--sp-4) 0 0; }

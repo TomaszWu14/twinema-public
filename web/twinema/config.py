@@ -50,6 +50,7 @@ class AppEnv(BaseSettings):
     DEMO_PASSWORD: str = ""            # hasło konta `demo` (rola Podgląd); puste = konto nie powstaje
     DEMO_SEED: bool = False            # True = docker-entrypoint.sh odpala seed_demo przy każdym starcie
     DEMO_PUBLIC: bool = False          # True = /demo/ wpuszcza bez hasła jako `demo` (Podgląd, tylko odczyt)
+    DEMO_VISITOR_GATE: bool | None = None   # None = jak DEMO_PUBLIC: wejście do demo wymaga przedstawienia się (RODO CP-7)
     DEMO_VIDEO_URL: str = ""           # adres filmu (np. YouTube) na stronie /demo/; puste = bez przycisku
 
     # ── Dziennik operacji wrażliwych (US-008) ──────────────────────────────

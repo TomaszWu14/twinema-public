@@ -9,7 +9,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from core.models import AuditEvent
+from core.models import AuditEvent, DemoVisitor
 
 
 class Command(BaseCommand):
@@ -24,3 +24,5 @@ class Command(BaseCommand):
         n = sum(model.objects.filter(attempt_time__lt=login_cutoff).delete()[0]
                 for model in (AccessAttempt, AccessFailureLog, AccessLog))
         self.stdout.write(f"Próby logowania: usunięto {n} wpisów starszych niż {settings.LOGIN_ATTEMPT_RETENTION_DAYS} dni.")
+        self.stdout.write(f"Odwiedzający demo: usunięto {DemoVisitor.purge()} wpisów starszych niż "
+                          f"{DemoVisitor.RETENTION_DAYS} dni.")

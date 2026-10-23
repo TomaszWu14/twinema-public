@@ -13,7 +13,7 @@
         Bez rejestracji i bez logowania.</p>
       <div class="demo-cta">
         {% if showcase_url %}<a class="btn btn-primary btn-lg" href="{{ showcase_url }}">Obejrzyj prezentację 3D</a>{% endif %}
-        {% if guest %}
+        {% if guest and not gate %}
           <form method="post" action="{% url 'core:demo_enter' %}">{% csrf_token %}
             <button class="btn btn-secondary btn-lg" type="submit">Wejdź do systemu</button>
           </form>
@@ -28,6 +28,33 @@
     <img class="demo-hero__img" src="{% static 'core/demo/hala-3d.webp' %}" width="1060" height="530"
          alt="Widok 3D hali demo: regały z paletami, doki i działka">
   </section>
+
+  {% if guest and gate %}
+  <section class="visitor-gate" aria-labelledby="visitor-gate-h">
+    <h2 id="visitor-gate-h">Zanim wejdziesz do wersji demonstracyjnej, przedstaw się, proszę.</h2>
+    <form method="post" action="{% url 'core:demo_enter' %}" novalidate>{% csrf_token %}
+      {% if errors.form %}<p class="login-error" role="alert">{{ errors.form }}</p>{% endif %}
+      <div class="visitor-gate__fields">
+        <div><label for="id_first_name">Imię</label>
+          <input class="form-control" id="id_first_name" name="first_name" value="{{ values.first_name }}" maxlength="100" minlength="2" autocomplete="given-name" required{% if errors.first_name %} aria-invalid="true" aria-describedby="err_first_name"{% endif %}>
+          {% if errors.first_name %}<p class="login-error" id="err_first_name" role="alert">{{ errors.first_name }}</p>{% endif %}</div>
+        <div><label for="id_last_name">Nazwisko</label>
+          <input class="form-control" id="id_last_name" name="last_name" value="{{ values.last_name }}" maxlength="100" minlength="2" autocomplete="family-name" required{% if errors.last_name %} aria-invalid="true" aria-describedby="err_last_name"{% endif %}>
+          {% if errors.last_name %}<p class="login-error" id="err_last_name" role="alert">{{ errors.last_name }}</p>{% endif %}</div>
+        <div><label for="id_company">Firma</label>
+          <input class="form-control" id="id_company" name="company" value="{{ values.company }}" maxlength="100" minlength="2" autocomplete="organization" required{% if errors.company %} aria-invalid="true" aria-describedby="err_company"{% endif %}>
+          {% if errors.company %}<p class="login-error" id="err_company" role="alert">{{ errors.company }}</p>{% endif %}</div>
+      </div>
+      <div class="visitor-gate__trap" aria-hidden="true"><label for="id_website">Nie wypełniaj tego pola</label>
+        <input id="id_website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+      <label class="visitor-gate__check"><input type="checkbox" name="gdpr" value="1" required{% if errors.gdpr %} aria-invalid="true" aria-describedby="err_gdpr"{% endif %}>
+        Zapoznałem(-am) się z informacją o przetwarzaniu danych poniżej.</label>
+      {% if errors.gdpr %}<p class="login-error" id="err_gdpr" role="alert">{{ errors.gdpr }}</p>{% endif %}
+      <button class="btn btn-primary btn-lg" type="submit">Wejdź do systemu</button>
+    </form>
+    <p class="text-muted text-sm visitor-gate__rodo">Administratorem danych jest Tomasz Wierzbowski (kontakt: tomasz.wierzbowski@op.pl). Imię, nazwisko i nazwę firmy przetwarzam wyłącznie w celu kontroli dostępu do wersji demonstracyjnej i statystyki odwiedzin portfolio, na podstawie prawnie uzasadnionego interesu (art. 6 ust. 1 lit. f RODO). Dane przechowuję 90 dni, potem są automatycznie usuwane, i nikomu ich nie przekazuję. Masz prawo dostępu do danych, ich sprostowania, usunięcia, ograniczenia przetwarzania i sprzeciwu – napisz na adres powyżej. Przysługuje Ci skarga do Prezesa UODO.</p>
+  </section>
+  {% endif %}
 
   <section class="hub demo-steps" aria-label="Co zobaczysz">
     <div class="hub-tile"><h2>1 · Hala i działka</h2>
