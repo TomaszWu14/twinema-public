@@ -1,5 +1,8 @@
 """Bramka odwiedzających publiczne demo (RODO CP-7): grzeczne przedstawienie się przed wejściem.
-Zapisujemy tylko imię, nazwisko i firmę — bez IP i user-agenta. Zgoda na wejście = podpisane ciasteczko na 30 dni."""
+Zapisujemy tylko imię, nazwisko i firmę — bez IP i user-agenta. Zgoda na wejście = podpisane ciasteczko na 30 dni
+z identyfikatorem wpisu („v<id>”, do liczenia aktywności — core/visitor_activity.py). Starsze ciasteczka „1” (sprzed
+zapisu id) nadal wpuszczają, ale aktywności nie liczymy."""
+import re
 import unicodedata
 
 from django.conf import settings
@@ -17,8 +20,22 @@ def gate_active():
     return bool(getattr(settings, "DEMO_VISITOR_GATE", False))
 
 
+_VALUE = re.compile(r"v([1-9][0-9]{0,17})")
+
+
+def _cookie(request):
+    return request.get_signed_cookie(COOKIE, default=None, max_age=COOKIE_MAX_AGE)
+
+
 def introduced(request):
-    return request.get_signed_cookie(COOKIE, default=None, max_age=COOKIE_MAX_AGE) == "1"
+    value = _cookie(request)
+    return value == "1" or (value is not None and _VALUE.fullmatch(value) is not None)
+
+
+def visitor_id(request):
+    """Id wpisu `DemoVisitor` z ważnego podpisanego ciasteczka albo None (brak, podróbka, stary format „1”)."""
+    m = _VALUE.fullmatch(_cookie(request) or "")
+    return int(m.group(1)) if m else None
 
 
 def clean_field(value):
@@ -52,6 +69,6 @@ def register(data):
     return visitor
 
 
-def set_cookie(response):
-    response.set_signed_cookie(COOKIE, "1", max_age=COOKIE_MAX_AGE, httponly=True, samesite="Lax",
+def set_cookie(response, visitor):
+    response.set_signed_cookie(COOKIE, f"v{visitor.pk}", max_age=COOKIE_MAX_AGE, httponly=True, samesite="Lax",
                                secure=bool(getattr(settings, "SESSION_COOKIE_SECURE", False)))

@@ -109,11 +109,11 @@ def demo_enter(request):
         if user is None or user.groups.exclude(name=GROUP_VIEWER).exists():
             raise Http404
         if new_visitor:
-            demo_gate.register(new_visitor)
+            new_visitor = demo_gate.register(new_visitor)
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
     resp = redirect("core:home")
     if new_visitor:
-        demo_gate.set_cookie(resp)
+        demo_gate.set_cookie(resp, new_visitor)
     return resp
 
 

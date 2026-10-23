@@ -51,7 +51,7 @@ Linie przerywane to przepływy ręczne, poza systemem. Strzałka wskazuje stron�
 | I-12 | Biblioteki przeglądarki (scena 3D, wykresy) | internet → obraz aplikacji | pliki JS z sumą SHA-256 | przy budowie obrazu | suma niezgodna → budowa przerwana; w czasie pracy brak zależności od CDN |
 | I-13 | Kontrole bezpieczeństwa repozytorium | CI → repozytorium | skan sekretów, audyt zależności | przy zmianach i co tydzień | wynik w CI |
 | I-14 | Zgłaszanie błędów aplikacji | system → monitoring | HTTPS, zdarzenia błędów i próbka 20% wydajności, bez danych osobowych, z wersją | przy wystąpieniu błędu | włączone tylko po podaniu adresu usługi; brak adresu → wyłączone |
-| I-16 | Powiadomienie o nowym odwiedzającym demo | system → usługa ntfy | HTTPS POST, tekst „imię nazwisko (firma) wszedł do twinema” (≤ 300 znaków), opcjonalnie token Bearer | po każdym poprawnym przedstawieniu się w bramce demo | wysyłka w tle, limit 5 s, błąd → ostrzeżenie w logach, gość wchodzi normalnie; brak `NTFY_URL` → wyłączone |
+| I-16 | Powiadomienie o nowym odwiedzającym demo | system → usługa ntfy | HTTPS POST, tekst „imię nazwisko (firma) wszedł do twinema” (≤ 300 znaków), opcjonalnie token Bearer | po każdym poprawnym przedstawieniu się w bramce demo; drugi raz (tytuł „Gosc oglada demo”, tekst „… obejrzał już N ekranów w twinema”), gdy gość obejrzy `NTFY_ENGAGED_VIEWS` ekranów (domyślnie 10, 0 = wyłączone); firma zawierająca frazę z `NTFY_WATCH_COMPANIES` → priorytet `urgent` i tytuł „UWAGA firma z listy” | wysyłka w tle, limit 5 s, błąd → ostrzeżenie w logach, gość wchodzi normalnie; brak `NTFY_URL` → wyłączone |
 | I-15 | Publikacja filmu | Projektant → serwis wideo | MP4, napisy SRT, opis TXT z rozdziałami | ręcznie | poza systemem |
 
 ## Zasady wymiany danych

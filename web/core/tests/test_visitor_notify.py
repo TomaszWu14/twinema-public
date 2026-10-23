@@ -2,7 +2,7 @@
 from unittest import mock
 
 from django.contrib.auth.models import Group, User
-from django.test import TestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 
 from core import visitor_notify
@@ -82,10 +82,48 @@ class VisitorNotifyTests(TestCase):
             self.assertRedirects(self.client.post(self.url, OK), reverse("core:home"))
         urlopen.assert_not_called()
 
+    @override_settings(NTFY_WATCH_COMPANIES="  przyklad , firma-x ")
+    def test_watched_company_sends_urgent(self, urlopen):
+        self.client.post(self.url, OK | {"company": "PRZYKŁAD Sp. z o.o."})
+        req = self._sent(urlopen)
+        headers = dict(req.header_items())
+        self.assertEqual((headers["Priority"], headers["Tags"]), ("urgent", "rotating_light"))
+        self.assertEqual(headers["Title"], "UWAGA firma z listy: twinema")
+        self.assertEqual(req.data.decode("utf-8"), "⚠️ Jan Żółć (PRZYKŁAD Sp. z o.o.) wszedł do twinema")
+        for value in headers.values():
+            value.encode("ascii")
+
+    @override_settings(NTFY_WATCH_COMPANIES="przyklad, x")
+    def test_unwatched_company_sends_normal(self, urlopen):
+        self.client.post(self.url, OK)          # „ACME” nie zawiera „przyklad”; jednoznakowa fraza „x” pominięta
+        headers = dict(self._sent(urlopen).header_items())
+        self.assertEqual((headers["Priority"], headers["Tags"], headers["Title"]), ("high", "bell", "Nowy gosc: twinema"))
+
+    @override_settings(NTFY_WATCH_COMPANIES=" , ,")
+    def test_empty_watch_list_sends_normal(self, urlopen):
+        self.client.post(self.url, OK)
+        self.assertEqual(dict(self._sent(urlopen).header_items())["Priority"], "high")
+
     def test_body_capped_at_300_chars(self, urlopen):
         req = visitor_notify.build_request({"first_name": "A" * 200, "last_name": "B" * 200, "company": "C"})
         self.assertEqual(len(req.data.decode("utf-8")), 300)
         urlopen.assert_not_called()
+
+
+class WatchMatchTests(SimpleTestCase):
+    @override_settings(NTFY_WATCH_COMPANIES="acme")
+    def test_diacritics_and_case(self):
+        self.assertTrue(visitor_notify.watched("ÄCME sp. z o.o."))
+        self.assertTrue(visitor_notify.watched("Grupa   acme  "))
+        self.assertFalse(visitor_notify.watched("ACM E"))
+
+    @override_settings(NTFY_WATCH_COMPANIES="łódzka  fabryka")
+    def test_phrase_normalized_too(self):
+        self.assertTrue(visitor_notify.watched("LODZKA FABRYKA Sp. j."))
+
+    @override_settings(NTFY_WATCH_COMPANIES="")
+    def test_empty_list_never_matches(self):
+        self.assertFalse(visitor_notify.watched("ACME"))
 
 
 @override_settings(DEMO_PUBLIC=True, DEMO_VISITOR_GATE=True)
@@ -93,6 +131,8 @@ class ClauseTests(TestCase):
     def test_clause_mentions_ntfy(self):
         r = self.client.get(reverse("core:demo"))
         self.assertContains(r, "Dane przechowuję 90 dni, potem są automatycznie usuwane. O każdej wizycie (imię, "
-                               "nazwisko, firma) dostaję powiadomienie na telefon przez usługę powiadomień push ntfy; "
-                               "poza tym nikomu danych nie przekazuję.")
+                               "nazwisko, firma) dostaję powiadomienie na telefon przez usługę powiadomień push ntfy. "
+                               "Zapisuję też, ile i jakie ekrany wersji demonstracyjnej obejrzałeś (bez adresu IP), "
+                               "żeby wiedzieć, co zainteresowało gości. Poza tym nikomu danych nie przekazuję.")
         self.assertNotContains(r, "i nikomu ich nie przekazuję")
+        self.assertNotContains(r, "push ntfy; poza tym")

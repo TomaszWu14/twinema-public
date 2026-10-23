@@ -67,6 +67,7 @@ MIDDLEWARE = [
     "axes.middleware.AxesMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "core.visitor_activity.VisitorActivityMiddleware",
 ]
 
 ROOT_URLCONF = "twinema.urls"
@@ -175,6 +176,8 @@ DEMO_VISITOR_GATE = env.DEMO_PUBLIC if env.DEMO_VISITOR_GATE is None else env.DE
 DEMO_VIDEO_URL = env.DEMO_VIDEO_URL
 NTFY_URL = env.NTFY_URL
 NTFY_TOKEN = env.NTFY_TOKEN
+NTFY_WATCH_COMPANIES = env.NTFY_WATCH_COMPANIES
+NTFY_ENGAGED_VIEWS = env.NTFY_ENGAGED_VIEWS
 AUDIT_RETENTION_DAYS = env.AUDIT_RETENTION_DAYS
 LOGIN_ATTEMPT_RETENTION_DAYS = env.LOGIN_ATTEMPT_RETENTION_DAYS
 JOB_STALE_MIN = env.JOB_STALE_MIN
