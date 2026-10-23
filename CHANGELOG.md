@@ -9,6 +9,7 @@ trafiają do sekcji „Unreleased”.
 ## [Unreleased]
 
 ### Added
+- Powiadomienie push (ntfy) o każdym nowym odwiedzającym demo: po zapisie w bramce wysyłka w tle na `NTFY_URL` (opcjonalnie `NTFY_TOKEN`), limit 5 s, błąd nie blokuje wejścia; bez `NTFY_URL` wyłączone. Klauzula RODO przy formularzu informuje o powiadomieniu.
 - Bramka odwiedzających demo (RODO CP-7): przed „Wejdź do systemu” obowiązkowe imię, nazwisko, firma, zgoda RODO i pułapka na boty; zapis w `DemoVisitor` bez IP i user-agenta, retencja 90 dni (przy zapisie i w `audit_prune`), ciasteczko na 30 dni, lista w panelu admina (tylko Administrator). Przełącznik `DEMO_VISITOR_GATE` (domyślnie jak `DEMO_PUBLIC`).
 - Dokumentacja analityczna procesów: przegląd, procesy P1–P8, model danych, user flow, integracje,
   decyzje i ograniczenia (`docs/00-…05-…`).

@@ -4,6 +4,7 @@ import unicodedata
 
 from django.conf import settings
 
+from . import visitor_notify
 from .models import DemoVisitor
 
 COOKIE = "demo_visitor"
@@ -46,7 +47,9 @@ def validate(post):
 
 def register(data):
     DemoVisitor.purge()
-    return DemoVisitor.objects.create(**data)
+    visitor = DemoVisitor.objects.create(**data)
+    visitor_notify.notify(data)
+    return visitor
 
 
 def set_cookie(response):
