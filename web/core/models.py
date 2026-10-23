@@ -93,15 +93,20 @@ class DemoObject(models.Model):
 
 
 class DemoVisitor(models.Model):
-    """Kto wszedł do publicznego demo (RODO CP-7): imię, nazwisko, firma — bez IP i user-agenta.
-    Rekordy starsze niż RETENTION_DAYS usuwa `purge` (przy zapisie i z `audit_prune`)."""
+    """Kto wszedł do publicznego demo (RODO CP-7): imię, nazwisko, firma — bez IP i user-agenta — oraz ile i jakie
+    ekrany obejrzał (core/visitor_activity.py). Rekordy starsze niż RETENTION_DAYS usuwa `purge` (przy zapisie
+    i z `audit_prune`)."""
 
     RETENTION_DAYS = 90
+    MAX_SECTIONS = 20
 
     first_name = models.CharField("imię", max_length=100)
     last_name = models.CharField("nazwisko", max_length=100)
     company = models.CharField("firma", max_length=100)
     created_at = models.DateTimeField("data wejścia", auto_now_add=True)
+    page_views = models.PositiveIntegerField("ekrany", default=0)
+    last_seen_at = models.DateTimeField("ostatnia aktywność", null=True, blank=True)
+    sections = models.JSONField("sekcje", default=dict, blank=True)   # sekcja → liczba ekranów, max MAX_SECTIONS
 
     class Meta:
         ordering = ["-created_at", "-id"]
@@ -110,6 +115,16 @@ class DemoVisitor(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.company})"
+
+    def duration_minutes(self):
+        """Czas wizyty = ostatnia aktywność − wejście, w pełnych minutach (None bez aktywności)."""
+        if not self.last_seen_at:
+            return None
+        return max(0, int((self.last_seen_at - self.created_at).total_seconds() // 60))
+
+    def top_sections(self, n=3):
+        items = (self.sections or {}).items() if isinstance(self.sections, dict) else ()
+        return [k for k, _ in sorted(items, key=lambda kv: (-kv[1], kv[0]))[:n]]
 
     @classmethod
     def purge(cls):

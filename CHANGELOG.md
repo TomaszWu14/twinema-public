@@ -9,6 +9,7 @@ trafiają do sekcji „Unreleased”.
 ## [Unreleased]
 
 ### Added
+- Aktywność gościa demo (RODO CP-7): przy wpisie `DemoVisitor` liczba obejrzanych ekranów, ostatnia aktywność i sekcje (pierwszy segment ścieżki, max 20); w panelu admina kolumny „Ekrany”, „Czas” (ok. N min), „Najczęściej”. Ciasteczko bramki niesie id wpisu (podpisane). Push „Gość ogląda demo” po `NTFY_ENGAGED_VIEWS` ekranach (domyślnie 10). Push pilny dla firm z listy `NTFY_WATCH_COMPANIES`. Klauzula RODO informuje o zapisie obejrzanych ekranów.
 - Powiadomienie push (ntfy) o każdym nowym odwiedzającym demo: po zapisie w bramce wysyłka w tle na `NTFY_URL` (opcjonalnie `NTFY_TOKEN`), limit 5 s, błąd nie blokuje wejścia; bez `NTFY_URL` wyłączone. Klauzula RODO przy formularzu informuje o powiadomieniu.
 - Bramka odwiedzających demo (RODO CP-7): przed „Wejdź do systemu” obowiązkowe imię, nazwisko, firma, zgoda RODO i pułapka na boty; zapis w `DemoVisitor` bez IP i user-agenta, retencja 90 dni (przy zapisie i w `audit_prune`), ciasteczko na 30 dni, lista w panelu admina (tylko Administrator). Przełącznik `DEMO_VISITOR_GATE` (domyślnie jak `DEMO_PUBLIC`).
 - Dokumentacja analityczna procesów: przegląd, procesy P1–P8, model danych, user flow, integracje,

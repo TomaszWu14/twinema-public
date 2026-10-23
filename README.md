@@ -6,8 +6,9 @@
 
 ![Animacja dnia szczytowego: auta w kolejce do doków, liczniki palet i paczek, wąskie gardła](docs/screenshots/demo.gif)
 
-🔗 **Demo:** [twinema.twapp.pl](https://twinema.twapp.pl) — bez hasła: „Obejrzyj prezentację 3D” albo „Wejdź do systemu”
-(konto `demo`, rola Podgląd, tylko odczyt). Dane w demo są syntetyczne.
+**▶ Zobacz demo: [https://twinema.twapp.pl](https://twinema.twapp.pl)** (przy wejściu demo poprosi o imię, nazwisko i firmę)
+— bez hasła: „Obejrzyj prezentację 3D” albo „Wejdź do systemu” (konto `demo`, rola Podgląd, tylko odczyt). Dane w demo
+są syntetyczne.
 
 ## Problem → rozwiązanie
 

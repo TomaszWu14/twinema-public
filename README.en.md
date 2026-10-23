@@ -7,7 +7,8 @@ shows the result to the board in 3D instead of in a spreadsheet.**
 
 ![Peak-day animation: trucks queuing at the docks, pallet and parcel counters, bottlenecks](docs/screenshots/demo.gif)
 
-🔗 **Demo:** [twinema.twapp.pl](https://twinema.twapp.pl) — no password needed: „Obejrzyj prezentację 3D” (watch the
+**▶ See the demo: [https://twinema.twapp.pl](https://twinema.twapp.pl)** (on entry the demo asks for your first name,
+last name and company) — no password needed: „Obejrzyj prezentację 3D” (watch the
 3D presentation) or „Wejdź do systemu” (enter the app as the read-only `demo` account). All demo data is synthetic.
 
 ## Problem → solution

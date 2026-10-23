@@ -54,6 +54,8 @@ class AppEnv(BaseSettings):
     DEMO_VIDEO_URL: str = ""           # adres filmu (np. YouTube) na stronie /demo/; puste = bez przycisku
     NTFY_URL: str = ""                 # pełny adres tematu ntfy (push o nowym odwiedzającym); puste = wyłączone
     NTFY_TOKEN: str = ""               # opcjonalny token ntfy → nagłówek Authorization: Bearer
+    NTFY_WATCH_COMPANIES: str = ""     # frazy po przecinku: firma gościa je zawiera → push pilny (tylko w env, nie w repo)
+    NTFY_ENGAGED_VIEWS: int = 10       # po tylu ekranach gościa jeden push „ogląda demo”; 0 = wyłączone
 
     # ── Dziennik operacji wrażliwych (US-008) ──────────────────────────────
     # ── Drugi składnik logowania (US-017) ──────────────────────────────────────
@@ -86,6 +88,8 @@ class AppEnv(BaseSettings):
             raise ValueError("DEMO_VIDEO_URL musi zaczynać się od https://.")
         if self.NTFY_URL and not self.NTFY_URL.startswith(("https://", "http://")):
             raise ValueError("NTFY_URL musi zaczynać się od https:// (albo http:// dla serwera w sieci lokalnej).")
+        if self.NTFY_ENGAGED_VIEWS < 0:
+            raise ValueError("NTFY_ENGAGED_VIEWS nie może być ujemne (0 = wyłączone).")
         if self.LOGIN_ATTEMPT_RETENTION_DAYS < 1:
             raise ValueError("LOGIN_ATTEMPT_RETENTION_DAYS musi wynosić co najmniej 1 dzień.")
         if self.TRUSTED_PROXIES:
