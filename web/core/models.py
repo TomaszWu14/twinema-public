@@ -90,3 +90,30 @@ class DemoObject(models.Model):
 
     def __str__(self):
         return f"demo {self.content_type.model} #{self.object_id}"
+
+
+class DemoVisitor(models.Model):
+    """Kto wszedł do publicznego demo (RODO CP-7): imię, nazwisko, firma — bez IP i user-agenta.
+    Rekordy starsze niż RETENTION_DAYS usuwa `purge` (przy zapisie i z `audit_prune`)."""
+
+    RETENTION_DAYS = 90
+
+    first_name = models.CharField("imię", max_length=100)
+    last_name = models.CharField("nazwisko", max_length=100)
+    company = models.CharField("firma", max_length=100)
+    created_at = models.DateTimeField("data wejścia", auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        verbose_name = "odwiedzający demo"
+        verbose_name_plural = "odwiedzający demo"
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} ({self.company})"
+
+    @classmethod
+    def purge(cls):
+        from datetime import timedelta
+
+        from django.utils import timezone
+        return cls.objects.filter(created_at__lt=timezone.now() - timedelta(days=cls.RETENTION_DAYS)).delete()[0]
