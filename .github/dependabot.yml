@@ -1,7 +1,8 @@
 # Aktualizacje zależności (SCA). PR-y Dependabota przechodzą ten sam proces co inne zmiany (CONTRIBUTING.md).
 # Cooldown 7 dni: nowe wydanie czeka tydzień, zanim powstanie PR — przejęte wydania zwykle
 # wycofuje się w ciągu kilku dni (semgrep: dependabot-missing-cooldown, US-014).
-# Grupy: aktualizacje minor + patch jednego ekosystemu w jednym PR; major — osobne PR-y.
+# Grupy: aktualizacje minor + patch jednego ekosystemu w jednym PR; major — osobne PR-y
+# (poza Django, które zostaje na 5.2 LTS — major ignorowany).
 version: 2
 updates:
   - package-ecosystem: pip
@@ -11,6 +12,11 @@ updates:
     groups:
       pip-minor-patch:
         update-types: ["minor", "patch"]
+    ignore:
+      # Django zostaje na 5.2 LTS (wsparcie do 04.2028) — przejście na nowszą wersję główną
+      # to świadoma decyzja PO, nie automatyczny PR. Poprawki 5.2.x przychodzą dalej w grupie.
+      - dependency-name: django
+        update-types: ["version-update:semver-major"]
     cooldown:
       default-days: 7
     open-pull-requests-limit: 5
