@@ -25,7 +25,7 @@ class RequestIDLogFilter(logging.Filter):
 # 'unsafe-eval' nie ma — three.js go nie potrzebuje; dodać świadomie, jeśli wejdzie biblioteka, która tak.
 _CSP = (
     "default-src 'self'; script-src 'self' 'nonce-{nonce}'; style-src 'self' 'nonce-{nonce}'; "
-    "font-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; "
+    "font-src 'self'; img-src 'self' data: blob: https://portfolio.twapp.pl; media-src 'self' blob:; connect-src 'self'; "
     "frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
 )
 # Wyłączone funkcje przeglądarki, których aplikacja nie używa (fullscreen zostaje — fullscreen.js).
