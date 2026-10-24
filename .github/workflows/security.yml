@@ -11,6 +11,11 @@ on:
     - cron: "0 5 * * 1"
   workflow_dispatch:
 
+# Nowy push do PR-a anuluje starszy przebieg (main zawsze do końca — od niego zależy deploy).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
   contents: read
 
