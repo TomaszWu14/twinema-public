@@ -1,5 +1,5 @@
 -r requirements.txt
-ruff==0.17.0
+ruff==0.17.1
 # Bezpieczeństwo i jakość — te same wersje co w CI (.github/workflows/security.yml, ci.yml)
 bandit==1.9.4        # SAST
 pip-audit==2.10.1     # SCA: podatności zależności
