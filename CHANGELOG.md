@@ -9,6 +9,7 @@ trafiają do sekcji „Unreleased”.
 ## [Unreleased]
 
 ### Changed
+- Monitor demo (`demo-monitor.yml`) wysyła push ntfy przy otwarciu zgłoszenia „Demo nie odpowiada” i po powrocie do normy (opcjonalny sekret `NTFY_URL`).
 - Adres kontaktowy w klauzuli RODO bramki demo zapisany jako „tomasz.wierzbowski [at] op.pl” (ochrona przed botami zbierającymi adresy).
 
 ### Added
