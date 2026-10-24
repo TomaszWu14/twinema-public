@@ -54,6 +54,11 @@ class DemoPageTests(TestCase):
         self.assertEqual(r["Referrer-Policy"], "same-origin")
         self.assertNotContains(r, reverse("core:demo_enter"))         # bez DEMO_PUBLIC nie ma wejścia gościa
 
+    def test_demo_page_has_portfolio_pixel(self):
+        """Piksel liczenia wyświetleń dla portfolio.twapp.pl — jeden na stronę (core/base.html)."""
+        r = self.client.get(reverse("core:demo"))
+        self.assertContains(r, '<img src="https://portfolio.twapp.pl/px/twinema" alt="" width="1" height="1" hidden>')
+
     def test_showcase_with_demo_title_but_not_from_seed_is_not_advertised(self):
         """Przegląd SEC (6): /demo/ wybiera pokaz z rejestru seed_demo, nie po tytule."""
         real = WarehouseModel.objects.create(name="Hala firmy", floor_width_m=30, floor_depth_m=20)
