@@ -1,7 +1,7 @@
 name: Monitor demo
 
-# Co 6 h sprawdza publiczne demo (twinema.twapp.pl): strona główna, logowanie i /health/ muszą
-# odpowiadać 200. Awaria → jedno issue „Demo nie odpowiada” z etykietą `demo` (kolejne awarie
+# Co 6 h sprawdza publiczne demo (twinema.twapp.pl): /health/ musi odpowiadać 200, strona główna
+# i logowanie 200 albo 401 z bramką portfolio (ForwardAuth, od 24.10). Awaria → jedno issue „Demo nie odpowiada” z etykietą `demo` (kolejne awarie
 # dopisują komentarz); powrót do normy → issue zamknięte. GITHUB_TOKEN + opcjonalny sekret NTFY_URL (push na telefon przez ntfy).
 on:
   schedule:
@@ -31,20 +31,37 @@ jobs:
         run: |
           set -uo pipefail
           problems=()
+          # Od 24.10 demo stoi za ForwardAuth portfolio: bez ciasteczka `gosc` strony dają 401
+          # z formularzem bramki (link do portfolio.twapp.pl/wejscie) — to znaczy, że bramka działa.
+          # Dowodem życia aplikacji jest wtedy /health/ (ForwardAuth go przepuszcza), który MUSI dać 200.
+          bramka() { [ "$1" = 401 ] && grep -qF 'portfolio.twapp.pl/wejscie' page.html 2>/dev/null; }
+          za_bramka=''
           # -L: strona główna przekierowuje gościa na /demo/ — liczy się kod strony docelowej
           for path in / /login/ /health/; do
-            code=$(curl -sS -L -o /dev/null -w '%{http_code}' --max-time 30 \
+            rm -f page.html   # curl nie tworzy pliku przy pustej treści — bez starej strony
+            code=$(curl -sS -L -o page.html -w '%{http_code}' --max-time 30 \
               --retry 2 --retry-delay 20 --retry-all-errors "$DEMO_URL$path" || echo 000)
             echo "$path → HTTP $code"
-            [ "$code" = 200 ] || problems+=("$DEMO_URL$path → HTTP $code")
+            if [ "$code" = 200 ]; then
+              :
+            elif [ "$path" != /health/ ] && bramka "$code"; then
+              za_bramka=1
+            elif [ "$path" = /health/ ]; then
+              problems+=("$DEMO_URL$path → HTTP $code")
+            else
+              problems+=("$DEMO_URL$path → HTTP $code (oczekiwane 200 albo 401 z bramką portfolio)")
+            fi
           done
+          note=''
+          [ -n "$za_bramka" ] && note=' Za bramką portfolio – sprawdzono tylko zdrowie.'
           if [ ${#problems[@]} -eq 0 ]; then
-            echo "Demo odpowiada." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "Demo odpowiada.$note" | tee -a "$GITHUB_STEP_SUMMARY"
             echo "ok=true" >> "$GITHUB_OUTPUT"
           else
             {
               echo "Demo $DEMO_URL nie odpowiada poprawnie ($(date -u '+%Y-%m-%d %H:%M UTC')):"
               for p in "${problems[@]}"; do echo "- $p"; done
+              [ -z "$note" ] || echo "-$note"
               echo
               echo "Przebieg: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
             } > report.md
