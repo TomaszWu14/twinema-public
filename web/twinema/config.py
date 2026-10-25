@@ -52,6 +52,8 @@ class AppEnv(BaseSettings):
     DEMO_PUBLIC: bool = False          # True = /demo/ wpuszcza bez hasła jako `demo` (Podgląd, tylko odczyt)
     DEMO_VISITOR_GATE: bool | None = None   # None = jak DEMO_PUBLIC: wejście do demo wymaga przedstawienia się (RODO CP-7)
     DEMO_VIDEO_URL: str = ""           # adres filmu (np. YouTube) na stronie /demo/; puste = bez przycisku
+    PORTFOLIO_URL: str = "https://portfolio.twapp.pl"   # skąd demo sprawdza przepustkę gościa (GET /api/gosc); tylko https://
+    PORTFOLIO_PASS: bool | None = None  # None = jak bramka dema; False = bez sprawdzania przepustki z portfolio
     NTFY_URL: str = ""                 # pełny adres tematu ntfy (push o nowym odwiedzającym); puste = wyłączone
     NTFY_TOKEN: str = ""               # opcjonalny token ntfy → nagłówek Authorization: Bearer
     NTFY_WATCH_COMPANIES: str = ""     # frazy po przecinku: firma gościa je zawiera → push pilny (tylko w env, nie w repo)

@@ -72,13 +72,19 @@ def _home(request):
     return render(request, "core/home.html", {"modules": modules, "demo_exposure": exposure})
 
 
+def _gate_needed(request):
+    """Formularz gościa: bramka włączona, brak ciasteczka bramki i brak ważnej przepustki z portfolio."""
+    return (demo_gate.gate_active() and not demo_gate.introduced(request)
+            and not demo_gate.portfolio_pass(request))
+
+
 def demo(request, errors=None, values=None, status=200):
     """Strona wejściowa publicznego demo (bez logowania): pokaz 3D, wejście gościa, film."""
     sc = demo_showcase()
     resp = render(request, "core/demo.html", {
         "showcase_url": reverse("scenario:public", args=[sc.share_token]) if sc else "",
         "guest": settings.DEMO_PUBLIC and not exposure_reasons(), "video_url": settings.DEMO_VIDEO_URL,
-        "gate": demo_gate.gate_active() and not demo_gate.introduced(request),
+        "gate": _gate_needed(request),
         "errors": errors or {}, "values": values or {}}, status=status)
     resp["Referrer-Policy"] = "same-origin"       # adres pokazu niesie token — poza domenę go nie wysyłamy;
     # no-referrer odpada: przeglądarka wysłałaby wtedy Origin: null i CSRF odrzuciłby „Wejdź do systemu”
@@ -95,7 +101,12 @@ def demo_enter(request):
         return render(request, "core/403.html", {"reason": "Wejście gościa jest wyłączone: na tej instancji są "
                                                            "dane spoza demo."}, status=403)
     new_visitor = None
+    from_portfolio = False
     if not request.user.is_authenticated and demo_gate.gate_active() and not demo_gate.introduced(request):
+        from_portfolio = demo_gate.portfolio_pass(request)
+    if from_portfolio:
+        new_visitor = demo_gate.PORTFOLIO_VISITOR      # przepustka: bez formularza i bez własnego pusha
+    elif not request.user.is_authenticated and demo_gate.gate_active() and not demo_gate.introduced(request):
         data, errors, bot = demo_gate.validate(request.POST)
         if bot:
             return demo(request, errors={"form": "Nie udało się wysłać formularza."}, status=400)
@@ -109,7 +120,7 @@ def demo_enter(request):
         if user is None or user.groups.exclude(name=GROUP_VIEWER).exists():
             raise Http404
         if new_visitor:
-            new_visitor = demo_gate.register(new_visitor)
+            new_visitor = demo_gate.register(new_visitor, notify=not from_portfolio)
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
     resp = redirect("core:home")
     if new_visitor:

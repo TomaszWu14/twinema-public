@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 from .config import load_env
@@ -174,6 +175,10 @@ DEMO_PASSWORD = env.DEMO_PASSWORD
 DEMO_PUBLIC = env.DEMO_PUBLIC
 DEMO_VISITOR_GATE = env.DEMO_PUBLIC if env.DEMO_VISITOR_GATE is None else env.DEMO_VISITOR_GATE
 DEMO_VIDEO_URL = env.DEMO_VIDEO_URL
+PORTFOLIO_URL = env.PORTFOLIO_URL
+PORTFOLIO_PASS = DEMO_VISITOR_GATE if env.PORTFOLIO_PASS is None else env.PORTFOLIO_PASS
+if PORTFOLIO_PASS and not PORTFOLIO_URL.startswith("https://"):
+    logging.getLogger(__name__).warning("PORTFOLIO_URL musi zaczynać się od https:// — przepustka portfolio wyłączona.")
 NTFY_URL = env.NTFY_URL
 NTFY_TOKEN = env.NTFY_TOKEN
 NTFY_WATCH_COMPANIES = env.NTFY_WATCH_COMPANIES
