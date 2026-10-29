@@ -1,13 +1,13 @@
 # Zależności runtime — PRZYPIĘTE. Podbijaj świadomie (zmień pin, odpal testy).
-django==5.2.17            # LTS
-pydantic-settings==2.16.0 # typowany env, fail-fast na starcie (twinema/config.py)
+django==5.2.18            # LTS
+pydantic-settings==2.16.1 # typowany env, fail-fast na starcie (twinema/config.py)
 psycopg[binary]==3.3.6   # PostgreSQL (gdy DATABASE_URL ustawiony)
 gunicorn==26.2.0
 whitenoise==6.12.0
 django-axes==8.3.1        # ochrona przed brute-force logowania
-django-otp==1.7.4         # US-017: drugi składnik logowania (TOTP), obowiązkowy dla Administratorów
+django-otp==1.7.5         # US-017: drugi składnik logowania (TOTP), obowiązkowy dla Administratorów
 segno==1.6.6              # US-017: kod QR do konfiguracji aplikacji uwierzytelniającej (SVG, bez zależności)
-sentry-sdk[django]==2.72.0  # opcjonalnie, gdy SENTRY_DSN
+sentry-sdk[django]==2.73.0  # opcjonalnie, gdy SENTRY_DSN
 openpyxl==3.1.5         # import zadań/lokalizacji z XLSX, eksport raportów
 defusedxml==0.7.1       # openpyxl parsuje XLSX przez defusedxml (bez XXE / „billion laughs”) — wykrywa sam
 anthropic==1.14.0       # Studio: szkic scenariusza (gdy ANTHROPIC_API_KEY)
